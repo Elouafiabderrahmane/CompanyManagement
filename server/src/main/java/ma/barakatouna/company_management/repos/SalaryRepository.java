@@ -10,6 +10,6 @@ public interface SalaryRepository extends JpaRepository<Salary, Long> {
 
     Salary findFirstByEmployers(Employer employer);
 
-    Salary findFirstBySalaries(Material material);
+    Salary findFirstByMaterial(Material material);
 
 }

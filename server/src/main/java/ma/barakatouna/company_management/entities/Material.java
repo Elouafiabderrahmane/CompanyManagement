@@ -39,8 +39,8 @@ public class Material {
     @ManyToMany(mappedBy = "materials")
     private Set<Employer> employers;
 
-    @OneToMany(mappedBy = "salaries")
-    private Set<Salary> materials;
+    @OneToMany(mappedBy = "material")
+    private Set<Salary> salaries;
 
     @OneToMany(mappedBy = "material")
     private Set<Payment> payments;

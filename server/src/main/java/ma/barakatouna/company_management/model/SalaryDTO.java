@@ -25,6 +25,6 @@ public class SalaryDTO {
 
     private Long employers;
 
-    private Long salaries;
+    private Long material;
 
 }

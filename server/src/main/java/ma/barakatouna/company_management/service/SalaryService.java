@@ -66,7 +66,7 @@ public class SalaryService {
         salaryDTO.setStartingDate(salary.getStartingDate());
         salaryDTO.setEndingDate(salary.getEndingDate());
         salaryDTO.setEmployers(salary.getEmployers() == null ? null : salary.getEmployers().getId());
-        salaryDTO.setSalaries(salary.getSalaries() == null ? null : salary.getSalaries().getId());
+        salaryDTO.setMaterial(salary.getMaterial() == null ? null : salary.getMaterial().getId());
         return salaryDTO;
     }
 
@@ -79,9 +79,9 @@ public class SalaryService {
         final Employer employers = salaryDTO.getEmployers() == null ? null : employerRepository.findById(salaryDTO.getEmployers())
                 .orElseThrow(() -> new NotFoundException("employers not found"));
         salary.setEmployers(employers);
-        final Material salaries = salaryDTO.getSalaries() == null ? null : materialRepository.findById(salaryDTO.getSalaries())
-                .orElseThrow(() -> new NotFoundException("salaries not found"));
-        salary.setSalaries(salaries);
+        final Material material = salaryDTO.getMaterial() == null ? null : materialRepository.findById(salaryDTO.getMaterial())
+                .orElseThrow(() -> new NotFoundException("material not found"));
+        salary.setMaterial(material);
         return salary;
     }
 

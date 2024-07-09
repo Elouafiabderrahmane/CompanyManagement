@@ -47,7 +47,7 @@ public class Salary {
     private Employer employers;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "salaries_id")
-    private Material salaries;
+    @JoinColumn(name = "material_id")
+    private Material material;
 
 }

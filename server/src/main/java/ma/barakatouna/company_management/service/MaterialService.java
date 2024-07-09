@@ -109,10 +109,10 @@ public class MaterialService {
         final ReferencedWarning referencedWarning = new ReferencedWarning();
         final Material material = materialRepository.findById(id)
                 .orElseThrow(NotFoundException::new);
-        final Salary salariesSalary = salaryRepository.findFirstBySalaries(material);
-        if (salariesSalary != null) {
-            referencedWarning.setKey("material.salary.salaries.referenced");
-            referencedWarning.addParam(salariesSalary.getId());
+        final Salary materialSalary = salaryRepository.findFirstByMaterial(material);
+        if (materialSalary != null) {
+            referencedWarning.setKey("material.salary.material.referenced");
+            referencedWarning.addParam(materialSalary.getId());
             return referencedWarning;
         }
         final Payment materialPayment = paymentRepository.findFirstByMaterial(material);

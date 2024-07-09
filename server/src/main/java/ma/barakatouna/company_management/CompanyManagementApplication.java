@@ -11,9 +11,6 @@ import jakarta.annotation.PostConstruct;
 public class CompanyManagementApplication {
 
     private static final Logger logger = LoggerFactory.getLogger(CompanyManagementApplication.class);
-
-
-
     public static void main(String[] args) {
         SpringApplication.run(CompanyManagementApplication.class, args);
         System.out.println("Application started successfully");

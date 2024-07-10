@@ -49,8 +49,8 @@ public class Task {
     private LocalDate endingDate;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "projet_id")
-    private Project projet;
+    @JoinColumn(name = "project_id")
+    private Project project;
 
     @ManyToMany
     @JoinTable(

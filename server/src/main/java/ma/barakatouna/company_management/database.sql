@@ -1,41 +1,8 @@
 -- Insert into Employer
-INSERT INTO employer (name, phone, cin, email, adress, hire_date, birth_date, url,user_id) VALUES
-                                                                                               ('Mohammed Alaoui', '0661234567', 'BE123456', 'mohammed@example.com', 'Casablanca', '2023-01-15', '1990-05-20', NULL,1),
-                                                                                               ('Fatima Bennis', '0662345678', 'BK234567', 'fatima@example.com', 'Rabat', '2023-02-01', '1988-07-10', NULL,2
-                                                                                                   ('Youssef El Amrani', '0663456789', 'BJ345678', 'youssef@example.com', 'Marrakech', '2023-03-10', '1992-09-15', NULL,3),
-                                                                                                ('Amina Tazi', '0664567890', 'BH456789', 'amina@example.com', 'Tangier', '2023-04-05', '1995-11-20', NULL, NULL),
-                                                                                                ('Karim Idrissi', '0665678901', 'BG567890', 'karim@example.com', 'Fez', '2023-05-20', '1991-02-25', NULL, NULL),
-                                                                                                ('Laila Bouazzaoui', '0666789012', 'BF678901', 'laila@example.com', 'Agadir', '2023-06-15', '1993-04-30', NULL, NULL),
-                                                                                                ('Hassan El Fassi', '0667890123', 'BE789012', 'hassan@example.com', 'Meknes', '2023-07-01', '1989-08-05', NULL, NULL),
-                                                                                                ('Nadia Chraibi', '0668901234', 'BD890123', 'nadia@example.com', 'Oujda', '2023-08-10', '1994-10-12', NULL, NULL),
-                                                                                                ('Omar Benjelloun', '0669012345', 'BC901234', 'omar@example.com', 'Tetouan', '2023-09-05', '1987-12-18', NULL, NULL),
-                                                                                                ('Samira El Ouazzani', '0670123456', 'BB012345', 'samira@example.com', 'El Jadida', '2023-10-01', '1996-03-22', NULL, NULL);
 
 -- Insert into Project
-INSERT INTO project (name, description, budget, paid, done, start_date, end_date, url) VALUES
-                                                                                           ('Marrakech Resort', 'Luxury resort construction', 10000000.00, false, false, '2024-03-01', '2025-12-31', NULL),
-                                                                                           ('Casablanca Office Tower', 'Modern office building in city center', 15000000.00, false, false, '2024-04-15', '2026-06-30', NULL),
-                                                                                           ('Rabat Smart City', 'Technological infrastructure upgrade', 20000000.00, false, false, '2024-05-01', '2027-04-30', NULL),
-                                                                                           ('Tangier Port Expansion', 'Expansion of shipping facilities', 25000000.00, false, false, '2024-06-15', '2027-12-31', NULL),
-                                                                                           ('Agadir Solar Farm', 'Large-scale solar energy project', 18000000.00, false, false, '2024-07-01', '2026-09-30', NULL),
-                                                                                           ('Fez Medina Restoration', 'Historical site preservation', 5000000.00, false, false, '2024-08-15', '2025-08-14', NULL),
-                                                                                           ('Oujda Industrial Park', 'New industrial zone development', 12000000.00, false, false, '2024-09-01', '2026-02-28', NULL),
-                                                                                           ('Essaouira Wind Farm', 'Coastal wind energy project', 8000000.00, false, false, '2024-10-15', '2025-10-14', NULL),
-                                                                                           ('Ifrane Eco-Resort', 'Sustainable mountain tourism complex', 7000000.00, false, false, '2024-11-01', '2026-04-30', NULL),
-                                                                                           ('Dakhla Desalination Plant', 'Water treatment facility', 30000000.00, false, false, '2024-12-15', '2027-06-30', NULL);
 
 -- Insert into Material
-INSERT INTO material (name, owned, reference) VALUES
-                                                  ('Cement Mixer', true, 'CM001'),
-                                                  ('Excavator', true, 'EX002'),
-                                                  ('Crane', false, 'CR003'),
-                                                  ('Dump Truck', true, 'DT004'),
-                                                  ('Concrete Pump', false, 'CP005'),
-                                                  ('Scaffolding Set', true, 'SS006'),
-                                                  ('Welding Machine', true, 'WM007'),
-                                                  ('Generator', true, 'GN008'),
-                                                  ('Forklift', false, 'FL009'),
-                                                  ('Bulldozer', true, 'BD010');
 
 -- Insert into Task
 INSERT INTO task (tasktype, done, title, description, starting_date, ending_date, projet_id) VALUES
@@ -64,24 +31,9 @@ INSERT INTO payment (time, type, projet_id, material_id, employer_id) VALUES
                                                                           ('2024-12-15', 'INSTALLMENT',  NULL, NULL, 3);
 
 -- Insert into User
-INSERT INTO user (username, password, role) VALUES
-                                                ('admin', 'hashed_password_1', 'ADMIN'),
-                                                ('mohammed_a', 'hashed_password_2', 'TECHNICIEN'),
-                                                ('fatima_b', 'hashed_password_3', 'TECHNICIEN'),
-                                                ('youssef_e', 'hashed_password_4', 'TECHNICIEN');
 
 -- Insert into Salary
-INSERT INTO salary (amount, frequency, paid, starting_date, employers_id,material_id) VALUES
-    (8000.00, 'MONTHLY', true, '2023-01-15', 1, NULL
-                                                                              (7500.00, 'MONTHLY', true, '2023-02-01', 2,NULL),
-     (12000.00, 'MONTHLY', true, '2023-03-10', 3,NULL),
-     (7000.00, 'MONTHLY', true, '2023-04-05', 4,NULL),
-     (7200.00, 'MONTHLY', true, '2023-05-20', 5,NULL),
-     (11500.00, 'MONTHLY', true, '2023-06-15',NULL,1),
-     (7800.00, 'MONTHLY', true, '2023-07-01',NULL,2),
-     (7300.00, 'MONTHLY', true, '2023-08-10',NULL,3),
-     (7500.00, 'MONTHLY', true, '2023-09-05',NULL,5),
-     (6800.00, 'MONTHLY', true, '2023-10-01',NULL,6);
+
 
 -- Insert into Project_Employer (relation table)
 INSERT INTO project_employer (employer_id, project_id) VALUES

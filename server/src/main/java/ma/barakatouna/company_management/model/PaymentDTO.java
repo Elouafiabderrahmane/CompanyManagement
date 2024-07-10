@@ -15,8 +15,10 @@ public class PaymentDTO {
 
     private Type type;
 
-    @PaymentProjetUnique
-    private Long projet;
+    private Double amount;
+
+    @PaymentProjectUnique
+    private Long project;
 
     private Long material;
 

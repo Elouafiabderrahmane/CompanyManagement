@@ -34,9 +34,12 @@ public class Payment {
     @Enumerated(EnumType.STRING)
     private Type type;
 
+    @Column
+    private Double amount;
+
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "projet_id", unique = true)
-    private Project projet;
+    @JoinColumn(name = "project_id", unique = true)
+    private Project project;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "material_id")

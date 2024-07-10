@@ -26,7 +26,7 @@ public class TaskDTO {
 
     private LocalDate endingDate;
 
-    private Long projet;
+    private Long project;
 
     private List<Long> employer;
 

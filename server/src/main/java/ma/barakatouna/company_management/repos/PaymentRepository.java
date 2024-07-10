@@ -9,12 +9,12 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface PaymentRepository extends JpaRepository<Payment, Long> {
 
-    Payment findFirstByProjet(Project project);
+    Payment findFirstByProject(Project project);
 
     Payment findFirstByMaterial(Material material);
 
     Payment findFirstByEmployer(Employer employer);
 
-    boolean existsByProjetId(Long id);
+    boolean existsByProjectId(Long id);
 
 }

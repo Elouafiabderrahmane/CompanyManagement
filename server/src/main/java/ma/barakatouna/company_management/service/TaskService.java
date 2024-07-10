@@ -78,7 +78,7 @@ public class TaskService {
         taskDTO.setDescription(task.getDescription());
         taskDTO.setStartingDate(task.getStartingDate());
         taskDTO.setEndingDate(task.getEndingDate());
-        taskDTO.setProjet(task.getProjet() == null ? null : task.getProjet().getId());
+        taskDTO.setProject(task.getProject() == null ? null : task.getProject().getId());
         taskDTO.setEmployer(task.getEmployer().stream()
                 .map(employer -> employer.getId())
                 .toList());
@@ -92,9 +92,9 @@ public class TaskService {
         task.setDescription(taskDTO.getDescription());
         task.setStartingDate(taskDTO.getStartingDate());
         task.setEndingDate(taskDTO.getEndingDate());
-        final Project projet = taskDTO.getProjet() == null ? null : projectRepository.findById(taskDTO.getProjet())
-                .orElseThrow(() -> new NotFoundException("projet not found"));
-        task.setProjet(projet);
+        final Project project = taskDTO.getProject() == null ? null : projectRepository.findById(taskDTO.getProject())
+                .orElseThrow(() -> new NotFoundException("project not found"));
+        task.setProject(project);
         final List<Employer> employer = employerRepository.findAllById(
                 taskDTO.getEmployer() == null ? Collections.emptyList() : taskDTO.getEmployer());
         if (employer.size() != (taskDTO.getEmployer() == null ? 0 : taskDTO.getEmployer().size())) {

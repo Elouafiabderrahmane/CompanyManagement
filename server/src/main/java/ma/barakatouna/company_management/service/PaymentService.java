@@ -66,7 +66,8 @@ public class PaymentService {
         paymentDTO.setId(payment.getId());
         paymentDTO.setTime(payment.getTime());
         paymentDTO.setType(payment.getType());
-        paymentDTO.setProjet(payment.getProjet() == null ? null : payment.getProjet().getId());
+        paymentDTO.setAmount(payment.getAmount());
+        paymentDTO.setProject(payment.getProject() == null ? null : payment.getProject().getId());
         paymentDTO.setMaterial(payment.getMaterial() == null ? null : payment.getMaterial().getId());
         paymentDTO.setEmployer(payment.getEmployer() == null ? null : payment.getEmployer().getId());
         return paymentDTO;
@@ -75,9 +76,10 @@ public class PaymentService {
     private Payment mapToEntity(final PaymentDTO paymentDTO, final Payment payment) {
         payment.setTime(paymentDTO.getTime());
         payment.setType(paymentDTO.getType());
-        final Project projet = paymentDTO.getProjet() == null ? null : projectRepository.findById(paymentDTO.getProjet())
-                .orElseThrow(() -> new NotFoundException("projet not found"));
-        payment.setProjet(projet);
+        payment.setAmount(paymentDTO.getAmount());
+        final Project project = paymentDTO.getProject() == null ? null : projectRepository.findById(paymentDTO.getProject())
+                .orElseThrow(() -> new NotFoundException("project not found"));
+        payment.setProject(project);
         final Material material = paymentDTO.getMaterial() == null ? null : materialRepository.findById(paymentDTO.getMaterial())
                 .orElseThrow(() -> new NotFoundException("material not found"));
         payment.setMaterial(material);
@@ -87,8 +89,8 @@ public class PaymentService {
         return payment;
     }
 
-    public boolean projetExists(final Long id) {
-        return paymentRepository.existsByProjetId(id);
+    public boolean projectExists(final Long id) {
+        return paymentRepository.existsByProjectId(id);
     }
 
 }

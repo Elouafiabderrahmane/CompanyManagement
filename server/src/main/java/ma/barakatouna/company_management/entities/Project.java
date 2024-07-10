@@ -53,24 +53,24 @@ public class Project {
 
     @ManyToMany
     @JoinTable(
-            name = "ProjectEmployer",
+            name = "ProjetEmployer",
             joinColumns = @JoinColumn(name = "projectId"),
             inverseJoinColumns = @JoinColumn(name = "employerId")
     )
     private Set<Employer> employers;
 
-    @OneToMany(mappedBy = "projet")
+    @OneToMany(mappedBy = "project")
     private Set<Task> tasks;
 
     @ManyToMany
     @JoinTable(
-            name = "ProjectMaterial",
+            name = "ProjetMaterial",
             joinColumns = @JoinColumn(name = "projectId"),
             inverseJoinColumns = @JoinColumn(name = "materialId")
     )
     private Set<Material> materials;
 
-    @OneToOne(mappedBy = "projet", fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "project", fetch = FetchType.LAZY)
     private Payment payment;
 
 }

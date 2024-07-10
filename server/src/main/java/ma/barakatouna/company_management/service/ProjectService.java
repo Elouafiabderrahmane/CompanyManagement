@@ -119,16 +119,16 @@ public class ProjectService {
         final ReferencedWarning referencedWarning = new ReferencedWarning();
         final Project project = projectRepository.findById(id)
                 .orElseThrow(NotFoundException::new);
-        final Task projetTask = taskRepository.findFirstByProjet(project);
-        if (projetTask != null) {
-            referencedWarning.setKey("project.task.projet.referenced");
-            referencedWarning.addParam(projetTask.getId());
+        final Task projectTask = taskRepository.findFirstByProject(project);
+        if (projectTask != null) {
+            referencedWarning.setKey("project.task.project.referenced");
+            referencedWarning.addParam(projectTask.getId());
             return referencedWarning;
         }
-        final Payment projetPayment = paymentRepository.findFirstByProjet(project);
-        if (projetPayment != null) {
-            referencedWarning.setKey("project.payment.projet.referenced");
-            referencedWarning.addParam(projetPayment.getId());
+        final Payment projectPayment = paymentRepository.findFirstByProject(project);
+        if (projectPayment != null) {
+            referencedWarning.setKey("project.payment.project.referenced");
+            referencedWarning.addParam(projectPayment.getId());
             return referencedWarning;
         }
         return null;

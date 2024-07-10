@@ -25,22 +25,22 @@ import org.springframework.web.servlet.HandlerMapping;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Constraint(
-        validatedBy = PaymentProjetUnique.PaymentProjetUniqueValidator.class
+        validatedBy = PaymentProjectUnique.PaymentProjectUniqueValidator.class
 )
-public @interface PaymentProjetUnique {
+public @interface PaymentProjectUnique {
 
-    String message() default "{Exists.payment.projet}";
+    String message() default "{Exists.payment.project}";
 
     Class<?>[] groups() default {};
 
     Class<? extends Payload>[] payload() default {};
 
-    class PaymentProjetUniqueValidator implements ConstraintValidator<PaymentProjetUnique, Long> {
+    class PaymentProjectUniqueValidator implements ConstraintValidator<PaymentProjectUnique, Long> {
 
         private final PaymentService paymentService;
         private final HttpServletRequest request;
 
-        public PaymentProjetUniqueValidator(final PaymentService paymentService,
+        public PaymentProjectUniqueValidator(final PaymentService paymentService,
                 final HttpServletRequest request) {
             this.paymentService = paymentService;
             this.request = request;
@@ -55,11 +55,11 @@ public @interface PaymentProjetUnique {
             @SuppressWarnings("unchecked") final Map<String, String> pathVariables =
                     ((Map<String, String>)request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE));
             final String currentId = pathVariables.get("id");
-            if (currentId != null && value.equals(paymentService.get(Long.parseLong(currentId)).getProjet())) {
+            if (currentId != null && value.equals(paymentService.get(Long.parseLong(currentId)).getProject())) {
                 // value hasn't changed
                 return true;
             }
-            return !paymentService.projetExists(value);
+            return !paymentService.projectExists(value);
         }
 
     }

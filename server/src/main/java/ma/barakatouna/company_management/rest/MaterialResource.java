@@ -72,7 +72,7 @@ public class MaterialResource {
 
     @GetMapping("/{projectId}/material")
     public ResponseEntity<List<Material>> getMaterialsByProjectId(@PathVariable Long projectId) {
-        List<Material> taskCount = materialRepository.findProjectMaterialsByProjectId(projectId);
+        List<Material> taskCount = materialService.getProjectMaterialsByProjectId(projectId);
         return ResponseEntity.ok(taskCount);
     }
 

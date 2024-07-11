@@ -120,4 +120,9 @@ public class MaterialServiceImpl implements MaterialService {
         return null;
     }
 
+    @Override
+    public List<Material> getProjectMaterialsByProjectId(Long projectId) {
+        return materialRepository.findAllByProjectId(projectId);
+    }
+
 }

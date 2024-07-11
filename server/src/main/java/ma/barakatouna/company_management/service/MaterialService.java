@@ -1,7 +1,8 @@
 package ma.barakatouna.company_management.service;
 
-import jakarta.transaction.Transactional;
 import java.util.List;
+
+import ma.barakatouna.company_management.entities.Material;
 import ma.barakatouna.company_management.model.MaterialDTO;
 import ma.barakatouna.company_management.util.ReferencedWarning;
 
@@ -18,4 +19,6 @@ public interface MaterialService {
     void delete(Long id);
 
     ReferencedWarning getReferencedWarning(Long id);
+
+    List<Material> getProjectMaterialsByProjectId(Long projectId);
 }

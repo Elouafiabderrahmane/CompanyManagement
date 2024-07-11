@@ -105,4 +105,25 @@ public class TaskServiceImpl implements TaskService{
         return task;
     }
 
+//    ====================================================.
+
+
+
+    @Override
+    public long getCountTaskByProjectId(long id) {
+        return taskRepository.countTasksByProjectId(id);
+    }
+
+    @Override
+    public long getCountTaskByProjectId_done(long id, boolean done) {
+        done = true;
+        return taskRepository.countTasksByProjectIdAndDone(id, done);
+    }
+
+    @Override
+    public List<TaskDTO> getTaskByProjectId(long id) {
+        return taskRepository.findByProjectId(id).stream()
+                .map(task -> mapToDTO(task, new TaskDTO()))
+                .toList();
+    }
 }

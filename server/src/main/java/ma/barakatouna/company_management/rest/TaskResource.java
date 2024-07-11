@@ -61,6 +61,24 @@ public class TaskResource {
 
 //    ===========================
 
+    @GetMapping("/projects/{projectId}/tasks/count")
+    public ResponseEntity<Long> getTaskCountByProjectId(@PathVariable Long projectId) {
+        long taskCount = taskService.getCountTaskByProjectId(projectId);
+        return ResponseEntity.ok(taskCount);
+    }
+
+    @GetMapping("/projects/{projectId}/tasks/count-done")
+    public ResponseEntity<Long> getTaskCountByProjectId_done(@PathVariable Long projectId) {
+        long taskCount = taskService.getCountTaskByProjectId_done(projectId, true);
+        return ResponseEntity.ok(taskCount);
+    }
+
+    @GetMapping("/projects/{projectId}/tasks")
+    public ResponseEntity<List<TaskDTO>> getTasksByProject(@PathVariable Long projectId) {
+        List<TaskDTO> taskCount = taskService.getTaskByProjectId(projectId);
+        return ResponseEntity.ok(taskCount);
+    }
+
 
 
 }

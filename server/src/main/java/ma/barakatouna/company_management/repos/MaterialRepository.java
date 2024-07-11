@@ -13,7 +13,8 @@ public interface MaterialRepository extends JpaRepository<Material, Long> {
     Material findFirstByTasks(Task task);
 
     List<Material> findAllByTasks(Task task);
-    @Query("SELECT m FROM Project p JOIN p.materials m WHERE p.id = :projectId")
-    List<Material> findProjectMaterialsByProjectId(@Param("projectId") Long projectId);
+
+    @Query("SELECT m FROM Material m JOIN m.projets p WHERE p.id = :projectId")
+    List<Material> findAllByProjectId(@Param("projectId") Long projectId);
 
 }

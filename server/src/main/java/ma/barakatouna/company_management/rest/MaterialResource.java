@@ -3,7 +3,10 @@ package ma.barakatouna.company_management.rest;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 import java.util.List;
+
+import ma.barakatouna.company_management.entities.Material;
 import ma.barakatouna.company_management.model.MaterialDTO;
+import ma.barakatouna.company_management.repos.MaterialRepository;
 import ma.barakatouna.company_management.service.MaterialService;
 import ma.barakatouna.company_management.util.ReferencedException;
 import ma.barakatouna.company_management.util.ReferencedWarning;
@@ -25,9 +28,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class MaterialResource {
 
     private final MaterialService materialService;
+    private final MaterialRepository materialRepository;
 
-    public MaterialResource(final MaterialService materialService) {
+    public MaterialResource(final MaterialService materialService, MaterialRepository materialRepository) {
         this.materialService = materialService;
+        this.materialRepository = materialRepository;
     }
 
     @GetMapping
@@ -63,6 +68,12 @@ public class MaterialResource {
         }
         materialService.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{projectId}/material")
+    public ResponseEntity<List<Material>> getMaterialsByProjectId(@PathVariable Long projectId) {
+        List<Material> taskCount = materialRepository.findProjectMaterialsByProjectId(projectId);
+        return ResponseEntity.ok(taskCount);
     }
 
 }

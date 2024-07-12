@@ -3,6 +3,8 @@ package ma.barakatouna.company_management.rest;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 import java.util.List;
+
+import ma.barakatouna.company_management.entities.Employer;
 import ma.barakatouna.company_management.model.EmployerDTO;
 import ma.barakatouna.company_management.service.EmployerService;
 import ma.barakatouna.company_management.util.ReferencedException;
@@ -65,4 +67,11 @@ public class EmployerResource {
         return ResponseEntity.noContent().build();
     }
 
+
+//    ====================================
+
+    @GetMapping("/{id}/projects")
+    public ResponseEntity<List<Employer>> getEmployerProjects(@PathVariable(name = "id") final Long id) {
+        return ResponseEntity.ok(employerService.findAllByProjectId(id));
+    }
 }

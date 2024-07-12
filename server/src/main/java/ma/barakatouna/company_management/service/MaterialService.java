@@ -21,4 +21,8 @@ public interface MaterialService {
     ReferencedWarning getReferencedWarning(Long id);
 
     List<Material> getProjectMaterialsByProjectId(Long projectId);
+
+    List<Material> getMaterialsOwn(Boolean Owned);
+
+
 }

@@ -76,4 +76,10 @@ public class MaterialResource {
         return ResponseEntity.ok(taskCount);
     }
 
+    @GetMapping("/own/{owned}")
+    public ResponseEntity<List<Material>> getMaterialsOwn(@PathVariable Boolean owned) {
+        List<Material> taskCount = materialService.getMaterialsOwn(owned);
+        return ResponseEntity.ok(taskCount);
+    }
+
 }

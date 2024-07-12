@@ -137,4 +137,10 @@ public class EmployerServiceImpl implements EmployerService{
         return null;
     }
 
+    @Override
+    public List<Employer> findAllByProjectId(Long projectId) {
+        Project project = projectRepository.findById(projectId).orElseThrow(NotFoundException::new);
+        return employerRepository.findAllByProjets(project);
+    }
+
 }

@@ -3,8 +3,14 @@ package ma.barakatouna.company_management.rest;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 import java.util.List;
+
+import ma.barakatouna.company_management.entities.Material;
+import ma.barakatouna.company_management.entities.Project;
 import ma.barakatouna.company_management.model.ProjectDTO;
+import ma.barakatouna.company_management.repos.MaterialRepository;
+import ma.barakatouna.company_management.repos.ProjectRepository;
 import ma.barakatouna.company_management.service.ProjectService;
+import ma.barakatouna.company_management.util.NotFoundException;
 import ma.barakatouna.company_management.util.ReferencedException;
 import ma.barakatouna.company_management.util.ReferencedWarning;
 import org.springframework.http.HttpStatus;
@@ -25,9 +31,14 @@ import org.springframework.web.bind.annotation.RestController;
 public class ProjectResource {
 
     private final ProjectService projectService;
+    private final ProjectRepository projectRepository;
+    private final MaterialRepository materialRepository;
 
-    public ProjectResource(final ProjectService projectService) {
+
+    public ProjectResource(final ProjectService projectService, ProjectRepository projectRepository, MaterialRepository materialRepository) {
         this.projectService = projectService;
+        this.projectRepository = projectRepository;
+        this.materialRepository = materialRepository;
     }
 
     @GetMapping
@@ -63,6 +74,13 @@ public class ProjectResource {
         }
         projectService.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/materials/{materialId}")
+    public ResponseEntity<List<Project>> getProjectsByMaterialId22(@PathVariable Long materialId) {
+        Material material =  materialRepository.findById(materialId).orElseThrow(NotFoundException::new) ;
+        List<Project> projects = projectRepository.findAllByMaterials(material);
+        return ResponseEntity.ok(projects);
     }
 
 }

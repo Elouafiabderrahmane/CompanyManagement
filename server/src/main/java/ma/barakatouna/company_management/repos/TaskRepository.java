@@ -15,5 +15,8 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
 
     List<Task> findAllByEmployer(Employer employer);
 
+    List<Task> findByProjectId(Long projectId);
+    long countTasksByProjectId(Long projectId);
+    long countTasksByProjectIdAndDone(Long projectId, boolean done);
 
 }

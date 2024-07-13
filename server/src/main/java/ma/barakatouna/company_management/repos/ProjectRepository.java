@@ -5,6 +5,7 @@ import ma.barakatouna.company_management.entities.Employer;
 import ma.barakatouna.company_management.entities.Material;
 import ma.barakatouna.company_management.entities.Project;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
 
 public interface ProjectRepository extends JpaRepository<Project, Long> {
@@ -16,7 +17,5 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
     List<Project> findAllByEmployers(Employer employer);
 
     List<Project> findAllByMaterials(Material material);
-
-
 
 }

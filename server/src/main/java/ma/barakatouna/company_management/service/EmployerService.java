@@ -2,8 +2,8 @@ package ma.barakatouna.company_management.service;
 
 import jakarta.transaction.Transactional;
 import java.util.List;
-
 import ma.barakatouna.company_management.entities.*;
+import ma.barakatouna.company_management.entities.Employer;
 import ma.barakatouna.company_management.model.EmployerDTO;
 import ma.barakatouna.company_management.util.ReferencedWarning;
 
@@ -22,7 +22,6 @@ public interface EmployerService {
     boolean userExists(Long id);
 
     ReferencedWarning getReferencedWarning(Long id);
-
     List<Salary> getAllSalariesByEmployer(Long employerId);
 
     List<Task> getAllTasksByEmployer(Long employerId);
@@ -32,4 +31,5 @@ public interface EmployerService {
 
     List<Material> getAllMaterialsByEmployer(Long employerId);
 
+    List<Employer> findAllByProjectId(Long projectId);
 }

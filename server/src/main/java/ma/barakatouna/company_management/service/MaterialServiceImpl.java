@@ -1,10 +1,7 @@
 package ma.barakatouna.company_management.service;
 
 import jakarta.transaction.Transactional;
-import ma.barakatouna.company_management.entities.Material;
-import ma.barakatouna.company_management.entities.Payment;
-import ma.barakatouna.company_management.entities.Salary;
-import ma.barakatouna.company_management.entities.Task;
+import ma.barakatouna.company_management.entities.*;
 import ma.barakatouna.company_management.model.MaterialDTO;
 import ma.barakatouna.company_management.repos.*;
 import ma.barakatouna.company_management.util.NotFoundException;
@@ -19,7 +16,7 @@ import java.util.List;
 
 @Service
 @Transactional
-public class MaterialServiceImpl implements MaterialService {
+public  class MaterialServiceImpl implements MaterialService {
 
     private final MaterialRepository materialRepository;
     private final TaskRepository taskRepository;
@@ -118,6 +115,17 @@ public class MaterialServiceImpl implements MaterialService {
             return referencedWarning;
         }
         return null;
+    }
+
+    @Override
+    public List<Material> getProjectMaterialsByProjectId(Long projectId) {
+        Project project = projectRepository.findById(projectId ).orElseThrow(NotFoundException::new) ;
+        return materialRepository.findAllByProjets(project);
+    }
+
+    @Override
+    public List<Material> getMaterialsOwn(Boolean Owned) {
+        return materialRepository.findAllByOwned(Owned);
     }
 
 }

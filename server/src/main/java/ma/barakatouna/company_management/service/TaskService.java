@@ -14,4 +14,9 @@ public interface TaskService {
     void update(Long id, TaskDTO taskDTO);
 
     void delete(Long id);
+
+    long getCountTaskByProjectId(long id);
+    long getCountTaskByProjectId_done(long id, boolean done);
+    List<TaskDTO> getTaskByProjectId(long id);
+
 }

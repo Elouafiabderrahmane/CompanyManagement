@@ -5,6 +5,7 @@ import jakarta.validation.Valid;
 import java.util.List;
 
 import ma.barakatouna.company_management.entities.*;
+import ma.barakatouna.company_management.entities.Employer;
 import ma.barakatouna.company_management.model.EmployerDTO;
 import ma.barakatouna.company_management.service.EmployerService;
 import ma.barakatouna.company_management.util.ReferencedException;
@@ -68,7 +69,6 @@ public class EmployerResource {
     }
 
 
-
     @GetMapping("/{employerId}/salaries")
     public ResponseEntity<List<Salary>> getAllSalariesForEmployer(@PathVariable(name = "employerId") Long employerId) {
         List<Salary> salaries = employerService.getAllSalariesByEmployer(employerId);
@@ -96,4 +96,8 @@ public class EmployerResource {
     }
 
 
+    @GetMapping("/{id}/projects")
+    public ResponseEntity<List<Employer>> getEmployerProjects(@PathVariable(name = "id") final Long id) {
+        return ResponseEntity.ok(employerService.findAllByProjectId(id));
+    }
 }

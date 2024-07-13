@@ -127,5 +127,10 @@ public class ProjectServiceImpl implements ProjectService{
         return null;
     }
 
+    @Override
+    public List<Project> getProjectsByMaterialId(Long materialID) {
+        Material material =  materialRepository.findById(materialID).orElseThrow(NotFoundException::new) ;
+        return projectRepository.findAllByMaterials(material);
+    }
 
 }

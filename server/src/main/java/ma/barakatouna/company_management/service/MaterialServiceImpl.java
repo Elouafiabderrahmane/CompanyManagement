@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -141,16 +142,18 @@ public class MaterialServiceImpl implements MaterialService {
     }
 
     @Override
-    public List<Material> getMaterialsBySalaryId(Long salaryId ) {
+    public List<Material> getMaterialsBySalaryId(Long salaryId) {
         Salary salary = salaryRepository.findById(salaryId).orElseThrow(NotFoundException::new);
         return materialRepository.findAllBySalaries(salary);
     }
 
     @Override
-    public List<Material> getMaterialsByEmployerId(Long employerId) {
+    public List<MaterialDTO> getMaterialsByEmployerId(Long employerId) {
         Employer employer = employerRepository.findById(employerId).orElseThrow(NotFoundException::new);
-        return materialRepository.findAllByEmployers(employer);
+        List<Material> materials = materialRepository.findAllByEmployers(employer);
+        return materials.stream()
+                .map(material -> mapToDTO(material, new MaterialDTO()))
+                .collect(Collectors.toList());
     }
-
 
 }

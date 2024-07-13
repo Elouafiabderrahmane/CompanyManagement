@@ -102,8 +102,8 @@ public class MaterialResource {
     }
 
     @GetMapping("/{employerId}/employer")
-    public ResponseEntity<List<Material>> getMaterialsByEmployerId(@PathVariable Long employerId) {
-        List<Material> taskCount = materialService.getMaterialsByEmployerId(employerId);
+    public ResponseEntity<List<MaterialDTO>> getMaterialsByEmployerId(@PathVariable Long employerId) {
+        List<MaterialDTO> taskCount = materialService.getMaterialsByEmployerId(employerId);
         return ResponseEntity.ok(taskCount);
     }
 }

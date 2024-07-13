@@ -31,5 +31,5 @@ public interface MaterialService {
 
     List<Material> getMaterialsBySalaryId(Long salaryId);
 
-    List<Material> getMaterialsByEmployerId(Long employerId);
+    List<MaterialDTO> getMaterialsByEmployerId(Long employerId);
 }

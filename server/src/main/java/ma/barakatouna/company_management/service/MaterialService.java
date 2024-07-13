@@ -20,16 +20,16 @@ public interface MaterialService {
 
     ReferencedWarning getReferencedWarning(Long id);
 
-    List<Material> getMaterialsByProjectId(Long projectId);
+    List<MaterialDTO> getMaterialsByProjectId(Long projectId);
 
-    List<Material> getMaterialsOwn(Boolean Owned);
+    List<MaterialDTO> getMaterialsOwn(Boolean Owned);
 
-    List <Material> getMaterialsByPaymentId(Long paymentId);
+    List <MaterialDTO> getMaterialsByPaymentId(Long paymentId);
 
-    List<Material> getMaterialsByTaskId(Long taskId);
+    List<MaterialDTO> getMaterialsByTaskId(Long taskId);
 
 
-    List<Material> getMaterialsBySalaryId(Long salaryId);
+    List<MaterialDTO> getMaterialsBySalaryId(Long salaryId);
 
     List<MaterialDTO> getMaterialsByEmployerId(Long employerId);
 }

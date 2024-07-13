@@ -72,32 +72,32 @@ public class MaterialResource {
     }
 
     @GetMapping("/{projectId}/material")
-    public ResponseEntity<List<Material>> getMaterialsByProjectId(@PathVariable Long projectId) {
-        List<Material> taskCount = materialService.getMaterialsByProjectId(projectId);
+    public ResponseEntity<List<MaterialDTO>> getMaterialsByProjectId(@PathVariable Long projectId) {
+        List<MaterialDTO> taskCount = materialService.getMaterialsByProjectId(projectId);
         return ResponseEntity.ok(taskCount);
     }
 
     @GetMapping("/own/{owned}")
-    public ResponseEntity<List<Material>> getMaterialsOwn(@PathVariable Boolean owned) {
-        List<Material> taskCount = materialService.getMaterialsOwn(owned);
+    public ResponseEntity<List<MaterialDTO>> getMaterialsOwn(@PathVariable Boolean owned) {
+        List<MaterialDTO> taskCount = materialService.getMaterialsOwn(owned);
         return ResponseEntity.ok(taskCount);
     }
 
     @GetMapping("/{paymentId}/payment")
-    public ResponseEntity<List<Material>> getMaterialsByPaymentId(@PathVariable Long paymentId) {
-        List<Material> taskCount = materialService.getMaterialsByPaymentId(paymentId);
+    public ResponseEntity<List<MaterialDTO>> getMaterialsByPaymentId(@PathVariable Long paymentId) {
+        List<MaterialDTO> taskCount = materialService.getMaterialsByPaymentId(paymentId);
         return ResponseEntity.ok(taskCount);
     }
 
     @GetMapping("/{taskId}/task")
-    public ResponseEntity<List<Material>> getMaterialsByTaskId(@PathVariable Long taskId) {
-        List<Material> taskCount = materialService.getMaterialsByTaskId(taskId);
+    public ResponseEntity<List<MaterialDTO>> getMaterialsByTaskId(@PathVariable Long taskId) {
+        List<MaterialDTO> taskCount = materialService.getMaterialsByTaskId(taskId);
         return ResponseEntity.ok(taskCount);
     }
 
     @GetMapping("/{salaryId}/salary")
-    public ResponseEntity<List<Material>> getMaterialsBySalaryId(@PathVariable Long salaryId) {
-        List<Material> taskCount = materialService.getMaterialsBySalaryId(salaryId);
+    public ResponseEntity<List<MaterialDTO>> getMaterialsBySalaryId(@PathVariable Long salaryId) {
+        List<MaterialDTO> taskCount = materialService.getMaterialsBySalaryId(salaryId);
         return ResponseEntity.ok(taskCount);
     }
 

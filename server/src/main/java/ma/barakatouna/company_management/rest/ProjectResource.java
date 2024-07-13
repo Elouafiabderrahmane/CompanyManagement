@@ -86,24 +86,21 @@ public class ProjectResource {
     }
 
     @GetMapping("/materials/{materialId}")
-    public ResponseEntity<List<Project>> getProjectsByMaterialId22(@PathVariable Long materialId) {
-        Material material = materialRepository.findById(materialId).orElseThrow(NotFoundException::new);
-        List<Project> projects = projectRepository.findAllByMaterials(material);
+    public ResponseEntity<List<ProjectDTO>> getProjectsByMaterialId22(@PathVariable Long materialId) {
+        List<ProjectDTO> projects = projectService.getProjectsByMaterialId(materialId);
         return ResponseEntity.ok(projects);
     }
 
 
     @GetMapping("/employers/{employerId}")
-    public ResponseEntity<List<Project>> getProjectsByEmployerId(@PathVariable Long employerId) {
-        Employer employer = employerRepository.findById(employerId).orElseThrow(NotFoundException::new);
-        List<Project> projects = projectRepository.findAllByEmployers(employer);
+    public ResponseEntity<List<ProjectDTO>> getProjectsByEmployerId(@PathVariable Long employerId) {
+        List<ProjectDTO> projects = projectService.getProjectsByEmployerId(employerId);
         return ResponseEntity.ok(projects);
     }
 
     @GetMapping("/tasks/{taskId}")
-    public ResponseEntity<List<Project>> getProjectsByTaskId(@PathVariable Long taskId) {
-        Task task = taskRepository.findById(taskId).orElseThrow(NotFoundException::new);
-        List<Project> projects = projectRepository.findAllByTasks(task);
+    public ResponseEntity<List<ProjectDTO>> getProjectsByTaskId(@PathVariable Long taskId) {
+        List<ProjectDTO> projects = projectService.getProjectsByTaskId(taskId);
         return ResponseEntity.ok(projects);
     }
 

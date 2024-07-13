@@ -69,35 +69,33 @@ public class EmployerResource {
     }
 
 
-    @GetMapping("/{employerId}/salaries")
-    public ResponseEntity<List<Salary>> getAllSalariesForEmployer(@PathVariable(name = "employerId") Long employerId) {
-        List<Salary> salaries = employerService.getAllSalariesByEmployer(employerId);
-        return ResponseEntity.ok(salaries);
+    @GetMapping("/salaries/{salaryId}")
+    public ResponseEntity<EmployerDTO> getEmployerBySalaryId(@PathVariable Long salaryId) {
+        EmployerDTO employer = employerService.getEmployerBySalaryId(salaryId);
+        return ResponseEntity.ok(employer);
     }
-    @GetMapping("/{employerId}/tasks")
-    public ResponseEntity<List<Task>> getAllTasksForEmployer(@PathVariable(name = "employerId") Long employerId) {
-        List<Task> tasks = employerService.getAllTasksByEmployer(employerId);
-        return ResponseEntity.ok(tasks);
+    @GetMapping("/tasks/{taskId}")
+    public ResponseEntity<List<EmployerDTO>> getEmployersByTaskId(@PathVariable Long taskId) {
+        List<EmployerDTO> employers = employerService.getEmployersByTaskId(taskId);
+        return ResponseEntity.ok(employers);
     }
-    @GetMapping("/{employerId}/payments")
-    public ResponseEntity<List<Payment>> getAllPaymentsForEmployer(@PathVariable(name = "employerId") Long employerId) {
-        List<Payment> payments = employerService.getAllPaymentsByEmployer(employerId);
-        return ResponseEntity.ok(payments);
+
+    @GetMapping("/payments/{paymentId}")
+    public ResponseEntity<EmployerDTO> getEmployerByPaymentId(@PathVariable Long paymentId) {
+        EmployerDTO employer = employerService.getEmployerByPaymentId(paymentId);
+        return ResponseEntity.ok(employer);
     }
-    @GetMapping("/{employerId}/projects")
-    public ResponseEntity<List<Project>> getAllProjectsForEmployer(@PathVariable(name = "employerId") Long employerId) {
-        List<Project> projects = employerService.getAllProjectsByEmployer(employerId);
-        return ResponseEntity.ok(projects);
-    }
-    @GetMapping("/{employerId}/materials")
-    public ResponseEntity<List<Material>> getAllMaterialsForEmployer(@PathVariable Long employerId) {
-        List<Material> materials = employerService.getAllMaterialsByEmployer(employerId);
-        return ResponseEntity.ok(materials);
+
+    @GetMapping("/materials/{materialId}")
+    public ResponseEntity<List<EmployerDTO>> getAllMaterialsForEmployer(@PathVariable Long materialId) {
+        List<EmployerDTO> employers = employerService.getAllEmployersByMaterial(materialId);
+        return ResponseEntity.ok(employers);
     }
 
 
-    @GetMapping("/{id}/projects")
-    public ResponseEntity<List<Employer>> getEmployerProjects(@PathVariable(name = "id") final Long id) {
-        return ResponseEntity.ok(employerService.findAllByProjectId(id));
+    @GetMapping("/projects/{projectId}")
+    public ResponseEntity<List<EmployerDTO>> getAllEmployersByProjectId(@PathVariable Long projectId) {
+        List<EmployerDTO> employers = employerService.findAllByProjectId(projectId);
+        return ResponseEntity.ok(employers);
     }
 }

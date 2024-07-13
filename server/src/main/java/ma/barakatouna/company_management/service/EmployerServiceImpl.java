@@ -3,20 +3,24 @@ package ma.barakatouna.company_management.service;
 import jakarta.transaction.Transactional;
 import ma.barakatouna.company_management.entities.*;
 import ma.barakatouna.company_management.model.EmployerDTO;
+import ma.barakatouna.company_management.model.MaterialDTO;
+import ma.barakatouna.company_management.model.ProjectDTO;
 import ma.barakatouna.company_management.repos.*;
 import ma.barakatouna.company_management.util.NotFoundException;
 import ma.barakatouna.company_management.util.ReferencedWarning;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 @Service
 @Transactional
-public class EmployerServiceImpl implements EmployerService{
+public class EmployerServiceImpl implements EmployerService {
 
     private final EmployerRepository employerRepository;
     private final MaterialRepository materialRepository;
@@ -136,42 +140,47 @@ public class EmployerServiceImpl implements EmployerService{
         }
         return null;
     }
-    public List<Salary> getAllSalariesByEmployer(Long employerId) {
-        Employer employer = employerRepository.findById(employerId)
-                .orElseThrow(() -> new NotFoundException("Employer not found with id: " + employerId));
-        return salaryRepository.findAllSalariesByEmployer(employer);
+
+
+    public EmployerDTO getEmployerBySalaryId(Long salaryId) {
+        Salary salary = salaryRepository.findById(salaryId)
+                .orElseThrow(() -> new NotFoundException("Salary not found with id: " + salaryId));
+        Employer employer = salary.getEmployer();
+        return mapToDTO(employer, new EmployerDTO());
+    }
+
+
+    public List<EmployerDTO> getEmployersByTaskId(Long taskId) {
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new NotFoundException("Task not found with id: " + taskId));
+        return task.getEmployer().stream()
+                .map(employer -> mapToDTO(employer, new EmployerDTO()))
+                .collect(Collectors.toList());
+    }
+
+
+    @Override
+    public List<EmployerDTO> getAllEmployersByMaterial(Long materialId) {
+        Material material = materialRepository.findById(materialId)
+                .orElseThrow(() -> new NotFoundException("Material not found with id: " + materialId));
+        return employerRepository.findAllByMaterials(material).stream()
+                .map(employer -> mapToDTO(employer, new EmployerDTO()))
+                .toList();
+    }
+
+    public EmployerDTO getEmployerByPaymentId(Long paymentId) {
+        Payment payment = paymentRepository.findById(paymentId)
+                .orElseThrow(() -> new NotFoundException("Payment not found with id: " + paymentId));
+        Employer employer = payment.getEmployer();
+        return mapToDTO(employer, new EmployerDTO());
     }
 
     @Override
-    public List<Task> getAllTasksByEmployer(Long employerId) {
-        Employer employer = employerRepository.findById(employerId)
-                .orElseThrow(() -> new NotFoundException("Employer not found with id: " + employerId));
-        return taskRepository.findAllByEmployer(employer);
-    }
-    @Override
-    public List<Payment> getAllPaymentsByEmployer(Long employerId) {
-        Employer employer = employerRepository.findById(employerId)
-                .orElseThrow(() -> new NotFoundException("Employer not found with id: " + employerId));
-        return paymentRepository.findAllByEmployer(employer);
-    }
-    @Override
-    public List<Project> getAllProjectsByEmployer(Long employerId) {
-        Employer employer = employerRepository.findById(employerId)
-                .orElseThrow(() -> new NotFoundException("Employer not found with id: " + employerId));
-        return projectRepository.findAllByEmployers(employer);
-    }
-    @Override
-    public List<Material> getAllMaterialsByEmployer(Long employerId) {
-        Employer employer = employerRepository.findById(employerId)
-                .orElseThrow(() -> new NotFoundException("Employer not found with id: " + employerId));
-
-        return materialRepository.findAllByEmployers_Id(employer.getId());
-    }
-
-    @Override
-    public List<Employer> findAllByProjectId(Long projectId) {
+    public List<EmployerDTO> findAllByProjectId(Long projectId) {
         Project project = projectRepository.findById(projectId).orElseThrow(NotFoundException::new);
-        return employerRepository.findAllByProjets(project);
-    }
+        return employerRepository.findAllByProjets(project).stream()
+                .map(employer -> mapToDTO(employer, new EmployerDTO()))
+                .toList();
 
+    }
 }

@@ -16,7 +16,7 @@ import java.util.List;
 
 @Service
 @Transactional
-public  class MaterialServiceImpl implements MaterialService {
+public class MaterialServiceImpl implements MaterialService {
 
     private final MaterialRepository materialRepository;
     private final TaskRepository taskRepository;
@@ -118,8 +118,8 @@ public  class MaterialServiceImpl implements MaterialService {
     }
 
     @Override
-    public List<Material> getProjectMaterialsByProjectId(Long projectId) {
-        Project project = projectRepository.findById(projectId ).orElseThrow(NotFoundException::new) ;
+    public List<Material> getMaterialsByProjectId(Long projectId) {
+        Project project = projectRepository.findById(projectId).orElseThrow(NotFoundException::new);
         return materialRepository.findAllByProjets(project);
     }
 
@@ -127,5 +127,30 @@ public  class MaterialServiceImpl implements MaterialService {
     public List<Material> getMaterialsOwn(Boolean Owned) {
         return materialRepository.findAllByOwned(Owned);
     }
+
+    @Override
+    public List<Material> getMaterialsByPaymentId(Long paymentId) {
+        Payment payment = paymentRepository.findById(paymentId).orElseThrow(NotFoundException::new);
+        return materialRepository.findAllByPayments(payment);
+    }
+
+    @Override
+    public List<Material> getMaterialsByTaskId(Long taskId) {
+        Task task = taskRepository.findById(taskId).orElseThrow(NotFoundException::new);
+        return materialRepository.findAllByTasks(task);
+    }
+
+    @Override
+    public List<Material> getMaterialsBySalaryId(Long salaryId ) {
+        Salary salary = salaryRepository.findById(salaryId).orElseThrow(NotFoundException::new);
+        return materialRepository.findAllBySalaries(salary);
+    }
+
+    @Override
+    public List<Material> getMaterialsByEmployerId(Long employerId) {
+        Employer employer = employerRepository.findById(employerId).orElseThrow(NotFoundException::new);
+        return materialRepository.findAllByEmployers(employer);
+    }
+
 
 }

@@ -2,6 +2,7 @@ package ma.barakatouna.company_management.rest;
 
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
+
 import java.util.List;
 
 import ma.barakatouna.company_management.entities.Material;
@@ -54,7 +55,7 @@ public class MaterialResource {
 
     @PutMapping("/{id}")
     public ResponseEntity<Long> updateMaterial(@PathVariable(name = "id") final Long id,
-            @RequestBody @Valid final MaterialDTO materialDTO) {
+                                               @RequestBody @Valid final MaterialDTO materialDTO) {
         materialService.update(id, materialDTO);
         return ResponseEntity.ok(id);
     }
@@ -72,7 +73,7 @@ public class MaterialResource {
 
     @GetMapping("/{projectId}/material")
     public ResponseEntity<List<Material>> getMaterialsByProjectId(@PathVariable Long projectId) {
-        List<Material> taskCount = materialService.getProjectMaterialsByProjectId(projectId);
+        List<Material> taskCount = materialService.getMaterialsByProjectId(projectId);
         return ResponseEntity.ok(taskCount);
     }
 
@@ -82,4 +83,27 @@ public class MaterialResource {
         return ResponseEntity.ok(taskCount);
     }
 
+    @GetMapping("/{paymentId}/payment")
+    public ResponseEntity<List<Material>> getMaterialsByPaymentId(@PathVariable Long paymentId) {
+        List<Material> taskCount = materialService.getMaterialsByPaymentId(paymentId);
+        return ResponseEntity.ok(taskCount);
+    }
+
+    @GetMapping("/{taskId}/task")
+    public ResponseEntity<List<Material>> getMaterialsByTaskId(@PathVariable Long taskId) {
+        List<Material> taskCount = materialService.getMaterialsByTaskId(taskId);
+        return ResponseEntity.ok(taskCount);
+    }
+
+    @GetMapping("/{salaryId}/salary")
+    public ResponseEntity<List<Material>> getMaterialsBySalaryId(@PathVariable Long salaryId) {
+        List<Material> taskCount = materialService.getMaterialsBySalaryId(salaryId);
+        return ResponseEntity.ok(taskCount);
+    }
+
+    @GetMapping("/{employerId}/employer")
+    public ResponseEntity<List<Material>> getMaterialsByEmployerId(@PathVariable Long employerId) {
+        List<Material> taskCount = materialService.getMaterialsByEmployerId(employerId);
+        return ResponseEntity.ok(taskCount);
+    }
 }

@@ -1,9 +1,8 @@
 package ma.barakatouna.company_management.repos;
 
 import java.util.List;
-import ma.barakatouna.company_management.entities.Material;
-import ma.barakatouna.company_management.entities.Project;
-import ma.barakatouna.company_management.entities.Task;
+
+import ma.barakatouna.company_management.entities.*;
 import ma.barakatouna.company_management.model.MaterialDTO;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -19,4 +18,13 @@ public interface MaterialRepository extends JpaRepository<Material, Long> {
     List<Material> findAllByProjets( Project project);
 
     List<Material> findAllByOwned(Boolean owned);
+
+    List <Material> findAllByPayments (Payment payment);
+
+    List <Material> findAllBySalaries (Salary salary);
+
+    List <Material> findAllByEmployers (Employer employer);
+
+
+
 }

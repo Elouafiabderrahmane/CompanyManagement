@@ -2,13 +2,18 @@ package ma.barakatouna.company_management.rest;
 
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
+
 import java.util.List;
 
+import ma.barakatouna.company_management.entities.Employer;
 import ma.barakatouna.company_management.entities.Material;
 import ma.barakatouna.company_management.entities.Project;
+import ma.barakatouna.company_management.entities.Task;
 import ma.barakatouna.company_management.model.ProjectDTO;
+import ma.barakatouna.company_management.repos.EmployerRepository;
 import ma.barakatouna.company_management.repos.MaterialRepository;
 import ma.barakatouna.company_management.repos.ProjectRepository;
+import ma.barakatouna.company_management.repos.TaskRepository;
 import ma.barakatouna.company_management.service.ProjectService;
 import ma.barakatouna.company_management.util.NotFoundException;
 import ma.barakatouna.company_management.util.ReferencedException;
@@ -33,12 +38,16 @@ public class ProjectResource {
     private final ProjectService projectService;
     private final ProjectRepository projectRepository;
     private final MaterialRepository materialRepository;
+    private final EmployerRepository employerRepository;
+    private final TaskRepository taskRepository;
 
 
-    public ProjectResource(final ProjectService projectService, ProjectRepository projectRepository, MaterialRepository materialRepository) {
+    public ProjectResource(final ProjectService projectService, ProjectRepository projectRepository, MaterialRepository materialRepository, EmployerRepository employerRepository, TaskRepository taskRepository) {
         this.projectService = projectService;
         this.projectRepository = projectRepository;
         this.materialRepository = materialRepository;
+        this.employerRepository = employerRepository;
+        this.taskRepository = taskRepository;
     }
 
     @GetMapping
@@ -60,7 +69,7 @@ public class ProjectResource {
 
     @PutMapping("/{id}")
     public ResponseEntity<Long> updateProject(@PathVariable(name = "id") final Long id,
-            @RequestBody @Valid final ProjectDTO projectDTO) {
+                                              @RequestBody @Valid final ProjectDTO projectDTO) {
         projectService.update(id, projectDTO);
         return ResponseEntity.ok(id);
     }
@@ -78,9 +87,25 @@ public class ProjectResource {
 
     @GetMapping("/materials/{materialId}")
     public ResponseEntity<List<Project>> getProjectsByMaterialId22(@PathVariable Long materialId) {
-        Material material =  materialRepository.findById(materialId).orElseThrow(NotFoundException::new) ;
+        Material material = materialRepository.findById(materialId).orElseThrow(NotFoundException::new);
         List<Project> projects = projectRepository.findAllByMaterials(material);
         return ResponseEntity.ok(projects);
     }
+
+
+    @GetMapping("/employers/{employerId}")
+    public ResponseEntity<List<Project>> getProjectsByEmployerId(@PathVariable Long employerId) {
+        Employer employer = employerRepository.findById(employerId).orElseThrow(NotFoundException::new);
+        List<Project> projects = projectRepository.findAllByEmployers(employer);
+        return ResponseEntity.ok(projects);
+    }
+
+    @GetMapping("/tasks/{taskId}")
+    public ResponseEntity<List<Project>> getProjectsByTaskId(@PathVariable Long taskId) {
+        Task task = taskRepository.findById(taskId).orElseThrow(NotFoundException::new);
+        List<Project> projects = projectRepository.findAllByTasks(task);
+        return ResponseEntity.ok(projects);
+    }
+
 
 }

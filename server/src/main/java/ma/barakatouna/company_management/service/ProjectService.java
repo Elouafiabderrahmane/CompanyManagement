@@ -20,5 +20,9 @@ public interface ProjectService {
 
     ReferencedWarning getReferencedWarning(Long id);
 
-    List<Project> getProjectsByMaterialId(Long materialID);
+    List<ProjectDTO> getProjectsByMaterialId(Long materialID);
+
+    List<ProjectDTO> getProjectsByEmployerId(Long employerId);
+
+    List<ProjectDTO> getProjectsByTaskId(Long taskId);
 }

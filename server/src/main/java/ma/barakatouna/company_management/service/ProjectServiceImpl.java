@@ -128,9 +128,30 @@ public class ProjectServiceImpl implements ProjectService{
     }
 
     @Override
-    public List<Project> getProjectsByMaterialId(Long materialID) {
+    public List<ProjectDTO> getProjectsByMaterialId(Long materialID) {
         Material material =  materialRepository.findById(materialID).orElseThrow(NotFoundException::new) ;
-        return projectRepository.findAllByMaterials(material);
+        List <Project> projects= projectRepository.findAllByMaterials(material);
+        return projects.stream()
+                .map(project -> mapToDTO(project, new ProjectDTO()))
+                .toList();
+    }
+
+    @Override
+    public List<ProjectDTO> getProjectsByEmployerId(Long employerId) {
+        Employer employer = employerRepository.findById(employerId).orElseThrow(NotFoundException::new);
+        List<Project> projects = projectRepository.findAllByEmployers(employer);
+        return projects.stream()
+                .map(project -> mapToDTO(project, new ProjectDTO()))
+                .toList();
+    }
+
+    @Override
+    public List<ProjectDTO> getProjectsByTaskId(Long taskId) {
+        Task task = taskRepository.findById(taskId).orElseThrow(NotFoundException::new);
+        List<Project> projects = projectRepository.findAllByTasks(task);
+        return projects.stream()
+                .map(project -> mapToDTO(project, new ProjectDTO()))
+                .toList();
     }
 
 }

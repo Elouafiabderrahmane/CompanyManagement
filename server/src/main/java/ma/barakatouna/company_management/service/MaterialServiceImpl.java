@@ -119,32 +119,48 @@ public class MaterialServiceImpl implements MaterialService {
     }
 
     @Override
-    public List<Material> getMaterialsByProjectId(Long projectId) {
+    public List<MaterialDTO> getMaterialsByProjectId(Long projectId) {
         Project project = projectRepository.findById(projectId).orElseThrow(NotFoundException::new);
-        return materialRepository.findAllByProjets(project);
+        List<Material> materials = materialRepository.findAllByProjets(project);
+        return materials.stream()
+                .map(material1 -> mapToDTO(material1, new MaterialDTO()))
+                .collect(Collectors.toList());
+
     }
 
     @Override
-    public List<Material> getMaterialsOwn(Boolean Owned) {
-        return materialRepository.findAllByOwned(Owned);
+    public List<MaterialDTO> getMaterialsOwn(Boolean Owned) {
+        List<Material> materials = materialRepository.findAllByOwned(Owned);
+        return materials.stream()
+                .map(material1 -> mapToDTO(material1, new MaterialDTO()))
+                .collect(Collectors.toList());
     }
 
     @Override
-    public List<Material> getMaterialsByPaymentId(Long paymentId) {
+    public List<MaterialDTO> getMaterialsByPaymentId(Long paymentId) {
         Payment payment = paymentRepository.findById(paymentId).orElseThrow(NotFoundException::new);
-        return materialRepository.findAllByPayments(payment);
+        List<Material> materials = materialRepository.findAllByPayments(payment);
+        return materials.stream()
+                .map(material1 -> mapToDTO(material1, new MaterialDTO()))
+                .collect(Collectors.toList());
     }
 
     @Override
-    public List<Material> getMaterialsByTaskId(Long taskId) {
+    public List<MaterialDTO> getMaterialsByTaskId(Long taskId) {
         Task task = taskRepository.findById(taskId).orElseThrow(NotFoundException::new);
-        return materialRepository.findAllByTasks(task);
+        List<Material> materials = materialRepository.findAllByTasks(task);
+        return  materials.stream()
+                .map(material1 -> mapToDTO(material1, new MaterialDTO()))
+                .collect(Collectors.toList());
     }
 
     @Override
-    public List<Material> getMaterialsBySalaryId(Long salaryId) {
+    public List<MaterialDTO> getMaterialsBySalaryId(Long salaryId) {
         Salary salary = salaryRepository.findById(salaryId).orElseThrow(NotFoundException::new);
-        return materialRepository.findAllBySalaries(salary);
+        List<Material> materials = materialRepository.findAllBySalaries(salary);
+        return materials.stream()
+                .map(material1 -> mapToDTO(material1, new MaterialDTO()))
+                .collect(Collectors.toList());
     }
 
     @Override

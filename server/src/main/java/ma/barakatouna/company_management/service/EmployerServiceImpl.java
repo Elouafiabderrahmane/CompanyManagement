@@ -122,7 +122,7 @@ public class EmployerServiceImpl implements EmployerService{
         final ReferencedWarning referencedWarning = new ReferencedWarning();
         final Employer employer = employerRepository.findById(id)
                 .orElseThrow(NotFoundException::new);
-        final Salary employersSalary = salaryRepository.findFirstByEmployers(employer);
+        final Salary employersSalary = salaryRepository.findFirstByEmployer(employer);
         if (employersSalary != null) {
             referencedWarning.setKey("employer.salary.employers.referenced");
             referencedWarning.addParam(employersSalary.getId());
@@ -135,6 +135,37 @@ public class EmployerServiceImpl implements EmployerService{
             return referencedWarning;
         }
         return null;
+    }
+    public List<Salary> getAllSalariesByEmployer(Long employerId) {
+        Employer employer = employerRepository.findById(employerId)
+                .orElseThrow(() -> new NotFoundException("Employer not found with id: " + employerId));
+        return salaryRepository.findAllSalariesByEmployer(employer);
+    }
+
+    @Override
+    public List<Task> getAllTasksByEmployer(Long employerId) {
+        Employer employer = employerRepository.findById(employerId)
+                .orElseThrow(() -> new NotFoundException("Employer not found with id: " + employerId));
+        return taskRepository.findAllByEmployer(employer);
+    }
+    @Override
+    public List<Payment> getAllPaymentsByEmployer(Long employerId) {
+        Employer employer = employerRepository.findById(employerId)
+                .orElseThrow(() -> new NotFoundException("Employer not found with id: " + employerId));
+        return paymentRepository.findAllByEmployer(employer);
+    }
+    @Override
+    public List<Project> getAllProjectsByEmployer(Long employerId) {
+        Employer employer = employerRepository.findById(employerId)
+                .orElseThrow(() -> new NotFoundException("Employer not found with id: " + employerId));
+        return projectRepository.findAllByEmployers(employer);
+    }
+    @Override
+    public List<Material> getAllMaterialsByEmployer(Long employerId) {
+        Employer employer = employerRepository.findById(employerId)
+                .orElseThrow(() -> new NotFoundException("Employer not found with id: " + employerId));
+
+        return materialRepository.findAllByEmployers_Id(employer.getId());
     }
 
     @Override

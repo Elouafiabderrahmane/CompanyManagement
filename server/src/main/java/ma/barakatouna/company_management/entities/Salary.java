@@ -43,8 +43,8 @@ public class Salary {
     private String endingDate;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "employers_id")
-    private Employer employers;
+    @JoinColumn(name = "employer_id")
+    private Employer employer;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "material_id")

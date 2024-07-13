@@ -65,7 +65,7 @@ public class Employer {
     )
     private Set<Material> materials;
 
-    @OneToMany(mappedBy = "employers")
+    @OneToMany(mappedBy = "employer")
     private Set<Salary> salaries;
 
     @OneToMany(mappedBy = "employer")

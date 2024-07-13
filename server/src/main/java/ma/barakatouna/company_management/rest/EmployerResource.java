@@ -3,6 +3,8 @@ package ma.barakatouna.company_management.rest;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 import java.util.List;
+
+import ma.barakatouna.company_management.entities.*;
 import ma.barakatouna.company_management.model.EmployerDTO;
 import ma.barakatouna.company_management.service.EmployerService;
 import ma.barakatouna.company_management.util.ReferencedException;
@@ -64,5 +66,34 @@ public class EmployerResource {
         employerService.delete(id);
         return ResponseEntity.noContent().build();
     }
+
+
+
+    @GetMapping("/{employerId}/salaries")
+    public ResponseEntity<List<Salary>> getAllSalariesForEmployer(@PathVariable(name = "employerId") Long employerId) {
+        List<Salary> salaries = employerService.getAllSalariesByEmployer(employerId);
+        return ResponseEntity.ok(salaries);
+    }
+    @GetMapping("/{employerId}/tasks")
+    public ResponseEntity<List<Task>> getAllTasksForEmployer(@PathVariable(name = "employerId") Long employerId) {
+        List<Task> tasks = employerService.getAllTasksByEmployer(employerId);
+        return ResponseEntity.ok(tasks);
+    }
+    @GetMapping("/{employerId}/payments")
+    public ResponseEntity<List<Payment>> getAllPaymentsForEmployer(@PathVariable(name = "employerId") Long employerId) {
+        List<Payment> payments = employerService.getAllPaymentsByEmployer(employerId);
+        return ResponseEntity.ok(payments);
+    }
+    @GetMapping("/{employerId}/projects")
+    public ResponseEntity<List<Project>> getAllProjectsForEmployer(@PathVariable(name = "employerId") Long employerId) {
+        List<Project> projects = employerService.getAllProjectsByEmployer(employerId);
+        return ResponseEntity.ok(projects);
+    }
+    @GetMapping("/{employerId}/materials")
+    public ResponseEntity<List<Material>> getAllMaterialsForEmployer(@PathVariable Long employerId) {
+        List<Material> materials = employerService.getAllMaterialsByEmployer(employerId);
+        return ResponseEntity.ok(materials);
+    }
+
 
 }

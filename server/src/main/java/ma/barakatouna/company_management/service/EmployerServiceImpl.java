@@ -3,14 +3,11 @@ package ma.barakatouna.company_management.service;
 import jakarta.transaction.Transactional;
 import ma.barakatouna.company_management.entities.*;
 import ma.barakatouna.company_management.model.EmployerDTO;
-import ma.barakatouna.company_management.model.MaterialDTO;
-import ma.barakatouna.company_management.model.ProjectDTO;
 import ma.barakatouna.company_management.repos.*;
 import ma.barakatouna.company_management.util.NotFoundException;
 import ma.barakatouna.company_management.util.ReferencedWarning;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-
 
 import java.util.Collections;
 import java.util.HashSet;

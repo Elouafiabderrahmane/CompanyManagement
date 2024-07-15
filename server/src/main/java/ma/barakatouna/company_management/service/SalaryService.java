@@ -1,7 +1,8 @@
 package ma.barakatouna.company_management.service;
 
-import java.util.List;
 import ma.barakatouna.company_management.model.SalaryDTO;
+
+import java.util.List;
 
 public interface SalaryService {
 

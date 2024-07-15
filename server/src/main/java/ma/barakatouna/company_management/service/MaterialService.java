@@ -1,10 +1,9 @@
 package ma.barakatouna.company_management.service;
 
-import java.util.List;
-
-import ma.barakatouna.company_management.entities.Material;
 import ma.barakatouna.company_management.model.MaterialDTO;
 import ma.barakatouna.company_management.util.ReferencedWarning;
+
+import java.util.List;
 
 public interface MaterialService {
 

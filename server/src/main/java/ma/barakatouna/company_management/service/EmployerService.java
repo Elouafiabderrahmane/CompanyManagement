@@ -1,12 +1,9 @@
 package ma.barakatouna.company_management.service;
 
-import jakarta.transaction.Transactional;
-import java.util.List;
-import ma.barakatouna.company_management.entities.*;
-import ma.barakatouna.company_management.entities.Employer;
 import ma.barakatouna.company_management.model.EmployerDTO;
-import ma.barakatouna.company_management.model.MaterialDTO;
 import ma.barakatouna.company_management.util.ReferencedWarning;
+
+import java.util.List;
 
 public interface EmployerService {
 

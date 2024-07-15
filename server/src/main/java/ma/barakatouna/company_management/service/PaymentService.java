@@ -1,7 +1,8 @@
 package ma.barakatouna.company_management.service;
 
-import java.util.List;
 import ma.barakatouna.company_management.model.PaymentDTO;
+
+import java.util.List;
 
 public interface PaymentService {
 

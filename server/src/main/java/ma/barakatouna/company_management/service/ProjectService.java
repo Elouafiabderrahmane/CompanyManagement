@@ -1,10 +1,9 @@
 package ma.barakatouna.company_management.service;
 
-import java.util.List;
-
-import ma.barakatouna.company_management.entities.Project;
 import ma.barakatouna.company_management.model.ProjectDTO;
 import ma.barakatouna.company_management.util.ReferencedWarning;
+
+import java.util.List;
 
 public interface ProjectService {
 

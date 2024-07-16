@@ -25,6 +25,11 @@
     "icon": "bx bx-task"
   },
   {
+    "display_name": "Salary",
+    "route": "/salaries",
+    "icon": "bx bxs-dock-left"
+  },
+  {
     "display_name": "Payments",
     "route": "/payments",
     "icon": "bx bx-money"

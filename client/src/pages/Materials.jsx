@@ -138,7 +138,6 @@ const Materials = () => {
       });
   };
 
-
   const showSnackbar = (message, severity) => {
     setSnackbar({ open: true, message, severity });
   };
@@ -250,6 +249,18 @@ const Materials = () => {
             value={updateData.reference}
             onChange={(e) =>
               setUpdateData({ ...updateData, reference: e.target.value })
+            }
+            fullWidth
+            margin="normal"
+          />
+          <TextField
+            label="Tasks"
+            value={updateData.tasks.join(", ")}
+            onChange={(e) =>
+              setUpdateData({
+                ...updateData,
+                tasks: e.target.value.split(", "),
+              })
             }
             fullWidth
             margin="normal"

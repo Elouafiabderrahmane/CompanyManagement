@@ -46,7 +46,7 @@ public class Task {
     @JoinTable(
             name = "TaskEmployer",
             joinColumns = @JoinColumn(name = "taskId"),
-            inverseJoinColumns = @JoinColumn(name = "employerId")
+            inverseJoinColumns = @JoinColumn(name = "employersId")
     )
     private Set<Employer> employer;
 

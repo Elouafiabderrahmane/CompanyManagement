@@ -37,7 +37,7 @@ public class Payment {
     private Material material;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "employers_id")
+    @JoinColumn(name = "employer_id")
     private Employer employer;
 
 }

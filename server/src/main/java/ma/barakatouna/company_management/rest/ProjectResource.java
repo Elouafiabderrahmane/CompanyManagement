@@ -19,6 +19,7 @@ import java.util.List;
 
 
 @RestController
+@CrossOrigin ("*")
 @RequestMapping(value = "/api/projects", produces = MediaType.APPLICATION_JSON_VALUE)
 public class ProjectResource {
 

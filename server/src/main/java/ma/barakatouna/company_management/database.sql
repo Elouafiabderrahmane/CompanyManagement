@@ -51,7 +51,7 @@ INSERT INTO user (username, password, role) VALUES
                                                 ('fatima_b', 'hashed_password_3', 'TECHNICIEN');
 
 -- Insert into Salary
-INSERT INTO salary (amount, frequency, paid, starting_date, employers_id, material_id) VALUES
+INSERT INTO salary (amount, frequency, paid, starting_date, employer_id, material_id) VALUES
                                                                                            (8000.00, 'MONTHLY', true, '2023-01-15', 1, NULL),
                                                                                            (7500.00, 'MONTHLY', true, '2023-02-01', 2, NULL),
                                                                                            (12000.00, 'MONTHLY', true, '2023-03-10', 3, NULL),

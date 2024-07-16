@@ -51,7 +51,7 @@ public class Employer {
     @ManyToMany
     @JoinTable(
             name = "EmployerMaterial",
-            joinColumns = @JoinColumn(name = "employersId"),
+            joinColumns = @JoinColumn(name = "employerId"),
             inverseJoinColumns = @JoinColumn(name = "materialId")
     )
     private Set<Material> materials;

@@ -16,6 +16,7 @@ import java.util.List;
 
 
 @RestController
+@CrossOrigin ("*")
 @RequestMapping(value = "/api/materials", produces = MediaType.APPLICATION_JSON_VALUE)
 public class MaterialResource {
 

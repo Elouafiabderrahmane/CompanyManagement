@@ -46,7 +46,7 @@ public class Project {
     @JoinTable(
             name = "ProjectEmployer",
             joinColumns = @JoinColumn(name = "projectId"),
-            inverseJoinColumns = @JoinColumn(name = "employersId")
+            inverseJoinColumns = @JoinColumn(name = "employerId")
     )
     private Set<Employer> employers;
 

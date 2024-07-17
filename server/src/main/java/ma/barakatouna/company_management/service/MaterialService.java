@@ -31,4 +31,7 @@ public interface MaterialService {
     List<MaterialDTO> getMaterialsBySalaryId(Long salaryId);
 
     List<MaterialDTO> getMaterialsByEmployerId(Long employerId);
+
+    MaterialDTO getMaterialByName(String name);
+    Long countAll();
 }

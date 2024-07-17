@@ -21,11 +21,9 @@ import java.util.List;
 public class MaterialResource {
 
     private final MaterialService materialService;
-    private final MaterialRepository materialRepository;
 
     public MaterialResource(final MaterialService materialService, MaterialRepository materialRepository) {
         this.materialService = materialService;
-        this.materialRepository = materialRepository;
     }
 
     @GetMapping
@@ -97,5 +95,16 @@ public class MaterialResource {
     public ResponseEntity<List<MaterialDTO>> getMaterialsByEmployerId(@PathVariable Long employerId) {
         List<MaterialDTO> taskCount = materialService.getMaterialsByEmployerId(employerId);
         return ResponseEntity.ok(taskCount);
+    }
+
+    @GetMapping("/name/{name}")
+    public ResponseEntity<MaterialDTO> getMaterialByName(@PathVariable String name) {
+        MaterialDTO taskCount = materialService.getMaterialByName(name);
+        return ResponseEntity.ok(taskCount);
+    }
+
+    @GetMapping("/count")
+    public ResponseEntity<Long> countAll() {
+        return ResponseEntity.ok(materialService.countAll());
     }
 }

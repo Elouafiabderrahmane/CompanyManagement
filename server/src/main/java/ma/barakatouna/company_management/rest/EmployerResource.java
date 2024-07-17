@@ -26,6 +26,8 @@ import java.util.UUID;
 
 
 @RestController
+@CrossOrigin ("*")
+
 @RequestMapping(value = "/api/employers", produces = MediaType.APPLICATION_JSON_VALUE)
 public class EmployerResource {
 

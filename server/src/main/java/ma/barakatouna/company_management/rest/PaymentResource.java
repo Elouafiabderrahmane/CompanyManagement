@@ -13,6 +13,7 @@ import java.util.List;
 
 
 @RestController
+@CrossOrigin ("*")
 @RequestMapping(value = "/api/payments", produces = MediaType.APPLICATION_JSON_VALUE)
 public class PaymentResource {
 

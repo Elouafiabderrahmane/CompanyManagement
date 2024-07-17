@@ -9,6 +9,7 @@ import java.util.List;
 public interface MaterialRepository extends JpaRepository<Material, Long> {
 
     Material findFirstByTasks(Task task);
+    Material findMaterialByName(String name);
 
     List<Material> findAllByTasks(Task task);
 
@@ -24,6 +25,7 @@ public interface MaterialRepository extends JpaRepository<Material, Long> {
 
     List <Material> findAllByEmployers (Employer employer);
 
+    long count();
 
 
 }

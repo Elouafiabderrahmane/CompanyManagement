@@ -10,33 +10,31 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  FormControlLabel,
-  Switch,
   TextField,
   Snackbar,
-  Select,
   MenuItem,
-  Alert,
+  Select,
+  InputLabel,
+  FormControl,
 } from "@mui/material";
 
-const tasksTableHead = [
-  "",
-  "Task Type",
-  "Done",
-  "Title",
-  "Description",
+const salariesTableHead = [
+  "ID",
+  "Amount",
+  "Frequency",
+  "Paid",
   "Starting Date",
   "Ending Date",
-  "Project",
   "Employer",
+  "Material",
   "Update",
   "Delete",
 ];
 
 const renderHead = (item, index) => <th key={index}>{item}</th>;
 
-const Tasks = () => {
-  const [tasks, setTasks] = useState([]);
+const Salaries = () => {
+  const [salaries, setSalaries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
@@ -44,14 +42,13 @@ const Tasks = () => {
   const [updateId, setUpdateId] = useState(null);
   const [updateData, setUpdateData] = useState({
     id: "",
-    tasktype: "",
-    done: false,
-    title: "",
-    description: "",
+    amount: "",
+    frequency: "",
+    paid: false,
     startingDate: "",
-    endingDate: "",
-    project: "",
-    employer: [],
+    endingDate: null,
+    employers: "",
+    material: "",
   });
   const [snackbar, setSnackbar] = useState({
     open: false,
@@ -60,21 +57,21 @@ const Tasks = () => {
   });
 
   useEffect(() => {
-    fetchTasks();
+    fetchSalaries();
   }, []);
 
-  const fetchTasks = () => {
+  const fetchSalaries = () => {
     setLoading(true);
-    fetch("http://localhost:8085/api/tasks")
+    fetch("http://localhost:8085/api/salaries")
       .then((response) => response.json())
       .then((data) => {
-        setTasks(data);
+        setSalaries(data);
         setLoading(false);
       })
       .catch((error) => {
-        console.error("Error fetching tasks:", error);
+        console.error("Error fetching salaries:", error);
         setLoading(false);
-        showSnackbar("Failed to fetch tasks", "error");
+        showSnackbar("Failed to fetch salaries", "error");
       });
   };
 
@@ -82,24 +79,24 @@ const Tasks = () => {
     setDeleteDialogOpen(true);
     setDeleteId(id);
     // Optimistically remove the item from the list
-    setTasks(tasks.filter((task) => task.id !== id));
+    setSalaries(salaries.filter((salary) => salary.id !== id));
   };
 
   const confirmDelete = () => {
-    fetch(`http://localhost:8085/api/tasks/${deleteId}`, {
+    fetch(`http://localhost:8085/api/salaries/${deleteId}`, {
       method: "DELETE",
     })
       .then((response) => {
         if (!response.ok) {
           throw new Error("Delete failed");
         }
-        showSnackbar("Task deleted successfully", "success");
+        showSnackbar("Salary deleted successfully", "success");
       })
       .catch((error) => {
-        console.error("Error deleting task:", error);
+        console.error("Error deleting salary:", error);
         // Revert the optimistic update
-        fetchTasks();
-        showSnackbar("Failed to delete task", "error");
+        fetchSalaries();
+        showSnackbar("Failed to delete salary", "error");
       })
       .finally(() => {
         setDeleteDialogOpen(false);
@@ -108,30 +105,29 @@ const Tasks = () => {
 
   const handleUpdate = (id) => {
     setUpdateId(id);
-    fetch(`http://localhost:8085/api/tasks/${id}`)
+    fetch(`http://localhost:8085/api/salaries/${id}`)
       .then((response) => response.json())
       .then((data) => {
         setUpdateData({
           id: data.id,
-          tasktype: data.tasktype,
-          done: data.done,
-          title: data.title,
-          description: data.description,
+          amount: data.amount,
+          frequency: data.frequency,
+          paid: data.paid,
           startingDate: data.startingDate,
           endingDate: data.endingDate,
-          project: data.project,
-          employer: data.employer,
+          employers: data.employers,
+          material: data.material,
         });
         setUpdateModalOpen(true);
       })
       .catch((error) => {
-        console.error("Error fetching task for update:", error);
-        showSnackbar("Failed to fetch task details", "error");
+        console.error("Error fetching salary for update:", error);
+        showSnackbar("Failed to fetch salary details", "error");
       });
   };
 
-  const updateTask = () => {
-    fetch(`http://localhost:8085/api/tasks/${updateId}`, {
+  const updateSalary = () => {
+    fetch(`http://localhost:8085/api/salaries/${updateId}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -140,16 +136,16 @@ const Tasks = () => {
     })
       .then((response) => {
         if (response.ok) {
-          fetchTasks();
+          fetchSalaries();
           setUpdateModalOpen(false);
-          showSnackbar("Task updated successfully", "success");
+          showSnackbar("Salary updated successfully", "success");
         } else {
           throw new Error("Update failed");
         }
       })
       .catch((error) => {
-        console.error("Error updating task:", error);
-        showSnackbar("Failed to update task", "error");
+        console.error("Error updating salary:", error);
+        showSnackbar("Failed to update salary", "error");
       });
   };
 
@@ -160,18 +156,13 @@ const Tasks = () => {
   const renderBody = (item, index) => (
     <tr key={index}>
       <td>{item.id}</td>
-      <td>{item.tasktype}</td>
-      <td>{item.done ? "Yes" : "No"}</td>
-      <td>{item.title}</td>
-      <td>{item.description}</td>
+      <td>{item.amount}</td>
+      <td>{item.frequency}</td>
+      <td>{item.paid ? "Yes" : "No"}</td>
       <td>{item.startingDate}</td>
-      <td>{item.endingDate}</td>
-      <td>{item.project}</td>
-      <td>
-        {Array.isArray(item.employer)
-          ? item.employer.join(", ")
-          : item.employer}
-      </td>
+      <td>{item.endingDate ? item.endingDate : "⊘"}</td>
+      <td>{item.employers}</td>
+      <td>{item.material ? item.material : "⊘"}</td>
       <td>
         <Button variant="contained" onClick={() => handleUpdate(item.id)}>
           Update
@@ -204,7 +195,7 @@ const Tasks = () => {
 
   return (
     <div>
-      <h2 className="page-header">Tasks</h2>
+      <h2 className="page-header">Salaries</h2>
       <div className="row">
         <div className="col-12">
           <div className="card">
@@ -214,9 +205,9 @@ const Tasks = () => {
               ) : (
                 <Table
                   limit="10"
-                  headData={tasksTableHead}
+                  headData={salariesTableHead}
                   renderHead={(item, index) => renderHead(item, index)}
-                  bodyData={tasks}
+                  bodyData={salaries}
                   renderBody={(item, index) => renderBody(item, index)}
                 />
               )}
@@ -230,7 +221,7 @@ const Tasks = () => {
       >
         <DialogTitle>Confirm Delete</DialogTitle>
         <DialogContent>
-          Are you sure you want to delete this task?
+          Are you sure you want to delete this salary?
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setDeleteDialogOpen(false)} color="primary">
@@ -243,54 +234,49 @@ const Tasks = () => {
       </Dialog>
 
       <Dialog open={updateModalOpen} onClose={() => setUpdateModalOpen(false)}>
-        <DialogTitle>Update Task</DialogTitle>
+        <DialogTitle>Update Salary</DialogTitle>
         <DialogContent>
-          <Select
-            value={updateData.tasktype}
+          <TextField
+            id="standard-basic"
+            variant="standard"
+            label="Amount"
+            type="number"
+            value={updateData.amount}
             onChange={(e) =>
-              setUpdateData({ ...updateData, tasktype: e.target.value })
+              setUpdateData({ ...updateData, amount: e.target.value })
             }
             fullWidth
             margin="normal"
+          />
+          <FormControl
+            fullWidth
+            margin="normal"
+            id="standard-basic"
+            variant="standard"
           >
-            <MenuItem value="BUILDING">BUILDING</MenuItem>
-            {/* Add other task types as needed */}
-          </Select>
-          <FormControlLabel
-            control={
-              <Switch
-                checked={updateData.done}
-                onChange={(e) =>
-                  setUpdateData({ ...updateData, done: e.target.checked })
-                }
-                color="primary"
-              />
-            }
-            label="Done"
-            style={{ marginBottom: 0 }}
-          />
-          <TextField
-            id="standard-basic"
-            variant="standard"
-            label="Title"
-            value={updateData.title}
-            onChange={(e) =>
-              setUpdateData({ ...updateData, title: e.target.value })
-            }
-            fullWidth
-            margin="normal"
-          />
-          <TextField
-            id="standard-basic"
-            variant="standard"
-            label="Description"
-            value={updateData.description}
-            onChange={(e) =>
-              setUpdateData({ ...updateData, description: e.target.value })
-            }
-            fullWidth
-            margin="normal"
-          />
+            <InputLabel>Frequency</InputLabel>
+            <Select
+              value={updateData.frequency}
+              onChange={(e) =>
+                setUpdateData({ ...updateData, frequency: e.target.value })
+              }
+            >
+              <MenuItem value="MONTHLY">Monthly</MenuItem>
+              <MenuItem value="ANNUAL">Annual</MenuItem>
+            </Select>
+          </FormControl>
+          <FormControl fullWidth margin="normal" variant="standard">
+            <InputLabel>Paid</InputLabel>
+            <Select
+              value={updateData.paid}
+              onChange={(e) =>
+                setUpdateData({ ...updateData, paid: e.target.value })
+              }
+            >
+              <MenuItem value={true}>Yes</MenuItem>
+              <MenuItem value={false}>No</MenuItem>
+            </Select>
+          </FormControl>
           <TextField
             id="standard-basic"
             variant="standard"
@@ -321,35 +307,12 @@ const Tasks = () => {
               shrink: true,
             }}
           />
-          <TextField
-            id="standard-basic"
-            variant="standard"
-            label="Project"
-            type="number"
-            value={updateData.project}
-            onChange={(e) =>
-              setUpdateData({ ...updateData, project: e.target.value })
-            }
-            fullWidth
-            margin="normal"
-          />
-          <TextField
-            id="standard-basic"
-            variant="standard"
-            label="Employer"
-            value={updateData.employer}
-            onChange={(e) =>
-              setUpdateData({ ...updateData, employer: e.target.value })
-            }
-            fullWidth
-            margin="normal"
-          />
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setUpdateModalOpen(false)} color="primary">
             Cancel
           </Button>
-          <Button onClick={updateTask} color="primary">
+          <Button onClick={updateSalary} color="primary">
             Update
           </Button>
         </DialogActions>
@@ -366,4 +329,4 @@ const Tasks = () => {
   );
 };
 
-export default Tasks;
+export default Salaries;

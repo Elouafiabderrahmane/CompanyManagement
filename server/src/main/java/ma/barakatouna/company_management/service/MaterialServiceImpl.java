@@ -149,7 +149,7 @@ public class MaterialServiceImpl implements MaterialService {
     public List<MaterialDTO> getMaterialsByTaskId(Long taskId) {
         Task task = taskRepository.findById(taskId).orElseThrow(NotFoundException::new);
         List<Material> materials = materialRepository.findAllByTasks(task);
-        return  materials.stream()
+        return materials.stream()
                 .map(material1 -> mapToDTO(material1, new MaterialDTO()))
                 .collect(Collectors.toList());
     }
@@ -172,4 +172,14 @@ public class MaterialServiceImpl implements MaterialService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public MaterialDTO getMaterialByName(String name) {
+        Material material = materialRepository.findMaterialByName(name);
+        return material != null ? mapToDTO(material, new MaterialDTO()) : null;
+    }
+
+    @Override
+    public Long countAll() {
+        return materialRepository.count();
+    }
 }

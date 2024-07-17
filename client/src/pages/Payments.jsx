@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Table from "../components/table/Table";
-import LinearProgress, {
-  linearProgressClasses,
-} from "@mui/material/LinearProgress";
+import LinearProgress, { linearProgressClasses } from "@mui/material/LinearProgress";
 import { styled } from "@mui/material";
 import {
   Button,
@@ -10,31 +8,37 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  FormControlLabel,
-  Switch,
   TextField,
   Snackbar,
+  MenuItem,
+  Select,
+  InputLabel,
+  FormControl,
   Box,
   Card,
   CardContent,
   Typography,
+  Switch,
+  FormControlLabel,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 
-const materialsTableHead = [
-  "",
-  "Name",
-  "Owned",
-  "Reference",
-  "Tasks",
+const paymentsTableHead = [
+  "ID",
+  "Time",
+  "Type",
+  "Amount",
+  "Project",
+  "Material",
+  "Employer",
   "Update",
   "Delete",
 ];
 
 const renderHead = (item, index) => <th key={index}>{item}</th>;
 
-const Materials = () => {
-  const [materials, setMaterials] = useState([]);
+const Payments = () => {
+  const [payments, setPayments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
@@ -42,17 +46,21 @@ const Materials = () => {
   const [updateId, setUpdateId] = useState(null);
   const [updateData, setUpdateData] = useState({
     id: "",
-    name: "",
-    owned: false,
-    reference: "",
-    tasks: [],
+    time: "",
+    type: "",
+    amount: "",
+    project: "",
+    material: "",
+    employer: "",
   });
   const [addModalOpen, setAddModalOpen] = useState(false);
-  const [newMaterialData, setNewMaterialData] = useState({
-    name: "",
-    owned: false,
-    reference: "",
-    tasks: [],
+  const [newPaymentData, setNewPaymentData] = useState({
+    time: "",
+    type: "",
+    amount: "",
+    project: "",
+    material: "",
+    employer: "",
   });
   const [snackbar, setSnackbar] = useState({
     open: false,
@@ -62,46 +70,43 @@ const Materials = () => {
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
-    fetchMaterials();
+    fetchPayments();
   }, []);
 
-  const fetchMaterials = () => {
+  const fetchPayments = () => {
     setLoading(true);
-    fetch("http://localhost:8085/api/materials")
+    fetch("http://localhost:8085/api/payments")
       .then((response) => response.json())
       .then((data) => {
-        setMaterials(data);
+        setPayments(data);
         setLoading(false);
       })
       .catch((error) => {
-        console.error("Error fetching materials:", error);
+        console.error("Error fetching payments:", error);
         setLoading(false);
-        showSnackbar("Failed to fetch materials", "error");
+        showSnackbar("Failed to fetch payments", "error");
       });
   };
 
   const handleDelete = (id) => {
     setDeleteDialogOpen(true);
     setDeleteId(id);
-    // Optimistically remove the item from the list
-    setMaterials(materials.filter((material) => material.id !== id));
   };
 
   const confirmDelete = () => {
-    fetch(`http://localhost:8085/api/materials/${deleteId}`, {
+    fetch(`http://localhost:8085/api/payments/${deleteId}`, {
       method: "DELETE",
     })
       .then((response) => {
         if (!response.ok) {
           throw new Error("Delete failed");
         }
-        showSnackbar("Material deleted successfully", "success");
+        setPayments(payments.filter((payment) => payment.id !== deleteId));
+        showSnackbar("Payment deleted successfully", "success");
       })
       .catch((error) => {
-        console.error("Error deleting material:", error);
-        // Revert the optimistic update
-        fetchMaterials();
-        showSnackbar("Failed to delete material", "error");
+        console.error("Error deleting payment:", error);
+        showSnackbar("Failed to delete payment", "error");
       })
       .finally(() => {
         setDeleteDialogOpen(false);
@@ -110,26 +115,28 @@ const Materials = () => {
 
   const handleUpdate = (id) => {
     setUpdateId(id);
-    fetch(`http://localhost:8085/api/materials/${id}`)
+    fetch(`http://localhost:8085/api/payments/${id}`)
       .then((response) => response.json())
       .then((data) => {
         setUpdateData({
           id: data.id,
-          name: data.name,
-          owned: data.owned,
-          reference: data.reference,
-          tasks: data.tasks,
+          time: data.time,
+          type: data.type,
+          amount: data.amount,
+          project: data.project,
+          material: data.material,
+          employer: data.employer,
         });
         setUpdateModalOpen(true);
       })
       .catch((error) => {
-        console.error("Error fetching material for update:", error);
-        showSnackbar("Failed to fetch material details", "error");
+        console.error("Error fetching payment for update:", error);
+        showSnackbar("Failed to fetch payment details", "error");
       });
   };
 
-  const updateMaterial = () => {
-    fetch(`http://localhost:8085/api/materials/${updateId}`, {
+  const updatePayment = () => {
+    fetch(`http://localhost:8085/api/payments/${updateId}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -138,60 +145,52 @@ const Materials = () => {
     })
       .then((response) => {
         if (response.ok) {
-          fetchMaterials();
+          fetchPayments();
           setUpdateModalOpen(false);
-          showSnackbar("Material updated successfully", "success");
+          showSnackbar("Payment updated successfully", "success");
         } else {
           throw new Error("Update failed");
         }
       })
       .catch((error) => {
-        console.error("Error updating material:", error);
-        showSnackbar("Failed to update material", "error");
+        console.error("Error updating payment:", error);
+        showSnackbar("Failed to update payment", "error");
       });
   };
 
-  const handleAddMaterial = () => {
+  const handleAddPayment = () => {
     setAddModalOpen(true);
   };
 
-  const addMaterial = () => {
-    fetch("http://localhost:8085/api/materials", {
+  const addPayment = () => {
+    fetch("http://localhost:8085/api/payments", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(newMaterialData),
+      body: JSON.stringify(newPaymentData),
     })
-      .then((response) => response.json())
-      .then((data) => {
-        fetchMaterials();
-        setAddModalOpen(false);
-        showSnackbar("Material added successfully", "success");
+      .then((response) => {
+        if (response.ok) {
+          fetchPayments();
+          setAddModalOpen(false);
+          setNewPaymentData({
+            time: "",
+            type: "",
+            amount: "",
+            project: "",
+            material: "",
+            employer: "",
+          });
+          showSnackbar("Payment added successfully", "success");
+        } else {
+          throw new Error("Add failed");
+        }
       })
       .catch((error) => {
-        console.error("Error adding material:", error);
-        showSnackbar("Failed to add material", "error");
+        console.error("Error adding payment:", error);
+        showSnackbar("Failed to add payment", "error");
       });
-  };
-
-  const handleSearch = () => {
-    if (searchQuery.trim() === "") {
-      fetchMaterials();
-    } else {
-      setLoading(true);
-      fetch(`http://localhost:8085/api/materials/name/${searchQuery}`)
-        .then((response) => response.json())
-        .then((data) => {
-          setMaterials([data]);
-          setLoading(false);
-        })
-        .catch((error) => {
-          console.error("Error searching materials by name:", error);
-          setLoading(false);
-          showSnackbar("Failed to search materials", "error");
-        });
-    }
   };
 
   const showSnackbar = (message, severity) => {
@@ -201,10 +200,12 @@ const Materials = () => {
   const renderBody = (item, index) => (
     <tr key={index}>
       <td>{item.id}</td>
-      <td>{item.name}</td>
-      <td>{item.owned ? "Yes" : "No"}</td>
-      <td>{item.reference}</td>
-      <td>{item.tasks.join(", ")}</td>
+      <td>{item.time}</td>
+      <td>{item.type}</td>
+      <td>{item.amount}</td>
+      <td>{item.project !== null ? item.project : "⊘"}</td>
+      <td>{item.material !== null ? item.material : "⊘"}</td>
+      <td>{item.employer !== null ? item.employer : "⊘"}</td>
       <td>
         <Button variant="contained" onClick={() => handleUpdate(item.id)}>
           Update
@@ -234,6 +235,25 @@ const Materials = () => {
       backgroundColor: theme.palette.mode === "light" ? "#1a90ff" : "#308fe8",
     },
   }));
+
+  const handleSearch = () => {
+    if (searchQuery.trim() === "") {
+      fetchPayments();
+    } else {
+      setLoading(true);
+      fetch(`http://localhost:8085/api/payments/${searchQuery}`)
+        .then((response) => response.json())
+        .then((data) => {
+          setPayments([data]);
+          setLoading(false);
+        })
+        .catch((error) => {
+          console.error("Error searching payments by ID:", error);
+          setLoading(false);
+          showSnackbar("Failed to search payments", "error");
+        });
+    }
+  };
 
   return (
     <div>
@@ -267,10 +287,10 @@ const Materials = () => {
             sx={{ width: "200px", height: "55px" }}
             variant="contained"
             color="primary"
-            onClick={handleAddMaterial}
+            onClick={handleAddPayment}
             startIcon={<AddIcon style={{ fontSize: "2rem" }} />}
           >
-            Add Material
+            Add Payment
           </Button>
         </Box>
       </Box>
@@ -288,26 +308,30 @@ const Materials = () => {
                   textAlign: "center",
                 }}
               >
-                Materials {materials.length}
+                Payments {payments.length}
               </Typography>
             </Box>
           </CardContent>
         </Card>
       </Box>
 
-      <div className="card">
-        <div className="card__body">
-          {loading ? (
-            <BorderLinearProgress />
-          ) : (
-            <Table
-              limit="10"
-              headData={materialsTableHead}
-              renderHead={(item, index) => renderHead(item, index)}
-              bodyData={materials}
-              renderBody={(item, index) => renderBody(item, index)}
-            />
-          )}
+      <div className="row">
+        <div className="col-12">
+          <div className="card">
+            <div className="card__body">
+              {loading ? (
+                <BorderLinearProgress />
+              ) : (
+                <Table
+                  limit="10"
+                  headData={paymentsTableHead}
+                  renderHead={(item, index) => renderHead(item, index)}
+                  bodyData={payments}
+                  renderBody={(item, index) => renderBody(item, index)}
+                />
+              )}
+            </div>
+          </div>
         </div>
       </div>
       <Dialog
@@ -316,7 +340,7 @@ const Materials = () => {
       >
         <DialogTitle>Confirm Delete</DialogTitle>
         <DialogContent>
-          Are you sure you want to delete this material?
+          Are you sure you want to delete this payment?
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setDeleteDialogOpen(false)} color="primary">
@@ -327,55 +351,44 @@ const Materials = () => {
           </Button>
         </DialogActions>
       </Dialog>
-
       <Dialog open={updateModalOpen} onClose={() => setUpdateModalOpen(false)}>
-        <DialogTitle>Update Material</DialogTitle>
+        <DialogTitle>Update Payment</DialogTitle>
         <DialogContent>
           <TextField
             id="standard-basic"
             variant="standard"
-            label="Name"
-            value={updateData.name}
+            label="Time"
+            type="date"
+            value={updateData.time}
             onChange={(e) =>
-              setUpdateData({ ...updateData, name: e.target.value })
+              setUpdateData({ ...updateData, time: e.target.value })
             }
             fullWidth
             margin="normal"
+            InputLabelProps={{
+              shrink: true,
+            }}
           />
-          <FormControlLabel
-            control={
-              <Switch
-                checked={updateData.owned}
-                onChange={(e) =>
-                  setUpdateData({ ...updateData, owned: e.target.checked })
-                }
-                color="primary"
-              />
-            }
-            label="Owned"
-            style={{ marginBottom: 0 }}
-          />
+          <FormControl fullWidth margin="normal" variant="standard">
+            <InputLabel>Type</InputLabel>
+            <Select
+              value={updateData.type}
+              onChange={(e) =>
+                setUpdateData({ ...updateData, type: e.target.value })
+              }
+            >
+              <MenuItem value="EMPLOYER">EMPLOYER</MenuItem>
+              <MenuItem value="PROJECT">PROJECT</MenuItem>
+              <MenuItem value="MATERIAL">MATERIAL</MenuItem>
+            </Select>
+          </FormControl>
           <TextField
             id="standard-basic"
             variant="standard"
-            label="Reference"
-            value={updateData.reference}
+            label="Amount"
+            value={updateData.amount}
             onChange={(e) =>
-              setUpdateData({ ...updateData, reference: e.target.value })
-            }
-            fullWidth
-            margin="normal"
-          />
-          <TextField
-            id="standard-basic"
-            variant="standard"
-            label="Tasks"
-            value={updateData.tasks.join(", ")}
-            onChange={(e) =>
-              setUpdateData({
-                ...updateData,
-                tasks: e.target.value.split(", "),
-              })
+              setUpdateData({ ...updateData, amount: e.target.value })
             }
             fullWidth
             margin="normal"
@@ -385,66 +398,49 @@ const Materials = () => {
           <Button onClick={() => setUpdateModalOpen(false)} color="primary">
             Cancel
           </Button>
-          <Button onClick={updateMaterial} color="primary">
+          <Button onClick={updatePayment} color="primary">
             Update
           </Button>
         </DialogActions>
       </Dialog>
-
       <Dialog open={addModalOpen} onClose={() => setAddModalOpen(false)}>
-        <DialogTitle>Add New Material</DialogTitle>
+        <DialogTitle>Add Payment</DialogTitle>
         <DialogContent>
           <TextField
             id="standard-basic"
             variant="standard"
-            label="Name"
-            value={newMaterialData.name}
+            label="Time"
+            type="date"
+            value={newPaymentData.time}
             onChange={(e) =>
-              setNewMaterialData({ ...newMaterialData, name: e.target.value })
+              setNewPaymentData({ ...newPaymentData, time: e.target.value })
             }
             fullWidth
             margin="normal"
+            InputLabelProps={{
+              shrink: true,
+            }}
           />
-          <FormControlLabel
-            control={
-              <Switch
-                checked={newMaterialData.owned}
-                onChange={(e) =>
-                  setNewMaterialData({
-                    ...newMaterialData,
-                    owned: e.target.checked,
-                  })
-                }
-                color="primary"
-              />
-            }
-            label="Owned"
-            style={{ marginBottom: 0 }}
-          />
+          <FormControl fullWidth margin="normal" variant="standard">
+            <InputLabel>Type</InputLabel>
+            <Select
+              value={newPaymentData.type}
+              onChange={(e) =>
+                setNewPaymentData({ ...newPaymentData, type: e.target.value })
+              }
+            >
+              <MenuItem value="EMPLOYER">EMPLOYER</MenuItem>
+              <MenuItem value="PROJECT">PROJECT</MenuItem>
+              <MenuItem value="MATERIAL">MATERIAL</MenuItem>
+            </Select>
+          </FormControl>
           <TextField
             id="standard-basic"
             variant="standard"
-            label="Reference"
-            value={newMaterialData.reference}
+            label="Amount"
+            value={newPaymentData.amount}
             onChange={(e) =>
-              setNewMaterialData({
-                ...newMaterialData,
-                reference: e.target.value,
-              })
-            }
-            fullWidth
-            margin="normal"
-          />
-          <TextField
-            id="standard-basic"
-            variant="standard"
-            label="Tasks (comma-separated)"
-            value={newMaterialData.tasks.join(", ")}
-            onChange={(e) =>
-              setNewMaterialData({
-                ...newMaterialData,
-                tasks: e.target.value.split(",").map((task) => task.trim()),
-              })
+              setNewPaymentData({ ...newPaymentData, amount: e.target.value })
             }
             fullWidth
             margin="normal"
@@ -454,12 +450,11 @@ const Materials = () => {
           <Button onClick={() => setAddModalOpen(false)} color="primary">
             Cancel
           </Button>
-          <Button onClick={addMaterial} color="primary">
+          <Button onClick={addPayment} color="primary">
             Add
           </Button>
         </DialogActions>
       </Dialog>
-
       <Snackbar
         open={snackbar.open}
         autoHideDuration={6000}
@@ -471,4 +466,4 @@ const Materials = () => {
   );
 };
 
-export default Materials;
+export default Payments;

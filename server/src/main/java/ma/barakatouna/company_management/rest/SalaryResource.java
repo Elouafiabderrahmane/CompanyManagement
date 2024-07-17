@@ -13,6 +13,8 @@ import java.util.List;
 
 
 @RestController
+@CrossOrigin ("*")
+
 @RequestMapping(value = "/api/salaries", produces = MediaType.APPLICATION_JSON_VALUE)
 public class SalaryResource {
 

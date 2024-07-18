@@ -63,7 +63,7 @@ public class EmployerResource {
     ) throws IOException {
 
         // Create directory for storing images if it does not exist
-        Path path = Paths.get(System.getProperty("user.home"), "employers-images");
+        Path path = Paths.get(System.getProperty("user.home"),"Company-Management", "employers-images");
         if (!Files.exists(path)) {
             Files.createDirectories(path);
         }
@@ -71,7 +71,7 @@ public class EmployerResource {
         // Generate unique image name
         String imageId = UUID.randomUUID().toString();
         String imageName = imageId + "-" + image.getOriginalFilename();
-        Path imagePath = Paths.get(System.getProperty("user.home"), "employers-images", imageName);
+        Path imagePath = Paths.get(System.getProperty("user.home"), "Company-Management","employers-images", imageName);
 
         // Save the image to the specified directory
         Files.copy(image.getInputStream(), imagePath);

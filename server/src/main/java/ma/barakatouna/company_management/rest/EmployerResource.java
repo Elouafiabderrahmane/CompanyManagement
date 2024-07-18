@@ -110,6 +110,18 @@ public class EmployerResource {
         employerService.update(id, employerDTO);
         return ResponseEntity.ok(id);
     }
+    @GetMapping("/name/{name}")
+    EmployerDTO getEmployerByName(@PathVariable String name) {
+        EmployerDTO employerDTO= employerService.getEmployerByName(name);
+        return ResponseEntity.ok(employerDTO).getBody();
+
+
+    }
+
+
+
+
+
 
     @DeleteMapping("/{id}")
     @ApiResponse(responseCode = "204")

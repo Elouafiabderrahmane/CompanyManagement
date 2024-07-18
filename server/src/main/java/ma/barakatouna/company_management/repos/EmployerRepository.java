@@ -20,4 +20,9 @@ public interface EmployerRepository extends JpaRepository<Employer, Long> {
     boolean existsByUserId(Long id);
 
     List<Employer> findAllByProjets(Project project);
+
+    Employer getEmployerByNameContaining(String name);
+
+    
+
 }

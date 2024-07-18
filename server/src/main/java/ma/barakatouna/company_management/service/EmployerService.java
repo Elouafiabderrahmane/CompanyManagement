@@ -17,6 +17,8 @@ public interface EmployerService {
 
     void delete(Long id);
 
+    EmployerDTO getEmployerByName(String name);
+
     boolean userExists(Long id);
 
     ReferencedWarning getReferencedWarning(Long id);

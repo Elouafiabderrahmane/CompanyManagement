@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import Table from "../components/table/Table";
-import LinearProgress, { linearProgressClasses } from "@mui/material/LinearProgress";
+import LinearProgress, {
+  linearProgressClasses,
+} from "@mui/material/LinearProgress";
 import { styled } from "@mui/material";
 import {
   Button,

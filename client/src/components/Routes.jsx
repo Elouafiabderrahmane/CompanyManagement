@@ -8,6 +8,7 @@ import Materials from "../pages/Materials";
 import Tasks from "../pages/Tasks";
 import Payments from "../pages/Payments";
 import Salaries from "../pages/Salaries";
+import Employers from '../pages/Employers';
 
 const Routes = () => {
     return (
@@ -18,6 +19,7 @@ const Routes = () => {
         <Route path="/Tasks" component={Tasks} />
         <Route path="/Payments" component={Payments} />
         <Route path="/Salaries" component={Salaries} />
+        <Route path="/Employers" component={Employers}/>
       </Switch>
     );
 }

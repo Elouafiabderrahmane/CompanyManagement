@@ -114,7 +114,11 @@ public class EmployerServiceImpl implements EmployerService {
         employer.setUser(user);
         return employer;
     }
-
+    @Override
+    public EmployerDTO getEmployerByName(String name) {
+        Employer employer = employerRepository.getEmployerByNameContaining(name);
+        return employer != null ? mapToDTO(employer, new EmployerDTO()) : null;
+    }
     public boolean userExists(final Long id) {
         return employerRepository.existsByUserId(id);
     }

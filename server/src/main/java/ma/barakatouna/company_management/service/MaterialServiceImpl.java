@@ -174,8 +174,10 @@ public class MaterialServiceImpl implements MaterialService {
 
     @Override
     public MaterialDTO getMaterialByName(String name) {
-        Material material = materialRepository.findMaterialByName(name);
-        return material != null ? mapToDTO(material, new MaterialDTO()) : null;
+       List <Material>  materials =  materialRepository.findAllByNameContaining(name);
+        return materials.stream()
+                .map(material -> mapToDTO(material, new MaterialDTO()))
+                .findFirst().orElseThrow(NotFoundException::new);
     }
 
     @Override

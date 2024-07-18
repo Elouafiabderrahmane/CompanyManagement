@@ -154,4 +154,13 @@ public class ProjectServiceImpl implements ProjectService{
                 .toList();
     }
 
+    @Override
+    public List<ProjectDTO> getProjectByName(String name) {
+        List<Project> projects = projectRepository.findAllByNameContaining(name);
+
+        return projects.stream()
+                .map(project -> mapToDTO(project, new ProjectDTO()))
+                .toList();
+    }
+
 }

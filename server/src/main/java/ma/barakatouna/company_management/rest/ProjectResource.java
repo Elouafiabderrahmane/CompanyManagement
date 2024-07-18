@@ -3,6 +3,7 @@ package ma.barakatouna.company_management.rest;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 import ma.barakatouna.company_management.entities.Project;
+import ma.barakatouna.company_management.model.MaterialDTO;
 import ma.barakatouna.company_management.model.ProjectDTO;
 import ma.barakatouna.company_management.repos.EmployerRepository;
 import ma.barakatouna.company_management.repos.MaterialRepository;
@@ -147,6 +148,12 @@ public class ProjectResource {
     @GetMapping("/tasks/{taskId}")
     public ResponseEntity<List<ProjectDTO>> getProjectsByTaskId(@PathVariable Long taskId) {
         List<ProjectDTO> projects = projectService.getProjectsByTaskId(taskId);
+        return ResponseEntity.ok(projects);
+    }
+
+    @GetMapping("/name/{name}")
+    public ResponseEntity<List<ProjectDTO>> getProjectsByName(@PathVariable String name) {
+        List<ProjectDTO> projects =  projectService.getProjectByName(name);
         return ResponseEntity.ok(projects);
     }
 

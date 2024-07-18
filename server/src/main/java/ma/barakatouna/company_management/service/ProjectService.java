@@ -1,5 +1,6 @@
 package ma.barakatouna.company_management.service;
 
+import ma.barakatouna.company_management.model.MaterialDTO;
 import ma.barakatouna.company_management.model.ProjectDTO;
 import ma.barakatouna.company_management.util.ReferencedWarning;
 
@@ -24,4 +25,6 @@ public interface ProjectService {
     List<ProjectDTO> getProjectsByEmployerId(Long employerId);
 
     List<ProjectDTO> getProjectsByTaskId(Long taskId);
+    List <ProjectDTO> getProjectByName(String name);
+
 }

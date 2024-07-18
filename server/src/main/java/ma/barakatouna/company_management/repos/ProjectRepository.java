@@ -19,6 +19,8 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
 
     List<Project> findAllByMaterials(Material material);
     List<Project> findAllByTasks(Task Task);
+    List<Project> findAllByNameContaining(String name);
+
 
 
 }

@@ -12,11 +12,14 @@ import {
   DialogTitle,
   FormControlLabel,
   Switch,
+  Box,
   TextField,
   Snackbar,
   Select,
+  Typography,
+  Card,
+  CardContent,
   MenuItem,
-  Alert,
 } from "@mui/material";
 
 const tasksTableHead = [
@@ -35,7 +38,7 @@ const tasksTableHead = [
 
 const renderHead = (item, index) => <th key={index}>{item}</th>;
 
-const Tasks = () => {
+const Tasks = ({ projectId }) => {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -61,11 +64,14 @@ const Tasks = () => {
 
   useEffect(() => {
     fetchTasks();
-  }, []);
+  }, [projectId]);
 
   const fetchTasks = () => {
     setLoading(true);
-    fetch("http://localhost:8085/api/tasks")
+    const url = projectId
+      ? `http://localhost:8085/api/tasks/projects/${projectId}`
+      : "http://localhost:8085/api/tasks";
+    fetch(url)
       .then((response) => response.json())
       .then((data) => {
         setTasks(data);
@@ -204,7 +210,37 @@ const Tasks = () => {
 
   return (
     <div>
-      <h2 className="page-header">Tasks</h2>
+      {loading ? (
+        <>
+          <div></div>
+        </>
+      ) : (
+        <Box sx={{ marginBottom: "30px" }}>
+          <Card
+            sx={{
+              width: "200px",
+              height: "60px",
+              backgroundColor: "#1976d2",
+              marginBottom: "30px", // Added margin to create space below the card
+            }}
+          >
+            <CardContent sx={{ height: "100%" }}>
+              <Box display="flex" justifyContent="center" alignItems="center">
+                <Typography
+                  variant="h5"
+                  style={{
+                    color: "white",
+                    fontWeight: "bold",
+                    textAlign: "center",
+                  }}
+                >
+                  Tasks {tasks.length}
+                </Typography>
+              </Box>
+            </CardContent>
+          </Card>
+        </Box>
+      )}
       <div className="row">
         <div className="col-12">
           <div className="card">
@@ -212,13 +248,15 @@ const Tasks = () => {
               {loading ? (
                 <BorderLinearProgress />
               ) : (
-                <Table
-                  limit="10"
-                  headData={tasksTableHead}
-                  renderHead={(item, index) => renderHead(item, index)}
-                  bodyData={tasks}
-                  renderBody={(item, index) => renderBody(item, index)}
-                />
+                <Box sx={{ marginTop: "20px" }}>
+                  <Table
+                    limit="10"
+                    headData={tasksTableHead}
+                    renderHead={(item, index) => renderHead(item, index)}
+                    bodyData={tasks}
+                    renderBody={(item, index) => renderBody(item, index)}
+                  />
+                </Box>
               )}
             </div>
           </div>

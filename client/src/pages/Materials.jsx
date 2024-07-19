@@ -83,8 +83,6 @@ const Materials = () => {
   const handleDelete = (id) => {
     setDeleteDialogOpen(true);
     setDeleteId(id);
-    // Optimistically remove the item from the list
-    setMaterials(materials.filter((material) => material.id !== id));
   };
 
   const confirmDelete = () => {
@@ -95,12 +93,11 @@ const Materials = () => {
         if (!response.ok) {
           throw new Error("Delete failed");
         }
+        fetchMaterials();
         showSnackbar("Material deleted successfully", "success");
       })
       .catch((error) => {
         console.error("Error deleting material:", error);
-        // Revert the optimistic update
-        fetchMaterials();
         showSnackbar("Failed to delete material", "error");
       })
       .finally(() => {
@@ -183,7 +180,7 @@ const Materials = () => {
       fetch(`http://localhost:8085/api/materials/name/${searchQuery}`)
         .then((response) => response.json())
         .then((data) => {
-          setMaterials([data]);
+          setMaterials(data.length ? data : []);
           setLoading(false);
         })
         .catch((error) => {
@@ -246,7 +243,7 @@ const Materials = () => {
         <Box display="flex" alignItems="center">
           <TextField
             id="outlined-basic"
-            label="Search by ID"
+            label="Search by Name"
             variant="outlined"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -261,7 +258,6 @@ const Materials = () => {
             Search
           </Button>
         </Box>
-        <Box mb={3}></Box>
         <Box>
           <Button
             sx={{ width: "200px", height: "55px" }}
@@ -303,9 +299,9 @@ const Materials = () => {
             <Table
               limit="10"
               headData={materialsTableHead}
-              renderHead={(item, index) => renderHead(item, index)}
+              renderHead={renderHead}
               bodyData={materials}
-              renderBody={(item, index) => renderBody(item, index)}
+              renderBody={renderBody}
             />
           )}
         </div>
@@ -374,7 +370,7 @@ const Materials = () => {
             onChange={(e) =>
               setUpdateData({
                 ...updateData,
-                tasks: e.target.value.split(", "),
+                tasks: e.target.value.split(",").map((task) => task.trim()),
               })
             }
             fullWidth

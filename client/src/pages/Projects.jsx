@@ -149,7 +149,7 @@ const Projects = () => {
             variant="outlined"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            style={{ minWidth: "700px", marginRight: 10 }}
+            style={{ width: "700px", marginRight: 10 }}
           />
           <Button
             sx={{ width: "150px", height: "60px" }}

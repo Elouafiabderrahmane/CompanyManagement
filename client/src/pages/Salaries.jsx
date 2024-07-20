@@ -10,13 +10,18 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  Box,
   TextField,
   Snackbar,
+  Typography,
+  Card,
+  CardContent,
   MenuItem,
   Select,
-  InputLabel,
   FormControl,
+  InputLabel, // Added InputLabel import
 } from "@mui/material";
+import AddIcon from "@mui/icons-material/Add"; // Added AddIcon import
 
 const salariesTableHead = [
   "ID",
@@ -55,6 +60,9 @@ const Salaries = () => {
     message: "",
     severity: "info",
   });
+  const [searchQuery, setSearchQuery] = useState(""); // Added state for search query
+  const [addModalOpen, setAddModalOpen] = useState(false); // Added state for add modal
+  const [tasks, setTasks] = useState([]); // Added state for tasks
 
   useEffect(() => {
     fetchSalaries();
@@ -193,8 +201,79 @@ const Salaries = () => {
     },
   }));
 
+  const handleSearch = () => {
+    setLoading(true);
+    fetch(`http://localhost:8085/api/salaries/keyword/${searchQuery}`)
+      .then((response) => response.json())
+      .then((data) => {
+        setSalaries(data);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error("Error searching salaries:", error);
+        setLoading(false);
+        showSnackbar("Failed to search salaries", "error");
+      });
+  };
+
   return (
     <div>
+      <Box
+        mb={3}
+        display="flex"
+        justifyContent="space-between"
+        alignItems="center"
+      >
+        <Box display="flex" alignItems="center">
+          <TextField
+            id="search-bar"
+            label="Search by Title"
+            variant="outlined"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            style={{ width: "1000px", marginRight: 10 }}
+          />
+          <Button
+            sx={{ width: "150px", height: "60px" }}
+            variant="contained"
+            color="primary"
+            onClick={handleSearch}
+          >
+            Search
+          </Button>
+        </Box>
+        <Box>
+          <Button
+            sx={{ width: "200px", height: "55px" }}
+            variant="contained"
+            color="primary"
+            onClick={() => setAddModalOpen(true)}
+            startIcon={<AddIcon style={{ fontSize: "2rem" }} />}
+          >
+            Add Salary
+          </Button>
+        </Box>
+      </Box>
+      <Box mb={"20px"}>
+        <Card
+          sx={{ width: "200px", height: "60px", backgroundColor: "#1976d2" }}
+        >
+          <CardContent sx={{ height: "100%" }}>
+            <Box display="flex" justifyContent="center" alignItems="center">
+              <Typography
+                variant="h6"
+                style={{
+                  color: "white",
+                  fontWeight: "bold",
+                  textAlign: "center",
+                }}
+              >
+                Salaries {salaries.length}
+              </Typography>
+            </Box>
+          </CardContent>
+        </Card>
+      </Box>
       <h2 className="page-header">Salaries</h2>
       <div className="row">
         <div className="col-12">

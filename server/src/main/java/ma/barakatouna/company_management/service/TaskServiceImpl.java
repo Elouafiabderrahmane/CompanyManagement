@@ -126,4 +126,13 @@ public class TaskServiceImpl implements TaskService{
                 .map(task -> mapToDTO(task, new TaskDTO()))
                 .toList();
     }
+
+    @Override
+    public List<TaskDTO> getTaskByTitle(String title) {
+        List< Task> tasks = taskRepository.findAllByTitleContaining(title);
+        return tasks.stream()
+                .map(task -> mapToDTO(task, new TaskDTO()))
+                .toList();
+
+    }
 }

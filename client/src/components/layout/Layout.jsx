@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { BrowserRouter } from "react-router-dom";
+import { BrowserRouter, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import ThemeAction from "../../redux/actions/ThemeAction";
 import Sidebar from "../sidebar/Sidebar";
@@ -10,6 +10,7 @@ import "./layout.css";
 const Layout = () => {
   const themeReducer = useSelector((state) => state.ThemeReducer);
   const dispatch = useDispatch();
+  const location = useLocation();
 
   useEffect(() => {
     const themeClass = localStorage.getItem("themeMode") || "theme-mode-light";
@@ -19,19 +20,25 @@ const Layout = () => {
     dispatch(ThemeAction.setColor(colorClass));
   }, [dispatch]);
 
+  const isAuthRoute = ["/login", "/register"].includes(location.pathname);
+
   return (
-    <BrowserRouter>
-      <div className={`layout ${themeReducer.mode} ${themeReducer.color}`}>
-        <Sidebar />
-        <div className="layout__content">
-          <TopNav />
-          <div className="layout__content-main">
-            <AppRoutes />
-          </div>
+    <div className={`layout ${themeReducer.mode} ${themeReducer.color}`}>
+      {!isAuthRoute && <Sidebar />}
+      <div className="layout__content">
+        {!isAuthRoute && <TopNav />}
+        <div className="layout__content-main">
+          <AppRoutes />
         </div>
       </div>
-    </BrowserRouter>
+    </div>
   );
 };
 
-export default Layout;
+const LayoutWrapper = () => (
+  <BrowserRouter>
+    <Layout />
+  </BrowserRouter>
+);
+
+export default LayoutWrapper;

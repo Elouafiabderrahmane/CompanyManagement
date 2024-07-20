@@ -39,14 +39,17 @@ const Projects = () => {
     message: "",
     severity: "info",
   });
+  const [loading, setLoading] = useState(false);
+  const [tasksLoading, setTasksLoading] = useState(false);
 
-  const navigate = useNavigate(); // Move this inside the component
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchProjects();
   }, []);
 
   const fetchProjects = () => {
+    setLoading(true);
     fetch("http://localhost:8085/api/projects")
       .then((response) => response.json())
       .then((data) => {
@@ -70,12 +73,30 @@ const Projects = () => {
               console.error("Error fetching project image:", error);
               setImages((prevImages) => ({
                 ...prevImages,
-                [project.id]: null, // Set null for failed images
+                [project.id]: null,
               }));
             });
         });
+        setLoading(false);
       })
-      .catch((error) => console.error("Error fetching projects:", error));
+      .catch((error) => {
+        console.error("Error fetching projects:", error);
+        setLoading(false);
+      });
+  };
+
+  const fetchTasks = (projectId) => {
+    setTasksLoading(true);
+    fetch(`http://localhost:8085/api/projects/${projectId}/tasks`)
+      .then((response) => response.json())
+      .then((data) => {
+        // Assume you handle tasks data here
+        setTasksLoading(false);
+      })
+      .catch((error) => {
+        console.error("Error fetching tasks:", error);
+        setTasksLoading(false);
+      });
   };
 
   const handleSearch = () => {
@@ -132,6 +153,7 @@ const Projects = () => {
 
   const handleCardClick = (id) => {
     navigate(`/project/${id}`);
+    fetchTasks(id); // Fetch tasks for the selected project
   };
 
   return (
@@ -283,7 +305,6 @@ const Projects = () => {
               })
             }
           />
-          {/* File input for image */}
           <TextField
             type="file"
             label="Image"
@@ -296,8 +317,6 @@ const Projects = () => {
             }
             accept="image/*"
           />
-          {/* Employers and Materials are arrays, you might need to implement appropriate input fields */}
-          {/* For simplicity, assuming they are entered as comma-separated values */}
           <TextField
             id="outlined-basic"
             label="Employers (IDs, comma-separated)"
@@ -342,10 +361,16 @@ const Projects = () => {
       </Dialog>
 
       <Snackbar
-        open={snackbar.open}
+        open={snackbar.open || loading || tasksLoading}
         autoHideDuration={6000}
         onClose={() => setSnackbar({ ...snackbar, open: false })}
-        message={snackbar.message}
+        message={
+          loading
+            ? "Loading projects..."
+            : tasksLoading
+            ? "Loading tasks..."
+            : snackbar.message
+        }
         action={
           <Button
             color="inherit"
@@ -357,7 +382,9 @@ const Projects = () => {
         ContentProps={{
           style: {
             backgroundColor:
-              snackbar.severity === "success"
+              loading || tasksLoading
+                ? "#1976d2"
+                : snackbar.severity === "success"
                 ? "#4caf50"
                 : snackbar.severity === "error"
                 ? "#f44336"

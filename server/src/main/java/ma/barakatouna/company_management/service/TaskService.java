@@ -20,4 +20,5 @@ public interface TaskService {
     long getCountTaskByProjectId_done(long id, boolean done);
     List<TaskDTO> getTaskByProjectId(long id);
 
+    List<TaskDTO> getTaskByTitle(String title);
 }

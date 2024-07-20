@@ -71,4 +71,10 @@ public class TaskResource {
         List<TaskDTO> tasks = taskService.getTaskByProjectId(projectId);
         return ResponseEntity.ok(tasks);
     }
+
+    @GetMapping("/keyword/{keyword}")
+    public ResponseEntity<List<TaskDTO>> getTasksByTitle(@PathVariable String keyword) {
+        List<TaskDTO> tasks = taskService.getTaskByTitle(keyword);
+        return ResponseEntity.ok(tasks);
+    }
 }

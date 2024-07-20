@@ -66,15 +66,29 @@ public class EmployerServiceImpl implements EmployerService {
         employerRepository.save(employer);
     }
 
-    public void delete(final Long id) {
-        final Employer employer = employerRepository.findById(id)
-                .orElseThrow(NotFoundException::new);
-        // remove many-to-many relations at owning side
-        projectRepository.findAllByEmployers(employer)
-                .forEach(project -> project.getEmployers().remove(employer));
-        taskRepository.findAllByEmployer(employer)
-                .forEach(task -> task.getEmployer().remove(employer));
-        employerRepository.delete(employer);
+    @Transactional
+    public void delete(Long id) {
+        Employer employer = employerRepository.findById(id).orElse(null);
+        if (employer != null) {
+            // Break relationships
+            employer.getProjets().forEach(projet -> projet.getEmployers().remove(employer));
+            employer.getTasks().forEach(task -> task.getEmployer().remove(employer));
+            employer.getMaterials().forEach(material -> material.getEmployers().remove(employer));
+            employer.getSalaries().forEach(salary -> salary.setEmployer(null));
+            employer.getPayments().forEach(payment -> payment.setEmployer(null));
+
+            User user = employer.getUser();
+            if (user != null) {
+                employer.setUser(null); // Break the relationship
+                userRepository.delete(user); // Delete the User entity
+            }
+
+            // Save changes to the database to update the state
+            employerRepository.save(employer);
+
+            // Now delete the employer
+            employerRepository.deleteById(id);
+        }
     }
 
     private EmployerDTO mapToDTO(final Employer employer, final EmployerDTO employerDTO) {

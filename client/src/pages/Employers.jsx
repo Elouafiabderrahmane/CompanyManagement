@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom"; // Updated import
 import Table from "../components/table/Table";
 import LinearProgress, {
   linearProgressClasses,
@@ -20,13 +21,13 @@ import {
 import AddIcon from "@mui/icons-material/Add";
 
 const employersTableHead = [
-  
   "Name",
   "Phone",
   "Cin",
-  "Adress",
+  "Address",
   "Hire Date",
   "Birth Date",
+  "Email",
   "Update",
   "Delete",
 ];
@@ -46,8 +47,10 @@ const Employers = () => {
     phone: "",
     cin: "",
     adress: "",
+    email: "",
     hireDate: "",
     birthDate: "",
+    image: null,
   });
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [newEmployerData, setNewEmployerData] = useState({
@@ -55,8 +58,10 @@ const Employers = () => {
     phone: "",
     cin: "",
     adress: "",
+    email: "",
     hireDate: "",
     birthDate: "",
+    image: null,
   });
   const [snackbar, setSnackbar] = useState({
     open: false,
@@ -64,6 +69,8 @@ const Employers = () => {
     severity: "info",
   });
   const [searchQuery, setSearchQuery] = useState("");
+
+  const navigate = useNavigate(); // Initialize useNavigate
 
   useEffect(() => {
     fetchEmployers();
@@ -87,7 +94,6 @@ const Employers = () => {
   const handleDelete = (id) => {
     setDeleteDialogOpen(true);
     setDeleteId(id);
-    setEmployers(employers.filter((employer) => employer.id !== id));
   };
 
   const confirmDelete = () => {
@@ -98,11 +104,11 @@ const Employers = () => {
         if (!response.ok) {
           throw new Error("Delete failed");
         }
+        fetchEmployers();
         showSnackbar("Employer deleted successfully", "success");
       })
       .catch((error) => {
         console.error("Error deleting employer:", error);
-        fetchEmployers();
         showSnackbar("Failed to delete employer", "error");
       })
       .finally(() => {
@@ -121,8 +127,10 @@ const Employers = () => {
           phone: data.phone,
           cin: data.cin,
           adress: data.adress,
+          email: data.email,
           hireDate: data.hireDate,
           birthDate: data.birthDate,
+          image: data.image,
         });
         setUpdateModalOpen(true);
       })
@@ -133,12 +141,14 @@ const Employers = () => {
   };
 
   const updateEmployer = () => {
+    const formData = new FormData();
+    Object.keys(updateData).forEach(key => {
+      formData.append(key, updateData[key]);
+    });
+
     fetch(`http://localhost:8085/api/employers/${updateId}`, {
       method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(updateData),
+      body: formData,
     })
       .then((response) => {
         if (response.ok) {
@@ -160,12 +170,14 @@ const Employers = () => {
   };
 
   const addEmployer = () => {
-    fetch("http://localhost:8085/api/employers", {
+    const formData = new FormData();
+    Object.keys(newEmployerData).forEach(key => {
+      formData.append(key, newEmployerData[key]);
+    });
+
+    fetch("http://localhost:8085/api/employers/api/employers", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(newEmployerData),
+      body: formData,
     })
       .then((response) => response.json())
       .then((data) => {
@@ -198,32 +210,48 @@ const Employers = () => {
     }
   };
 
+  const handleKeyDown = (event) => {
+    if (event.key === 'Enter') {
+      handleSearch();
+    }
+  };
+
   const showSnackbar = (message, severity) => {
     setSnackbar({ open: true, message, severity });
   };
 
   const renderBody = (item, index) => (
-    <tr key={index}>
+    <tr key={index} onClick={() => navigate(`/employers/${item.id}`)}> {/* Redirect on row click */}
       <td>{item.name}</td>
       <td>{item.phone}</td>
       <td>{item.cin}</td>
       <td>{item.adress}</td>
       <td>{item.hireDate}</td>
       <td>{item.birthDate}</td>
+      <td>{item.email}</td>
       <td>
-        <Button variant="contained" onClick={() => handleUpdate(item.id)}>
-          Update
-        </Button>
-      </td>
-      <td>
-        <Button
-          variant="contained"
-          onClick={() => handleDelete(item.id)}
-          style={{ backgroundColor: "red" }}
-        >
-          Delete
-        </Button>
-      </td>
+      <Button 
+        variant="contained" 
+        onClick={(e) => {
+          e.stopPropagation(); // Prevent row click event
+          handleUpdate(item.id);
+        }}
+      >
+        Update
+      </Button>
+    </td>
+    <td>
+      <Button
+        variant="contained"
+        onClick={(e) => {
+          e.stopPropagation(); // Prevent row click event
+          handleDelete(item.id);
+        }}
+        style={{ backgroundColor: "red" }}
+      >
+        Delete
+      </Button>
+    </td>
     </tr>
   );
 
@@ -255,10 +283,11 @@ const Employers = () => {
             variant="outlined"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            style={{ width: "1000px", marginRight: 10 }}
+            onKeyDown={handleKeyDown}
+            style={{ width: '1000px', marginRight: 10 }}
           />
           <Button
-            sx={{ width: "150px", height: "60px" }}
+            sx={{ width: '150px', height: '60px' }}
             variant="contained"
             color="primary"
             onClick={handleSearch}
@@ -372,10 +401,21 @@ const Employers = () => {
           <TextField
             id="standard-basic"
             variant="standard"
-            label="Adress"
+            label="Address"
             value={updateData.adress}
             onChange={(e) =>
               setUpdateData({ ...updateData, adress: e.target.value })
+            }
+            fullWidth
+            margin="normal"
+          />
+          <TextField
+            id="standard-basic"
+            variant="standard"
+            label="Email"
+            value={updateData.email}
+            onChange={(e) =>
+              setUpdateData({ ...updateData, email: e.target.value })
             }
             fullWidth
             margin="normal"
@@ -401,6 +441,14 @@ const Employers = () => {
             }
             fullWidth
             margin="normal"
+          />
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) =>
+              setUpdateData({ ...updateData, image: e.target.files[0] })
+            }
+            style={{ marginTop: 16 }}
           />
         </DialogContent>
         <DialogActions>
@@ -452,7 +500,7 @@ const Employers = () => {
           <TextField
             id="standard-basic"
             variant="standard"
-            label="Adress"
+            label="Address"
             value={newEmployerData.adress}
             onChange={(e) =>
               setNewEmployerData({ ...newEmployerData, adress: e.target.value })
@@ -463,13 +511,21 @@ const Employers = () => {
           <TextField
             id="standard-basic"
             variant="standard"
+            label="Email"
+            value={newEmployerData.email}
+            onChange={(e) =>
+              setNewEmployerData({ ...newEmployerData, email: e.target.value })
+            }
+            fullWidth
+            margin="normal"
+          />
+          <TextField
+            id="standard-basic"
+            variant="standard"
             label="Hire Date"
             value={newEmployerData.hireDate}
             onChange={(e) =>
-              setNewEmployerData({
-                ...newEmployerData,
-                hireDate: e.target.value,
-              })
+              setNewEmployerData({ ...newEmployerData, hireDate: e.target.value })
             }
             fullWidth
             margin="normal"
@@ -480,13 +536,18 @@ const Employers = () => {
             label="Birth Date"
             value={newEmployerData.birthDate}
             onChange={(e) =>
-              setNewEmployerData({
-                ...newEmployerData,
-                birthDate: e.target.value,
-              })
+              setNewEmployerData({ ...newEmployerData, birthDate: e.target.value })
             }
             fullWidth
             margin="normal"
+          />
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) =>
+              setNewEmployerData({ ...newEmployerData, image: e.target.files[0] })
+            }
+            style={{ marginTop: 16 }}
           />
         </DialogContent>
         <DialogActions>

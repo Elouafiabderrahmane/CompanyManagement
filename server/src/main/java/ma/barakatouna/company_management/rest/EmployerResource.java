@@ -126,10 +126,8 @@ public class EmployerResource {
     @DeleteMapping("/{id}")
     @ApiResponse(responseCode = "204")
     public ResponseEntity<Void> deleteEmployer(@PathVariable(name = "id") final Long id) {
-        final ReferencedWarning referencedWarning = employerService.getReferencedWarning(id);
-        if (referencedWarning != null) {
-            throw new ReferencedException(referencedWarning);
-        }
+
+
         employerService.delete(id);
         return ResponseEntity.noContent().build();
     }

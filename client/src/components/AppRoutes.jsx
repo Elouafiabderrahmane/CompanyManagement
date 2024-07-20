@@ -8,6 +8,9 @@ import Payments from "../pages/Payments";
 import Salaries from "../pages/Salaries";
 import Projects from "../pages/Projects";
 import Project from "../pages/Project";
+import HelloWorld from "../pages/HelloWorld";
+import Employers from "../pages/Employers";
+import EmployerDetails from "../pages/EmployerDetails"
 
 const AppRoutes = () => {
   return (
@@ -20,7 +23,9 @@ const AppRoutes = () => {
       <Route path="/payments" element={<Payments />} />
       <Route path="/salaries" element={<Salaries />} />
       <Route path="/projects" element={<Projects />} />
-      <Route path="/project/:id" element={<Project />} />
+      <Route path="/employers/:id" element={<EmployerDetails/>}/>
+      <Route path="/employers" element={<Employers/>}/>
+      <Route path="/a" element={<HelloWorld />}/>
     </Routes>
   );
 };

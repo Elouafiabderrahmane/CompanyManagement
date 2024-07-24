@@ -76,6 +76,7 @@ const EmployersDetails = () => {
   };
 
   useEffect(() => {
+    console.log(id);
     fetch(`http://localhost:8085/api/employers/${id}`)
       .then((response) => {
         if (!response.ok) throw new Error("Employer not found");
@@ -226,7 +227,7 @@ const EmployersDetails = () => {
           >
             Return
           </Button>
-          <Projects employerId={3} />
+          <Projects employerId={id} />
         </>
       ) : view === "tasks" ? (
         <>

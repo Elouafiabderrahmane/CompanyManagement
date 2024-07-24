@@ -13,9 +13,11 @@ import {
   Snackbar,
   FormControlLabel,
   Switch,
+  Typography,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import image from "../assets/images/AxeoFM_Maquette3D_Drone-3.jpg";
+
 
 const Projects = ({ employerId }) => {
   const [projects, setProjects] = useState([]);
@@ -40,7 +42,6 @@ const Projects = ({ employerId }) => {
     severity: "info",
   });
   const [loading, setLoading] = useState(false);
-  const [tasksLoading, setTasksLoading] = useState(false);
 
   const navigate = useNavigate();
 
@@ -50,14 +51,14 @@ const Projects = ({ employerId }) => {
 
   const fetchProjects = () => {
     setLoading(true);
-  
+
     const url = employerId
       ? `http://localhost:8085/api/projects/employers/${employerId}`
       : "http://localhost:8085/api/projects";
     fetch(url)
       .then((response) => response.json())
       .then((data) => {
-        setProjects([...data]);
+        setProjects(data);
         data.forEach((project) => {
           fetch(`http://localhost:8085/api/projects/${project.id}/image`)
             .then((response) => {
@@ -96,7 +97,7 @@ const Projects = ({ employerId }) => {
       fetch(`http://localhost:8085/api/projects/name/${searchQuery}`)
         .then((response) => response.json())
         .then((data) => {
-          setProjects([...data]);
+          setProjects(data);
         })
         .catch((error) => {
           console.error("Error searching projects by ID:", error);
@@ -143,7 +144,6 @@ const Projects = ({ employerId }) => {
 
   const handleCardClick = (id) => {
     navigate(`/project/${id}`);
-    
   };
 
   return (
@@ -172,7 +172,6 @@ const Projects = ({ employerId }) => {
             Search
           </Button>
         </Box>
-        <Box mb={3}></Box>
         <Box>
           <Button
             sx={{ width: "200px", height: "55px" }}
@@ -186,22 +185,41 @@ const Projects = ({ employerId }) => {
         </Box>
       </Box>
       <Box sx={{ flexGrow: 1, padding: 3 }}>
-        <Grid container spacing={4}>
-          {projects.map((project) => (
-            <Grid item xs={12} sm={6} md={4} key={project.id}>
-              <ProjectCard
-                img={images[project.id] || image}
-                title={project.name}
-                description={project.description}
-                endingDate={project.endDate}
-                done={project.done}
-                budget={project.budget}
-                onClick={() => handleCardClick(project.id)}
-              />
-            </Grid>
-          ))}
+  {projects.length > 0 ? (
+    <Grid container spacing={4}>
+      {projects.map((project) => (
+        <Grid item xs={12} sm={6} md={4} key={project.id}>
+          <ProjectCard
+            img={images[project.id] || image}
+            title={project.name}
+            description={project.description}
+            endingDate={project.endDate}
+            done={project.done}
+            budget={project.budget}
+            onClick={() => handleCardClick(project.id)}
+          />
         </Grid>
-      </Box>
+      ))}
+    </Grid>
+  ) : (
+    <Box
+      display="flex"
+      justifyContent="center"
+      alignItems="center"
+      flexDirection="column"
+      mt={5}
+    >
+      <img
+        src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRtUVYATWPrDOHE_R5qO_XBS5VyJ6Sx78bSUw&s"
+        alt="No projects"
+        style={{ maxWidth: "100%", height: "auto" }}
+      />
+      <Typography variant="h6" color="textSecondary" align="center" mt={2}>
+        There are no projects here.
+      </Typography>
+    </Box>
+  )}
+</Box>
 
       {/* Add Project Modal */}
       <Dialog open={addModalOpen} onClose={() => setAddModalOpen(false)}>

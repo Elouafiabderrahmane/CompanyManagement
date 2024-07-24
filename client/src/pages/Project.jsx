@@ -29,6 +29,7 @@ import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import Table from "../components/table/Table";
 import Tasks from "./Tasks";
 import Materials from "./Materials"; // Import the Materials component
+import Employers from "./Employers";
 
 const StyledImage = styled("img")({
   width: "100%",
@@ -223,7 +224,7 @@ const Project = () => {
               variant="contained"
               color="primary"
               startIcon={<PeopleIcon />}
-              onClick={() => fetchData("employers")}
+              onClick={() => setView("employers")}
             >
               Employers
             </Button>
@@ -445,6 +446,19 @@ const Project = () => {
           </Button>
           <Materials projectId={id} /> {/* Render Materials component */}
         </>
+         ) : view === "employers" ? ( // Updated to render employers component
+          <>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() => setView("projectDetails")}
+              startIcon={<ArrowBackIosIcon />}
+              sx={{ marginBottom: 2 }}
+            >
+              Return
+            </Button>
+            <Employers projectId={id} /> {/* Render Materials component */}
+          </>
       ) : (
         <>
           <Button

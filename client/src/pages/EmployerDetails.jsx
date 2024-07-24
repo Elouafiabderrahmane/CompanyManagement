@@ -1,231 +1,309 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   Box,
+  Grid,
   Button,
   Typography,
+  CircularProgress,
+  Snackbar,
+  Dialog,
+  DialogTitle,
+  DialogContent,
   TextField,
-  Card,
-  CardContent,
-  IconButton,
-  CircularProgress
+  DialogActions,
+  FormControlLabel,
+  Switch,
 } from "@mui/material";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import { styled } from "@mui/system";
+import defaultImage from "../assets/images/AxeoFM_Maquette3D_Drone-3.jpg";
+import PeopleIcon from "@mui/icons-material/People";
+import BuildIcon from "@mui/icons-material/Build";
+import AssignmentIcon from "@mui/icons-material/Assignment";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import CancelIcon from "@mui/icons-material/Cancel";
+import LinearProgress, { linearProgressClasses } from "@mui/material/LinearProgress";
+import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
+import Table from "../components/table/Table";
+import Tasks from "./Tasks";
+import Materials from "./Materials"; // Import the Materials component
+import Projects from "./Projects"; // Import the Projects component
 
-const EmployerDetails = () => {
-  const { id } = useParams(); // Get the id from the URL
-  const navigate = useNavigate(); // Initialize useNavigate
+const StyledImage = styled("img")({
+  width: "100%",
+  height: "auto",
+  borderRadius: "8px",
+  marginBottom: "16px",
+});
+
+const EmployerDetails = styled(Box)(({ theme }) => ({
+  padding: theme.spacing(3),
+}));
+
+const BorderLinearProgress = styled(LinearProgress)(({ theme }) => ({
+  height: 10,
+  borderRadius: 5,
+  [`& .${linearProgressClasses.colorPrimary}`]: {
+    backgroundColor:
+      theme.palette.grey[theme.palette.mode === "light" ? 200 : 800],
+  },
+  [`& .${linearProgressClasses.bar}`]: {
+    borderRadius: 5,
+    backgroundColor: theme.palette.mode === "light" ? "#1a90ff" : "#308fe8",
+  },
+}));
+
+const EmployersDetails = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
   const [employer, setEmployer] = useState(null);
+  const [image, setImage] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [editMode, setEditMode] = useState(false);
-  const [formData, setFormData] = useState({
-    name: "",
-    phone: "",
-    cin: "",
-    address: "",
-    email: "",
-    hireDate: "",
-    birthDate: "",
-    image: null,
+  const [error, setError] = useState(null);
+  const [view, setView] = useState("employerDetails");
+  const [tableData, setTableData] = useState([]);
+  const [tableLoading, setTableLoading] = useState(false);
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "info",
   });
 
-  useEffect(() => {
-    fetchEmployerDetails();
-  }, [id]);
+  const tableHeaders = {
+    projects: ["", "Project Name", "Description", "Budget", "Start Date", "End Date"],
+    tasks: ["", "Task Type", "Title", "Description", "Starting Date", "Ending Date", "Project", "Status"],
+    materials: ["", "Material Name", "Quantity", "Price", "Project"],
+  };
 
-  const fetchEmployerDetails = () => {
-    setLoading(true);
+  useEffect(() => {
     fetch(`http://localhost:8085/api/employers/${id}`)
-      .then((response) => response.json())
+      .then((response) => {
+        if (!response.ok) throw new Error("Employer not found");
+        return response.json();
+      })
       .then((data) => {
         setEmployer(data);
-        setFormData({
-          name: data.name,
-          phone: data.phone,
-          cin: data.cin,
-          address: data.address,
-          email: data.email,
-          hireDate: data.hireDate,
-          birthDate: data.birthDate,
-          image: data.image,
-        });
         setLoading(false);
       })
       .catch((error) => {
-        console.error("Error fetching employer details:", error);
+        setError(error.message);
         setLoading(false);
       });
-  };
+  }, [id]);
 
-  const handleEditToggle = () => {
-    setEditMode(!editMode);
-  };
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-  };
-
-  const handleImageChange = (e) => {
-    setFormData({ ...formData, image: e.target.files[0] });
-  };
-
-  const handleUpdate = () => {
-    const formDataToUpdate = new FormData();
-    Object.keys(formData).forEach((key) => {
-      formDataToUpdate.append(key, formData[key]);
-    });
-
-    fetch(`http://localhost:8085/api/employers/${id}`, {
-      method: "PUT",
-      body: formDataToUpdate,
-    })
+  const fetchData = (dataType) => {
+    setTableLoading(true);
+    fetch(`http://localhost:8085/api/employers/${id}/${dataType}`)
       .then((response) => response.json())
-      .then(() => {
-        setEditMode(false);
-        fetchEmployerDetails(); // Refresh the data
+      .then((data) => {
+        setTableData(data);
+        setView(dataType);
+        setTableLoading(false);
       })
       .catch((error) => {
-        console.error("Error updating employer details:", error);
+        console.error("Error fetching data:", error);
+        setTableLoading(false);
       });
   };
+
+  const showSnackbar = (message, severity) => {
+    setSnackbar({ open: true, message, severity });
+  };
+
+  const renderHead = (item, index) => <th key={index}>{item}</th>;
+
+  const renderBody = (item, index) => (
+    <tr key={index}>
+      {Object.values(item).map((val, i) => (
+        <td key={i}>{val}</td>
+      ))}
+    </tr>
+  );
+
+  if (loading) {
+    return <CircularProgress />;
+  }
+
+  if (error) {
+    return <Typography color="error">Error: {error}</Typography>;
+  }
 
   return (
     <Box padding={3}>
-      <IconButton
-        onClick={() => navigate("/employers")}
-        color="primary"
-        aria-label="back"
-      >
-        <ArrowBackIcon />
-      </IconButton>
-      {loading ? (
-        <CircularProgress />
-      ) : employer ? (
-        <Card>
-          <CardContent>
-            <Typography variant="h4">Employer Details</Typography>
-            <Box marginY={2}>
-              <Typography variant="h6">Name</Typography>
-              {editMode ? (
-                <TextField
-                  fullWidth
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                />
-              ) : (
-                <Typography>{employer.name}</Typography>
-              )}
-            </Box>
-            <Box marginY={2}>
-              <Typography variant="h6">Phone</Typography>
-              {editMode ? (
-                <TextField
-                  fullWidth
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleChange}
-                />
-              ) : (
-                <Typography>{employer.phone}</Typography>
-              )}
-            </Box>
-            <Box marginY={2}>
-              <Typography variant="h6">Cin</Typography>
-              {editMode ? (
-                <TextField
-                  fullWidth
-                  name="cin"
-                  value={formData.cin}
-                  onChange={handleChange}
-                />
-              ) : (
-                <Typography>{employer.cin}</Typography>
-              )}
-            </Box>
-            <Box marginY={2}>
-              <Typography variant="h6">Address</Typography>
-              {editMode ? (
-                <TextField
-                  fullWidth
-                  name="address"
-                  value={formData.address}
-                  onChange={handleChange}
-                />
-              ) : (
-                <Typography>{employer.address}</Typography>
-              )}
-            </Box>
-            <Box marginY={2}>
-              <Typography variant="h6">Email</Typography>
-              {editMode ? (
-                <TextField
-                  fullWidth
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                />
-              ) : (
-                <Typography>{employer.email}</Typography>
-              )}
-            </Box>
-            <Box marginY={2}>
-              <Typography variant="h6">Hire Date</Typography>
-              {editMode ? (
-                <TextField
-                  fullWidth
-                  name="hireDate"
-                  type="date"
-                  value={formData.hireDate}
-                  onChange={handleChange}
-                />
-              ) : (
-                <Typography>{employer.hireDate}</Typography>
-              )}
-            </Box>
-            <Box marginY={2}>
-              <Typography variant="h6">Birth Date</Typography>
-              {editMode ? (
-                <TextField
-                  fullWidth
-                  name="birthDate"
-                  type="date"
-                  value={formData.birthDate}
-                  onChange={handleChange}
-                />
-              ) : (
-                <Typography>{employer.birthDate}</Typography>
-              )}
-            </Box>
-            {editMode && (
-              <Box marginY={2}>
-                <Typography variant="h6">Image</Typography>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageChange}
-                />
-              </Box>
-            )}
-            <Box marginY={2}>
-              {editMode ? (
-                <Button variant="contained" color="primary" onClick={handleUpdate}>
-                  Update
-                </Button>
-              ) : (
-                <Button variant="contained" color="primary" onClick={handleEditToggle}>
-                  Edit
-                </Button>
-              )}
-            </Box>
-          </CardContent>
-        </Card>
+      {view === "employerDetails" ? (
+        <>
+          <Box
+            sx={{ marginBottom: "20px" }}
+            display="flex"
+            justifyContent="center"
+            alignItems="center"
+          >
+            <Button
+              sx={{
+                width: "150px",
+                height: "60px",
+                marginRight: "10px",
+                fontSize: "18px",
+                fontWeight: "bold",
+              }}
+              variant="contained"
+              color="primary"
+              startIcon={<PeopleIcon />}
+              onClick={() => setView("projects")}
+            >
+              Projects
+            </Button>
+            <Button
+              sx={{
+                width: "150px",
+                height: "60px",
+                marginRight: "10px",
+                fontSize: "18px",
+                fontWeight: "bold",
+              }}
+              variant="contained"
+              color="primary"
+              startIcon={<AssignmentIcon />}
+              onClick={() => fetchData("tasks")}
+            >
+              Tasks
+            </Button>
+            <Button
+              sx={{
+                width: "150px",
+                height: "60px",
+                marginRight: "10px",
+                fontSize: "18px",
+                fontWeight: "bold",
+              }}
+              variant="contained"
+              color="primary"
+              startIcon={<BuildIcon />}
+              onClick={() => fetchData("materials")}
+            >
+              Materials
+            </Button>
+          </Box>
+          <Typography variant="h2" fontWeight="bold" gutterBottom>
+            {employer.name}
+          </Typography>
+          <Grid container spacing={3}>
+            <Grid item xs={12} md={6}>
+              <EmployerDetails>
+                <Typography variant="h6" color="text.secondary" gutterBottom>
+                  {`Phone: ${employer.phone}`}
+                </Typography>
+                <Typography variant="body1" paragraph>
+                  {`Address: ${employer.address}`}
+                </Typography>
+                <Typography variant="body2" color="text.secondary" paragraph>
+                  {`Hire Date: ${employer.hireDate}`}
+                </Typography>
+                <Typography variant="body2" color="text.secondary" paragraph>
+                  {`Birth Date: ${employer.birthDate}`}
+                </Typography>
+                <Typography variant="body2" color="text.secondary" paragraph>
+                  {`Email: ${employer.email}`}
+                </Typography>
+              </EmployerDetails>
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <StyledImage
+                src={image || defaultImage}
+                alt={employer.name || "Employer Image"}
+              />
+            </Grid>
+          </Grid>
+        </>
+      ) : view === "projects" ? (
+        <>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => setView("employerDetails")}
+            startIcon={<ArrowBackIosIcon />}
+            sx={{ marginBottom: 2 }}
+          >
+            Return
+          </Button>
+          <Projects employerId={3} />
+        </>
+      ) : view === "tasks" ? (
+        <>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => setView("employerDetails")}
+            startIcon={<ArrowBackIosIcon />}
+            sx={{ marginBottom: 2 }}
+          >
+            Return
+          </Button>
+          <Tasks employerId={id} />
+        </>
+      ) : view === "materials" ? (
+        <>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => setView("employerDetails")}
+            startIcon={<ArrowBackIosIcon />}
+            sx={{ marginBottom: 2 }}
+          >
+            Return
+          </Button>
+          <Materials employerId={id} />
+        </>
       ) : (
-        <Typography variant="h6">Employer not found</Typography>
+        <>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => setView("employerDetails")}
+            startIcon={<ArrowBackIosIcon />}
+            sx={{ marginBottom: 2 }}
+          >
+            Return
+          </Button>
+          {tableLoading ? (
+            <BorderLinearProgress />
+          ) : (
+            <Table
+              limit="10"
+              headData={tableHeaders[view]}
+              renderHead={renderHead}
+              bodyData={tableData}
+              renderBody={renderBody}
+            />
+          )}
+        </>
       )}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+        message={snackbar.message}
+        action={
+          <Button
+            color="inherit"
+            onClick={() => setSnackbar({ ...snackbar, open: false })}
+          >
+            Close
+          </Button>
+        }
+        C        ContentProps={{
+          style: {
+            backgroundColor:
+              snackbar.severity === "success"
+                ? "#4caf50"
+                : snackbar.severity === "error"
+                ? "#f44336"
+                : "#1976d2",
+          },
+        }}
+      />
     </Box>
   );
 };
 
-export default EmployerDetails;
+export default EmployersDetails;

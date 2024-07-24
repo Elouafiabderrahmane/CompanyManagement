@@ -4,6 +4,8 @@ import LinearProgress, {
   linearProgressClasses,
 } from "@mui/material/LinearProgress";
 import { styled } from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
+
 import {
   Button,
   Dialog,
@@ -23,7 +25,6 @@ import {
 } from "@mui/material";
 
 const tasksTableHead = [
-  "",
   "Task Type",
   "Done",
   "Title",
@@ -38,7 +39,9 @@ const tasksTableHead = [
 
 const renderHead = (item, index) => <th key={index}>{item}</th>;
 
+
 const Tasks = ({ projectId }) => {
+  const [addModalOpen, setAddModalOpen] = useState(false);
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -61,6 +64,17 @@ const Tasks = ({ projectId }) => {
     message: "",
     severity: "info",
   });
+  const [searchQuery, setSearchQuery] = useState("");
+  const [newTaskData, setNewTaskData] = useState({
+    tasktype: "",
+    done: false,
+    title: "",
+    description: "",
+    startingDate: "",
+    endingDate: "",
+    project: "",
+    employer: [],
+  });
 
   useEffect(() => {
     fetchTasks();
@@ -81,6 +95,52 @@ const Tasks = ({ projectId }) => {
         console.error("Error fetching tasks:", error);
         setLoading(false);
         showSnackbar("Failed to fetch tasks", "error");
+      });
+  };
+  const handleSearch = () => {
+    if (searchQuery.trim() === "") {
+      fetchTasks();
+    } else {
+      setLoading(true);
+      fetch(`http://localhost:8085/api/tasks/keyword/${searchQuery}`)
+        .then((response) => response.json())
+        .then((data) => {
+          setTasks([data]);
+          setLoading(false);
+        })
+        .catch((error) => {
+          console.error("Error searching tasks by name:", error);
+          setLoading(false);
+          showSnackbar("Failed to search employers", "error");
+        });
+    }
+  };
+  const handleKeyDown = (event) => {
+    if (event.key === "Enter") {
+      handleSearch();
+    }
+  };
+  const handleAddTask = () => {
+    setAddModalOpen(true);
+  };
+
+  const addTask = () => {
+    fetch("http://localhost:8085/api/tasks", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(newTaskData),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        fetchTasks();
+        setAddModalOpen(false);
+        showSnackbar("task added successfully", "success");
+      })
+      .catch((error) => {
+        console.error("Error adding task:", error);
+        showSnackbar("Failed to add task", "error");
       });
   };
 
@@ -165,7 +225,7 @@ const Tasks = ({ projectId }) => {
 
   const renderBody = (item, index) => (
     <tr key={index}>
-      <td>{item.id}</td>
+
       <td>{item.tasktype}</td>
       <td>{item.done ? "Yes" : "No"}</td>
       <td>{item.title}</td>
@@ -215,31 +275,68 @@ const Tasks = ({ projectId }) => {
           <div></div>
         </>
       ) : (
-        <Box sx={{ marginBottom: "30px" }}>
-          <Card
-            sx={{
-              width: "200px",
-              height: "60px",
-              backgroundColor: "#1976d2",
-              marginBottom: "30px", // Added margin to create space below the card
-            }}
+        <>
+        <Box
+        mb={3}
+        display="flex"
+        justifyContent="space-between"
+        alignItems="center"
+      >
+        <Box display="flex" alignItems="center">
+          <TextField
+            id="outlined-basic"
+            label="Search by Name"
+            variant="outlined"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onKeyDown={handleKeyDown}
+            style={{ width: "1000px", marginRight: 10 }}
+          />
+          <Button
+            sx={{ width: "150px", height: "60px" }}
+            variant="contained"
+            color="primary"
+            onClick={handleSearch}
           >
-            <CardContent sx={{ height: "100%" }}>
-              <Box display="flex" justifyContent="center" alignItems="center">
-                <Typography
-                  variant="h5"
-                  style={{
-                    color: "white",
-                    fontWeight: "bold",
-                    textAlign: "center",
-                  }}
-                >
-                  Tasks {tasks.length}
-                </Typography>
-              </Box>
-            </CardContent>
-          </Card>
+            Search
+          </Button>
         </Box>
+        <Box mb={3}></Box>
+        <Box>
+        <Button
+            sx={{ width: "200px", height: "55px" }}
+            variant="contained"
+            color="primary"
+            onClick={handleAddTask}
+            startIcon={<AddIcon style={{ fontSize: "2rem" }} />}
+          >
+            Add task
+          </Button>
+        </Box>
+      </Box>
+      <Box mb={"20px"}>
+        <Card
+          sx={{ width: "200px", height: "60px", backgroundColor: "#1976d2" }}
+        >
+          <CardContent sx={{ height: "100%" }}>
+            <Box display="flex" justifyContent="center" alignItems="center">
+              <Typography
+                variant="h6"
+                style={{
+                  color: "white",
+                  fontWeight: "bold",
+                  textAlign: "center",
+                }}
+              >
+               tasks {tasks.length}
+              </Typography>
+            </Box>
+          </CardContent>
+        </Card>
+      </Box>
+      </>
+      
+      
       )}
       <div className="row">
         <div className="col-12">
@@ -392,6 +489,134 @@ const Tasks = ({ projectId }) => {
           </Button>
         </DialogActions>
       </Dialog>
+      <Dialog open={addModalOpen} onClose={() => setAddModalOpen(false)}>
+      <DialogTitle>Add New Task</DialogTitle>
+      <DialogContent>
+        <TextField
+          id="standard-basic"
+          variant="standard"
+          label="Task Type"
+          value={newTaskData.tasktype}
+          onChange={(e) =>
+            setNewTaskData({ ...newTaskData, tasktype: e.target.value })
+          }
+          fullWidth
+          margin="normal"
+        />
+        <FormControlLabel
+          control={
+            <Switch
+              checked={newTaskData.done}
+              onChange={(e) =>
+                setNewTaskData({
+                  ...newTaskData,
+                  done: e.target.checked,
+                })
+              }
+              color="primary"
+            />
+          }
+          label="Done"
+          style={{ marginBottom: 0 }}
+        />
+        <TextField
+          id="standard-basic"
+          variant="standard"
+          label="Title"
+          value={newTaskData.title}
+          onChange={(e) =>
+            setNewTaskData({
+              ...newTaskData,
+              title: e.target.value,
+            })
+          }
+          fullWidth
+          margin="normal"
+        />
+        <TextField
+          id="standard-basic"
+          variant="standard"
+          label="Description"
+          value={newTaskData.description}
+          onChange={(e) =>
+            setNewTaskData({
+              ...newTaskData,
+              description: e.target.value,
+            })
+          }
+          fullWidth
+          margin="normal"
+        />
+        <TextField
+          id="standard-basic"
+          variant="standard"
+          label="Starting Date"
+          type="date"
+          InputLabelProps={{ shrink: true }}
+          value={newTaskData.startingDate}
+          onChange={(e) =>
+            setNewTaskData({
+              ...newTaskData,
+              startingDate: e.target.value,
+            })
+          }
+          fullWidth
+          margin="normal"
+        />
+        <TextField
+          id="standard-basic"
+          variant="standard"
+          label="Ending Date"
+          type="date"
+          InputLabelProps={{ shrink: true }}
+          value={newTaskData.endingDate}
+          onChange={(e) =>
+            setNewTaskData({
+              ...newTaskData,
+              endingDate: e.target.value,
+            })
+          }
+          fullWidth
+          margin="normal"
+        />
+        <TextField
+          id="standard-basic"
+          variant="standard"
+          label="Project"
+          value={newTaskData.project}
+          onChange={(e) =>
+            setNewTaskData({
+              ...newTaskData,
+              project: e.target.value,
+            })
+          }
+          fullWidth
+          margin="normal"
+        />
+        <TextField
+          id="standard-basic"
+          variant="standard"
+          label="Employers (comma-separated)"
+          value={newTaskData.employer.join(", ")}
+          onChange={(e) =>
+            setNewTaskData({
+              ...newTaskData,
+              employer: e.target.value.split(",").map((emp) => emp.trim()),
+            })
+          }
+          fullWidth
+          margin="normal"
+        />
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={() => setAddModalOpen(false)} color="primary">
+          Cancel
+        </Button>
+        <Button onClick={addTask} color="primary">
+          Add
+        </Button>
+      </DialogActions>
+    </Dialog>
 
       <Snackbar
         open={snackbar.open}

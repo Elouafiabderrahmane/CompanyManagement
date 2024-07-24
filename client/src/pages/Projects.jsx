@@ -17,7 +17,7 @@ import {
 import AddIcon from "@mui/icons-material/Add";
 import image from "../assets/images/AxeoFM_Maquette3D_Drone-3.jpg";
 
-const Projects = () => {
+const Projects = ({ employerId }) => {
   const [projects, setProjects] = useState([]);
   const [images, setImages] = useState({});
   const [searchQuery, setSearchQuery] = useState("");
@@ -46,14 +46,18 @@ const Projects = () => {
 
   useEffect(() => {
     fetchProjects();
-  }, []);
+  }, [employerId]);
 
   const fetchProjects = () => {
     setLoading(true);
-    fetch("http://localhost:8085/api/projects")
+  
+    const url = employerId
+      ? `http://localhost:8085/api/projects/employers/${employerId}`
+      : "http://localhost:8085/api/projects";
+    fetch(url)
       .then((response) => response.json())
       .then((data) => {
-        setProjects(data);
+        setProjects([...data]);
         data.forEach((project) => {
           fetch(`http://localhost:8085/api/projects/${project.id}/image`)
             .then((response) => {
@@ -82,20 +86,6 @@ const Projects = () => {
       .catch((error) => {
         console.error("Error fetching projects:", error);
         setLoading(false);
-      });
-  };
-
-  const fetchTasks = (projectId) => {
-    setTasksLoading(true);
-    fetch(`http://localhost:8085/api/projects/${projectId}/tasks`)
-      .then((response) => response.json())
-      .then((data) => {
-        // Assume you handle tasks data here
-        setTasksLoading(false);
-      })
-      .catch((error) => {
-        console.error("Error fetching tasks:", error);
-        setTasksLoading(false);
       });
   };
 
@@ -153,7 +143,7 @@ const Projects = () => {
 
   const handleCardClick = (id) => {
     navigate(`/project/${id}`);
-    fetchTasks(id); // Fetch tasks for the selected project
+    
   };
 
   return (
@@ -213,52 +203,36 @@ const Projects = () => {
         </Grid>
       </Box>
 
+      {/* Add Project Modal */}
       <Dialog open={addModalOpen} onClose={() => setAddModalOpen(false)}>
-        <DialogTitle>Add New Project</DialogTitle>
+        <DialogTitle>Add Project</DialogTitle>
         <DialogContent>
           <TextField
-            id="outlined-basic"
             label="Name"
-            variant="standard"
             fullWidth
-            margin="normal"
+            margin="dense"
             value={newProjectData.name}
             onChange={(e) =>
-              setNewProjectData({
-                ...newProjectData,
-                name: e.target.value,
-              })
+              setNewProjectData({ ...newProjectData, name: e.target.value })
             }
           />
           <TextField
-            id="outlined-multiline-static"
             label="Description"
-            multiline
-            rows={4}
-            variant="outlined"
             fullWidth
-            margin="normal"
+            margin="dense"
             value={newProjectData.description}
             onChange={(e) =>
-              setNewProjectData({
-                ...newProjectData,
-                description: e.target.value,
-              })
+              setNewProjectData({ ...newProjectData, description: e.target.value })
             }
           />
           <TextField
-            id="outlined-basic"
             label="Budget"
-            variant="standard"
             fullWidth
-            margin="normal"
+            margin="dense"
             type="number"
             value={newProjectData.budget}
             onChange={(e) =>
-              setNewProjectData({
-                ...newProjectData,
-                budget: e.target.value,
-              })
+              setNewProjectData({ ...newProjectData, budget: e.target.value })
             }
           />
           <FormControlLabel
@@ -266,131 +240,63 @@ const Projects = () => {
               <Switch
                 checked={newProjectData.paid}
                 onChange={(e) =>
-                  setNewProjectData({
-                    ...newProjectData,
-                    paid: e.target.checked,
-                  })
+                  setNewProjectData({ ...newProjectData, paid: e.target.checked })
                 }
-                color="primary"
               />
             }
             label="Paid"
-            style={{ marginBottom: 0 }}
+          />
+          <FormControlLabel
+            control={
+              <Switch
+                checked={newProjectData.done}
+                onChange={(e) =>
+                  setNewProjectData({ ...newProjectData, done: e.target.checked })
+                }
+              />
+            }
+            label="Done"
           />
           <TextField
-            id="outlined-basic"
-            variant="standard"
+            label="Start Date"
             fullWidth
-            margin="normal"
-            type="date"
+            margin="dense"
             value={newProjectData.startDate}
             onChange={(e) =>
-              setNewProjectData({
-                ...newProjectData,
-                startDate: e.target.value,
-              })
+              setNewProjectData({ ...newProjectData, startDate: e.target.value })
             }
           />
           <TextField
-            id="outlined-basic"
-            variant="standard"
+            label="End Date"
             fullWidth
-            margin="normal"
-            type="date"
+            margin="dense"
             value={newProjectData.endDate}
             onChange={(e) =>
-              setNewProjectData({
-                ...newProjectData,
-                endDate: e.target.value,
-              })
+              setNewProjectData({ ...newProjectData, endDate: e.target.value })
             }
           />
-          <TextField
+          <input
             type="file"
-            label="Image"
-            variant="standard"
             onChange={(e) =>
-              setNewProjectData({
-                ...newProjectData,
-                image: e.target.files[0],
-              })
-            }
-            accept="image/*"
-          />
-          <TextField
-            id="outlined-basic"
-            label="Employers (IDs, comma-separated)"
-            variant="standard"
-            fullWidth
-            margin="normal"
-            value={newProjectData.employers.join(", ")}
-            onChange={(e) =>
-              setNewProjectData({
-                ...newProjectData,
-                employers: e.target.value
-                  .split(",")
-                  .map((id) => Number(id.trim())),
-              })
-            }
-          />
-          <TextField
-            id="outlined-basic"
-            label="Materials (IDs, comma-separated)"
-            variant="standard"
-            fullWidth
-            margin="normal"
-            value={newProjectData.materials.join(", ")}
-            onChange={(e) =>
-              setNewProjectData({
-                ...newProjectData,
-                materials: e.target.value
-                  .split(",")
-                  .map((id) => Number(id.trim())),
-              })
+              setNewProjectData({ ...newProjectData, image: e.target.files[0] })
             }
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setAddModalOpen(false)} color="primary">
-            Cancel
-          </Button>
+          <Button onClick={() => setAddModalOpen(false)}>Cancel</Button>
           <Button onClick={addProject} color="primary">
-            Add Project
+            Add
           </Button>
         </DialogActions>
       </Dialog>
 
+      {/* Snackbar for notifications */}
       <Snackbar
-        open={snackbar.open || loading || tasksLoading}
+        open={snackbar.open}
         autoHideDuration={6000}
         onClose={() => setSnackbar({ ...snackbar, open: false })}
-        message={
-          loading
-            ? "Loading projects..."
-            : tasksLoading
-            ? "Loading tasks..."
-            : snackbar.message
-        }
-        action={
-          <Button
-            color="inherit"
-            onClick={() => setSnackbar({ ...snackbar, open: false })}
-          >
-            Close
-          </Button>
-        }
-        ContentProps={{
-          style: {
-            backgroundColor:
-              loading || tasksLoading
-                ? "#1976d2"
-                : snackbar.severity === "success"
-                ? "#4caf50"
-                : snackbar.severity === "error"
-                ? "#f44336"
-                : "#1976d2",
-          },
-        }}
+        message={snackbar.message}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
       />
     </Box>
   );

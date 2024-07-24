@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom"; // Updated import
+import { useNavigate } from "react-router-dom";
 import Table from "../components/table/Table";
 import LinearProgress, {
   linearProgressClasses,
@@ -34,7 +34,7 @@ const employersTableHead = [
 
 const renderHead = (item, index) => <th key={index}>{item}</th>;
 
-const Employers = () => {
+const Employers = ({ projectId }) => {
   const [employers, setEmployers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -70,15 +70,18 @@ const Employers = () => {
   });
   const [searchQuery, setSearchQuery] = useState("");
 
-  const navigate = useNavigate(); // Initialize useNavigate
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchEmployers();
-  }, []);
+  }, [projectId]);
 
   const fetchEmployers = () => {
     setLoading(true);
-    fetch("http://localhost:8085/api/employers")
+    const url = projectId
+      ? `http://localhost:8085/api/employers/projects/${projectId}`
+      : "http://localhost:8085/api/employers";
+    fetch(url)
       .then((response) => response.json())
       .then((data) => {
         setEmployers(data);
@@ -142,7 +145,7 @@ const Employers = () => {
 
   const updateEmployer = () => {
     const formData = new FormData();
-    Object.keys(updateData).forEach(key => {
+    Object.keys(updateData).forEach((key) => {
       formData.append(key, updateData[key]);
     });
 
@@ -171,11 +174,11 @@ const Employers = () => {
 
   const addEmployer = () => {
     const formData = new FormData();
-    Object.keys(newEmployerData).forEach(key => {
+    Object.keys(newEmployerData).forEach((key) => {
       formData.append(key, newEmployerData[key]);
     });
 
-    fetch("http://localhost:8085/api/employers/api/employers", {
+    fetch("http://localhost:8085/api/employers", {
       method: "POST",
       body: formData,
     })
@@ -211,7 +214,7 @@ const Employers = () => {
   };
 
   const handleKeyDown = (event) => {
-    if (event.key === 'Enter') {
+    if (event.key === "Enter") {
       handleSearch();
     }
   };
@@ -221,7 +224,7 @@ const Employers = () => {
   };
 
   const renderBody = (item, index) => (
-    <tr key={index} onClick={() => navigate(`/employers/${item.id}`)}> {/* Redirect on row click */}
+    <tr key={index} onClick={() => navigate(`/employers/${item.id}`)}>
       <td>{item.name}</td>
       <td>{item.phone}</td>
       <td>{item.cin}</td>
@@ -230,28 +233,28 @@ const Employers = () => {
       <td>{item.birthDate}</td>
       <td>{item.email}</td>
       <td>
-      <Button 
-        variant="contained" 
-        onClick={(e) => {
-          e.stopPropagation(); // Prevent row click event
-          handleUpdate(item.id);
-        }}
-      >
-        Update
-      </Button>
-    </td>
-    <td>
-      <Button
-        variant="contained"
-        onClick={(e) => {
-          e.stopPropagation(); // Prevent row click event
-          handleDelete(item.id);
-        }}
-        style={{ backgroundColor: "red" }}
-      >
-        Delete
-      </Button>
-    </td>
+        <Button
+          variant="contained"
+          onClick={(e) => {
+            e.stopPropagation();
+            handleUpdate(item.id);
+          }}
+        >
+          Update
+        </Button>
+      </td>
+      <td>
+        <Button
+          variant="contained"
+          onClick={(e) => {
+            e.stopPropagation();
+            handleDelete(item.id);
+          }}
+          style={{ backgroundColor: "red" }}
+        >
+          Delete
+        </Button>
+      </td>
     </tr>
   );
 
@@ -284,10 +287,10 @@ const Employers = () => {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             onKeyDown={handleKeyDown}
-            style={{ width: '1000px', marginRight: 10 }}
+            style={{ width: "1000px", marginRight: 10 }}
           />
           <Button
-            sx={{ width: '150px', height: '60px' }}
+            sx={{ width: "150px", height: "60px" }}
             variant="contained"
             color="primary"
             onClick={handleSearch}
@@ -308,264 +311,245 @@ const Employers = () => {
           </Button>
         </Box>
       </Box>
-      <Box mb={"20px"}>
-        <Card
-          sx={{ width: "200px", height: "60px", backgroundColor: "#1976d2" }}
-        >
-          <CardContent sx={{ height: "100%" }}>
-            <Box display="flex" justifyContent="center" alignItems="center">
-              <Typography
-                variant="h6"
-                style={{
-                  color: "white",
-                  fontWeight: "bold",
-                  textAlign: "center",
-                }}
-              >
-                Employers {employers.length}
-              </Typography>
-            </Box>
-          </CardContent>
-        </Card>
-      </Box>
+      <Box mb={"20px"}></Box>
+      <Card>
+        <CardContent>
+          <Typography variant="h4" component="div" gutterBottom>
+            List of Employers
+          </Typography>
+          <Box sx={{ width: "100%" }}>
+            {loading ? (
+              <BorderLinearProgress />
+            ) : (
+              <div className="card">
+                <div className="card__body">
+                  <Table
+                    limit="10"
+                    headData={employersTableHead}
+                    renderHead={(item, index) => renderHead(item, index)}
+                    bodyData={employers}
+                    renderBody={(item, index) => renderBody(item, index)}
+                  />
+                </div>
+              </div>
+            )}
+          </Box>
+        </CardContent>
+      </Card>
 
-      <div className="card">
-        <div className="card__body">
-          {loading ? (
-            <BorderLinearProgress />
-          ) : (
-            <Table
-              limit="10"
-              headData={employersTableHead}
-              renderHead={(item, index) => renderHead(item, index)}
-              bodyData={employers}
-              renderBody={(item, index) => renderBody(item, index)}
-            />
-          )}
-        </div>
-      </div>
+      {/* Delete Confirmation Dialog */}
       <Dialog
         open={deleteDialogOpen}
         onClose={() => setDeleteDialogOpen(false)}
       >
         <DialogTitle>Confirm Delete</DialogTitle>
-        <DialogContent>
-          Are you sure you want to delete this employer?
-        </DialogContent>
+        <DialogContent>Are you sure you want to delete this employer?</DialogContent>
         <DialogActions>
-          <Button onClick={() => setDeleteDialogOpen(false)} color="primary">
-            Cancel
-          </Button>
-          <Button onClick={confirmDelete} style={{ color: "red" }}>
+          <Button onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>
+          <Button onClick={confirmDelete} color="secondary">
             Delete
           </Button>
         </DialogActions>
       </Dialog>
 
+      {/* Update Employer Modal */}
       <Dialog open={updateModalOpen} onClose={() => setUpdateModalOpen(false)}>
         <DialogTitle>Update Employer</DialogTitle>
         <DialogContent>
           <TextField
-            id="standard-basic"
-            variant="standard"
             label="Name"
+            fullWidth
+            margin="dense"
             value={updateData.name}
             onChange={(e) =>
               setUpdateData({ ...updateData, name: e.target.value })
             }
-            fullWidth
-            margin="normal"
           />
           <TextField
-            id="standard-basic"
-            variant="standard"
             label="Phone"
+            fullWidth
+            margin="dense"
             value={updateData.phone}
             onChange={(e) =>
               setUpdateData({ ...updateData, phone: e.target.value })
             }
-            fullWidth
-            margin="normal"
           />
           <TextField
-            id="standard-basic"
-            variant="standard"
-            label="Cin"
+            label="CIN"
+            fullWidth
+            margin="dense"
             value={updateData.cin}
             onChange={(e) =>
               setUpdateData({ ...updateData, cin: e.target.value })
             }
-            fullWidth
-            margin="normal"
           />
           <TextField
-            id="standard-basic"
-            variant="standard"
             label="Address"
+            fullWidth
+            margin="dense"
             value={updateData.adress}
             onChange={(e) =>
               setUpdateData({ ...updateData, adress: e.target.value })
             }
-            fullWidth
-            margin="normal"
           />
           <TextField
-            id="standard-basic"
-            variant="standard"
             label="Email"
+            fullWidth
+            margin="dense"
             value={updateData.email}
             onChange={(e) =>
               setUpdateData({ ...updateData, email: e.target.value })
             }
-            fullWidth
-            margin="normal"
           />
           <TextField
-            id="standard-basic"
-            variant="standard"
             label="Hire Date"
+            fullWidth
+            margin="dense"
             value={updateData.hireDate}
             onChange={(e) =>
               setUpdateData({ ...updateData, hireDate: e.target.value })
             }
-            fullWidth
-            margin="normal"
           />
           <TextField
-            id="standard-basic"
-            variant="standard"
             label="Birth Date"
+            fullWidth
+            margin="dense"
             value={updateData.birthDate}
             onChange={(e) =>
               setUpdateData({ ...updateData, birthDate: e.target.value })
             }
-            fullWidth
-            margin="normal"
           />
           <input
             type="file"
-            accept="image/*"
             onChange={(e) =>
               setUpdateData({ ...updateData, image: e.target.files[0] })
             }
-            style={{ marginTop: 16 }}
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setUpdateModalOpen(false)} color="primary">
-            Cancel
-          </Button>
+          <Button onClick={() => setUpdateModalOpen(false)}>Cancel</Button>
           <Button onClick={updateEmployer} color="primary">
             Update
           </Button>
         </DialogActions>
       </Dialog>
 
+      {/* Add Employer Modal */}
       <Dialog open={addModalOpen} onClose={() => setAddModalOpen(false)}>
-        <DialogTitle>Add New Employer</DialogTitle>
+        <DialogTitle>Add Employer</DialogTitle>
         <DialogContent>
           <TextField
-            id="standard-basic"
-            variant="standard"
             label="Name"
+            fullWidth
+            margin="dense"
             value={newEmployerData.name}
             onChange={(e) =>
               setNewEmployerData({ ...newEmployerData, name: e.target.value })
             }
-            fullWidth
-            margin="normal"
           />
           <TextField
-            id="standard-basic"
-            variant="standard"
             label="Phone"
+            fullWidth
+            margin="dense"
             value={newEmployerData.phone}
             onChange={(e) =>
               setNewEmployerData({ ...newEmployerData, phone: e.target.value })
             }
-            fullWidth
-            margin="normal"
           />
           <TextField
-            id="standard-basic"
-            variant="standard"
-            label="Cin"
+            label="CIN"
+            fullWidth
+            margin="dense"
             value={newEmployerData.cin}
             onChange={(e) =>
               setNewEmployerData({ ...newEmployerData, cin: e.target.value })
             }
-            fullWidth
-            margin="normal"
           />
           <TextField
-            id="standard-basic"
-            variant="standard"
             label="Address"
+            fullWidth
+            margin="dense"
             value={newEmployerData.adress}
             onChange={(e) =>
               setNewEmployerData({ ...newEmployerData, adress: e.target.value })
             }
-            fullWidth
-            margin="normal"
           />
           <TextField
-            id="standard-basic"
-            variant="standard"
             label="Email"
+            fullWidth
+            margin="dense"
             value={newEmployerData.email}
             onChange={(e) =>
               setNewEmployerData({ ...newEmployerData, email: e.target.value })
             }
-            fullWidth
-            margin="normal"
           />
           <TextField
-            id="standard-basic"
-            variant="standard"
             label="Hire Date"
+            fullWidth
+            margin="dense"
             value={newEmployerData.hireDate}
             onChange={(e) =>
               setNewEmployerData({ ...newEmployerData, hireDate: e.target.value })
             }
-            fullWidth
-            margin="normal"
           />
           <TextField
-            id="standard-basic"
-            variant="standard"
             label="Birth Date"
-            value={newEmployerData.birthDate}
-            onChange={(e) =>
-              setNewEmployerData({ ...newEmployerData, birthDate: e.target.value })
-            }
             fullWidth
-            margin="normal"
-          />
-          <input
-            type="file"
-            accept="image/*"
+            margin="dense"
+            value={newEmployerData.birthDate}
             onChange={(e) =>
               setNewEmployerData({ ...newEmployerData, image: e.target.files[0] })
             }
-            style={{ marginTop: 16 }}
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setAddModalOpen(false)} color="primary">
-            Cancel
-          </Button>
+          <Button onClick={() => setAddModalOpen(false)}>Cancel</Button>
           <Button onClick={addEmployer} color="primary">
             Add
           </Button>
         </DialogActions>
       </Dialog>
 
+      {/* Update Employer Modal */}
+      <Dialog open={updateModalOpen} onClose={() => setUpdateModalOpen(false)}>
+        <DialogTitle>Update Employer</DialogTitle>
+        <DialogContent>
+          <TextField
+            label="Name"
+            value={selectedEmployer ? selectedEmployer.name : ""}
+            onChange={(e) => setSelectedEmployer({ ...selectedEmployer, name: e.target.value })}
+            fullWidth
+            margin="normal"
+          />
+          <TextField
+            label="Email"
+            value={selectedEmployer ? selectedEmployer.email : ""}
+            onChange={(e) => setSelectedEmployer({ ...selectedEmployer, email: e.target.value })}
+            fullWidth
+            margin="normal"
+          />
+          <input
+            type="file"
+            onChange={(e) =>
+              setSelectedEmployer({ ...selectedEmployer, image: e.target.files[0] })
+            }
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setUpdateModalOpen(false)}>Cancel</Button>
+          <Button onClick={updateEmployer} color="primary">
+            Update
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Snackbar for notifications */}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={6000}
         onClose={() => setSnackbar({ ...snackbar, open: false })}
         message={snackbar.message}
-        severity={snackbar.severity}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
       />
     </div>
   );

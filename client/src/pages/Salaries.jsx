@@ -39,6 +39,7 @@ const salariesTableHead = [
 const renderHead = (item, index) => <th key={index}>{item}</th>;
 
 const Salaries = () => {
+  
   const [salaries, setSalaries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -63,6 +64,7 @@ const Salaries = () => {
   const [searchQuery, setSearchQuery] = useState(""); // Added state for search query
   const [addModalOpen, setAddModalOpen] = useState(false); // Added state for add modal
   const [tasks, setTasks] = useState([]); // Added state for tasks
+  
 
   useEffect(() => {
     fetchSalaries();

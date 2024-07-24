@@ -39,8 +39,7 @@ const tasksTableHead = [
 
 const renderHead = (item, index) => <th key={index}>{item}</th>;
 
-
-const Tasks = ({ projectId }) => {
+const Tasks = ({ projectId, employerId }) => {
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -78,13 +77,19 @@ const Tasks = ({ projectId }) => {
 
   useEffect(() => {
     fetchTasks();
-  }, [projectId]);
+  }, [projectId, employerId]);
 
   const fetchTasks = () => {
     setLoading(true);
-    const url = projectId
-      ? `http://localhost:8085/api/tasks/projects/${projectId}`
-      : "http://localhost:8085/api/tasks";
+    let url;
+    if (projectId) {
+      url = `http://localhost:8085/api/tasks/projects/${projectId}`;
+    } else if (employerId) {
+      url = `http://localhost:8085/api/tasks/employers/${employerId}`;
+    } else {
+      url = "http://localhost:8085/api/tasks";
+    }
+
     fetch(url)
       .then((response) => response.json())
       .then((data) => {
@@ -97,6 +102,7 @@ const Tasks = ({ projectId }) => {
         showSnackbar("Failed to fetch tasks", "error");
       });
   };
+
   const handleSearch = () => {
     if (searchQuery.trim() === "") {
       fetchTasks();
@@ -111,15 +117,17 @@ const Tasks = ({ projectId }) => {
         .catch((error) => {
           console.error("Error searching tasks by name:", error);
           setLoading(false);
-          showSnackbar("Failed to search employers", "error");
+          showSnackbar("Failed to search tasks", "error");
         });
     }
   };
+
   const handleKeyDown = (event) => {
     if (event.key === "Enter") {
       handleSearch();
     }
   };
+
   const handleAddTask = () => {
     setAddModalOpen(true);
   };
@@ -136,7 +144,7 @@ const Tasks = ({ projectId }) => {
       .then((data) => {
         fetchTasks();
         setAddModalOpen(false);
-        showSnackbar("task added successfully", "success");
+        showSnackbar("Task added successfully", "success");
       })
       .catch((error) => {
         console.error("Error adding task:", error);
@@ -147,8 +155,6 @@ const Tasks = ({ projectId }) => {
   const handleDelete = (id) => {
     setDeleteDialogOpen(true);
     setDeleteId(id);
-    // Optimistically remove the item from the list
-    setTasks(tasks.filter((task) => task.id !== id));
   };
 
   const confirmDelete = () => {
@@ -159,12 +165,11 @@ const Tasks = ({ projectId }) => {
         if (!response.ok) {
           throw new Error("Delete failed");
         }
+        fetchTasks(); // Refetch the tasks to reflect the deletion
         showSnackbar("Task deleted successfully", "success");
       })
       .catch((error) => {
         console.error("Error deleting task:", error);
-        // Revert the optimistic update
-        fetchTasks();
         showSnackbar("Failed to delete task", "error");
       })
       .finally(() => {
@@ -225,7 +230,6 @@ const Tasks = ({ projectId }) => {
 
   const renderBody = (item, index) => (
     <tr key={index}>
-
       <td>{item.tasktype}</td>
       <td>{item.done ? "Yes" : "No"}</td>
       <td>{item.title}</td>
@@ -276,89 +280,110 @@ const Tasks = ({ projectId }) => {
         </>
       ) : (
         <>
-        <Box
-        mb={3}
-        display="flex"
-        justifyContent="space-between"
-        alignItems="center"
-      >
-        <Box display="flex" alignItems="center">
-          <TextField
-            id="outlined-basic"
-            label="Search by Name"
-            variant="outlined"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            onKeyDown={handleKeyDown}
-            style={{ width: "1000px", marginRight: 10 }}
-          />
-          <Button
-            sx={{ width: "150px", height: "60px" }}
-            variant="contained"
-            color="primary"
-            onClick={handleSearch}
+          <Box
+            mb={3}
+            display="flex"
+            justifyContent="space-between"
+            alignItems="center"
           >
-            Search
-          </Button>
-        </Box>
-        <Box mb={3}></Box>
-        <Box>
-        <Button
-            sx={{ width: "200px", height: "55px" }}
-            variant="contained"
-            color="primary"
-            onClick={handleAddTask}
-            startIcon={<AddIcon style={{ fontSize: "2rem" }} />}
-          >
-            Add task
-          </Button>
-        </Box>
-      </Box>
-      <Box mb={"20px"}>
-        <Card
-          sx={{ width: "200px", height: "60px", backgroundColor: "#1976d2" }}
-        >
-          <CardContent sx={{ height: "100%" }}>
-            <Box display="flex" justifyContent="center" alignItems="center">
-              <Typography
-                variant="h6"
-                style={{
-                  color: "white",
-                  fontWeight: "bold",
-                  textAlign: "center",
-                }}
+            <Box display="flex" alignItems="center">
+              <TextField
+                id="outlined-basic"
+                label="Search by Name"
+                variant="outlined"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={handleKeyDown}
+                style={{ width: "1000px", marginRight: 10 }}
+              />
+              <Button
+                sx={{ width: "150px", height: "60px" }}
+                variant="contained"
+                color="primary"
+                onClick={handleSearch}
               >
-               tasks {tasks.length}
-              </Typography>
+                Search
+              </Button>
             </Box>
-          </CardContent>
-        </Card>
-      </Box>
-      </>
-      
-      
-      )}
-      <div className="row">
-        <div className="col-12">
-          <div className="card">
-            <div className="card__body">
-              {loading ? (
-                <BorderLinearProgress />
-              ) : (
-                <Box sx={{ marginTop: "20px" }}>
-                  <Table
-                    limit="10"
-                    headData={tasksTableHead}
-                    renderHead={(item, index) => renderHead(item, index)}
-                    bodyData={tasks}
-                    renderBody={(item, index) => renderBody(item, index)}
-                  />
+            <Box mb={3}></Box>
+            <Box>
+              <Button
+                sx={{ width: "200px", height: "55px" }}
+                variant="contained"
+                color="primary"
+                onClick={handleAddTask}
+                startIcon={<AddIcon style={{ fontSize: "2rem" }} />}
+              >
+                Add task
+              </Button>
+            </Box>
+          </Box>
+          <Box mb={"20px"}>
+            <Card
+              sx={{ width: "200px", height: "60px", backgroundColor: "#1976d2" }}
+            >
+              <CardContent sx={{ height: "100%" }}>
+                <Box display="flex" justifyContent="center" alignItems="center">
+                  <Typography
+                    variant="h6"
+                    style={{
+                      color: "white",
+                      fontWeight: "bold",
+                      textAlign: "center",
+                    }}
+                  >
+                    tasks {tasks.length}
+                  </Typography>
                 </Box>
-              )}
+              </CardContent>
+            </Card>
+          </Box>
+          {tasks.length === 0 ?  (
+    <Box
+      display="flex"
+      justifyContent="center"
+      alignItems="center"
+      flexDirection="column"
+      mt={5}
+    >
+      <img
+        src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRtUVYATWPrDOHE_R5qO_XBS5VyJ6Sx78bSUw&s"
+        alt="No tasks "
+        style={{ maxWidth: "100%", height: "auto" }}
+      />
+      <Typography variant="h6" color="textSecondary" align="center" mt={2}>
+        There are no tasks here.
+      </Typography>
+    </Box>
+  ) : (
+            <div className="row">
+              <div className="col-12">
+                <div className="card">
+                  <div className="card__body">
+                    {loading ? (
+                      <BorderLinearProgress />
+                    ) : (
+                      <Box sx={{ marginTop: "20px" }}>
+                        <Table
+                          limit="10"
+                          headData={tasksTableHead}
+                          renderHead={(item, index) =>
+                            renderHead(item, index)
+                          }
+                          bodyData={tasks}
+                          renderBody={(item, index) =>
+                            renderBody(item, index)
+                          }
+                        />
+                      </Box>
+                    )}
+                  </div>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-      </div>
+          )}
+        </>
+      )}
       <Dialog
         open={deleteDialogOpen}
         onClose={() => setDeleteDialogOpen(false)}

@@ -31,8 +31,8 @@ const materialsTableHead = [
   "Delete",
 ];
 
-const renderHead = (item, index) => <th key={index}>{item}</th>;
 
+const renderHead = (item, index) => <th key={index}>{item}</th>;
 const Materials = () => {
   const [materials, setMaterials] = useState([]);
   const [loading, setLoading] = useState(true);

@@ -19,5 +19,4 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
 
     boolean existsByProjectId(Long id);
     List<Payment> findAllByEmployer(Employer employer);
-
 }

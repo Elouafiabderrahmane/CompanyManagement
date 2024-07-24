@@ -42,7 +42,7 @@ public class PaymentResource {
 
     @PutMapping("/{id}")
     public ResponseEntity<Long> updatePayment(@PathVariable(name = "id") final Long id,
-            @RequestBody @Valid final PaymentDTO paymentDTO) {
+                                              @RequestBody @Valid final PaymentDTO paymentDTO) {
         paymentService.update(id, paymentDTO);
         return ResponseEntity.ok(id);
     }

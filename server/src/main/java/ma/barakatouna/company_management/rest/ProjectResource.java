@@ -27,8 +27,6 @@ import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 
 @RestController
@@ -109,29 +107,12 @@ public class ProjectResource {
         return new ResponseEntity<>(project.getId(), HttpStatus.CREATED);
     }
 
-
     @GetMapping(value = "/{id}/image", produces = {MediaType.IMAGE_PNG_VALUE, MediaType.IMAGE_JPEG_VALUE})
-    public ResponseEntity<byte[]> getProjectImage(@PathVariable(name = "id") final Long id) {
-        Logger logger = LoggerFactory.getLogger(ProjectResource.class);
-        try {
-            Project project = projectRepository.findById(id).orElseThrow(NotFoundException::new);
-            String imagePath = project.getUrl();
-            logger.info("Fetching image from path: " + imagePath);
-            byte[] imageBytes = Files.readAllBytes(Path.of(URI.create(imagePath)));
-            return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(imageBytes);
-        } catch (NotFoundException e) {
-            logger.error("Project not found: " + id, e);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-        } catch (IOException e) {
-            logger.error("IO exception when reading image for project: " + id, e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-        } catch (Exception e) {
-            logger.error("Unexpected error when fetching image for project: " + id, e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-        }
+    public byte[] getProjectImage(@PathVariable(name = "id") final Long id) throws IOException {
+        Project project = projectRepository.findById(id).orElseThrow(NotFoundException::new);
+        String imagePath = project.getUrl();
+        return Files.readAllBytes(Path.of(URI.create(imagePath)));
     }
-
-
 
     @PutMapping("/{id}")
     public ResponseEntity<Long> updateProject(@PathVariable(name = "id") final Long id,

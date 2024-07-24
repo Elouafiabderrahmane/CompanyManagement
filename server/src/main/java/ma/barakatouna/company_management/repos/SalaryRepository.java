@@ -10,10 +10,9 @@ import java.util.List;
 
 public interface SalaryRepository extends JpaRepository<Salary, Long> {
 
-    Salary findFirstByEmployer(Employer employer);
+    Salary findFirstByEmployers(Employer employer);
 
     Salary findFirstByMaterial(Material material);
-    List<Salary> findAllSalariesByEmployer(Employer employer);
-
+    List<Salary> findAllSalariesByEmployers(Employer employer);
 
 }

@@ -43,7 +43,7 @@ public class SalaryResource {
 
     @PutMapping("/{id}")
     public ResponseEntity<Long> updateSalary(@PathVariable(name = "id") final Long id,
-            @RequestBody @Valid final SalaryDTO salaryDTO) {
+                                             @RequestBody @Valid final SalaryDTO salaryDTO) {
         salaryService.update(id, salaryDTO);
         return ResponseEntity.ok(id);
     }

@@ -49,7 +49,7 @@ public class EmployerResource {
         return ResponseEntity.ok(employerService.get(id));
     }
 
-        @PostMapping(value = "/api/employers", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/api/employers", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiResponse(ref = "201")
     public ResponseEntity<Long> createEmployer(
             @RequestParam("image") MultipartFile image,
@@ -106,7 +106,7 @@ public class EmployerResource {
 
     @PutMapping("/{id}")
     public ResponseEntity<Long> updateEmployer(@PathVariable(name = "id") final Long id,
-            @RequestBody @Valid final EmployerDTO employerDTO) {
+                                               @RequestBody @Valid final EmployerDTO employerDTO) {
         employerService.update(id, employerDTO);
         return ResponseEntity.ok(id);
     }

@@ -9,7 +9,7 @@ public class CompanyManagementApplication {
 
     public static void main(final String[] args) {
         SpringApplication.run(CompanyManagementApplication.class, args);
-        System.out.println("Company Management Application is running......");
+        System.out.println("CompanyManagement Running ........");
     }
 
 }

@@ -12,11 +12,16 @@ public class UserDTO {
     private Long id;
 
     @Size(max = 255)
+    @UserUsernameUnique
     private String username;
 
     @Size(max = 255)
     private String password;
 
-    private UserRole role;
+    @Size(max = 255)
+    @UserEmailUnique
+    private String email;
+
+    private Boolean enabled;
 
 }

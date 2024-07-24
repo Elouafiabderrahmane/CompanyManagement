@@ -1,9 +1,8 @@
 package ma.barakatouna.company_management.model;
 
+import java.time.LocalDate;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.time.LocalDate;
 
 
 @Getter

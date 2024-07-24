@@ -1,14 +1,15 @@
 package ma.barakatouna.company_management.repos;
 
+import java.util.List;
+
 import ma.barakatouna.company_management.entities.*;
 import org.springframework.data.jpa.repository.JpaRepository;
-
-import java.util.List;
 
 
 public interface MaterialRepository extends JpaRepository<Material, Long> {
 
     Material findFirstByTasks(Task task);
+
     List<Material> findAllByNameContaining(String name);
 
     List<Material> findAllByTasks(Task task);
@@ -26,6 +27,5 @@ public interface MaterialRepository extends JpaRepository<Material, Long> {
     List <Material> findAllByEmployers (Employer employer);
 
     long count();
-
 
 }

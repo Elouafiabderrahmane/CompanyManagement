@@ -27,8 +27,6 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import javax.crypto.spec.SecretKeySpec;
-import javax.sql.DataSource;
-
 
 @Configuration
 @EnableWebSecurity
@@ -70,7 +68,7 @@ public class SecurityConfig {
                         .requestMatchers("/swagger-ui/ui.html/**").permitAll()
                         .requestMatchers("/v3/api-docs/**").permitAll()
                         .requestMatchers("/").permitAll()
-                        .anyRequest().permitAll())
+                        .anyRequest().authenticated())
                 .oauth2ResourceServer(oa -> oa.jwt(Customizer.withDefaults()))
                 .userDetailsService(userDetailsService)
                 .build();

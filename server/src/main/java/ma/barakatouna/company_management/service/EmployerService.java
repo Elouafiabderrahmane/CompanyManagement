@@ -188,4 +188,9 @@ public class EmployerService {
                 .toList();
 
     }
+
+    public EmployerDTO getEmployerByUserId(Long userId) {
+        User user = userRepository.findById(userId).orElseThrow(NotFoundException::new);
+        return mapToDTO(employerRepository.findByUser(user), new EmployerDTO());
+    }
 }

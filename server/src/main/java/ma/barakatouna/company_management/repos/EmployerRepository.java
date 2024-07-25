@@ -20,4 +20,5 @@ public interface EmployerRepository extends JpaRepository<Employer, Long> {
     List<Employer> findAllByProjets(Project project);
 
     Employer getEmployerByNameContaining(String name);
+    Employer findByUser( User user);
 }

@@ -162,4 +162,10 @@ public class EmployerResource {
         List<EmployerDTO> employers = employerService.findAllByProjectId(projectId);
         return ResponseEntity.ok(employers);
     }
+
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<EmployerDTO> getEmployerByUserId(@PathVariable Long userId) {
+        EmployerDTO employer = employerService.getEmployerByUserId(userId);
+        return ResponseEntity.ok(employer);
+    }
 }

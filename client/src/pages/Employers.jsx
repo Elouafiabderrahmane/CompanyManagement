@@ -120,6 +120,7 @@ const Employers = ({ projectId }) => {
   };
 
   const handleUpdate = (id) => {
+  
     setUpdateId(id);
     fetch(`http://localhost:8085/api/employers/${id}`)
       .then((response) => response.json())
@@ -312,30 +313,41 @@ const Employers = ({ projectId }) => {
         </Box>
       </Box>
       <Box mb={"20px"}></Box>
-      <Card>
-        <CardContent>
-          <Typography variant="h4" component="div" gutterBottom>
-            List of Employers
-          </Typography>
-          <Box sx={{ width: "100%" }}>
-            {loading ? (
-              <BorderLinearProgress />
-            ) : (
-              <div className="card">
-                <div className="card__body">
-                  <Table
-                    limit="10"
-                    headData={employersTableHead}
-                    renderHead={(item, index) => renderHead(item, index)}
-                    bodyData={employers}
-                    renderBody={(item, index) => renderBody(item, index)}
-                  />
-                </div>
-              </div>
-            )}
-          </Box>
-        </CardContent>
-      </Card>
+      <Box mb={"20px"}>
+        <Card
+          sx={{ width: "200px", height: "60px", backgroundColor: "#1976d2" }}
+        >
+          <CardContent sx={{ height: "100%" }}>
+            <Box display="flex" justifyContent="center" alignItems="center">
+              <Typography
+                variant="h6"
+                style={{
+                  color: "white",
+                  fontWeight: "bold",
+                  textAlign: "center",
+                }}
+              >
+               Employers {employers.length}
+              </Typography>
+            </Box>
+          </CardContent>
+        </Card>
+      </Box>
+      <div className="card">
+        <div className="card__body">
+          {loading ? (
+            <BorderLinearProgress />
+          ) : (
+            <Table
+              limit="10"
+              headData={ employersTableHead}
+              renderHead={renderHead}
+              bodyData={employers}
+              renderBody={renderBody}
+            />
+          )}
+        </div>
+      </div>
 
       {/* Delete Confirmation Dialog */}
       <Dialog
@@ -510,38 +522,7 @@ const Employers = ({ projectId }) => {
         </DialogActions>
       </Dialog>
 
-      {/* Update Employer Modal */}
-      <Dialog open={updateModalOpen} onClose={() => setUpdateModalOpen(false)}>
-        <DialogTitle>Update Employer</DialogTitle>
-        <DialogContent>
-          <TextField
-            label="Name"
-            value={selectedEmployer ? selectedEmployer.name : ""}
-            onChange={(e) => setSelectedEmployer({ ...selectedEmployer, name: e.target.value })}
-            fullWidth
-            margin="normal"
-          />
-          <TextField
-            label="Email"
-            value={selectedEmployer ? selectedEmployer.email : ""}
-            onChange={(e) => setSelectedEmployer({ ...selectedEmployer, email: e.target.value })}
-            fullWidth
-            margin="normal"
-          />
-          <input
-            type="file"
-            onChange={(e) =>
-              setSelectedEmployer({ ...selectedEmployer, image: e.target.files[0] })
-            }
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setUpdateModalOpen(false)}>Cancel</Button>
-          <Button onClick={updateEmployer} color="primary">
-            Update
-          </Button>
-        </DialogActions>
-      </Dialog>
+     
 
       {/* Snackbar for notifications */}
       <Snackbar

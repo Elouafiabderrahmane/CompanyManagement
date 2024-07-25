@@ -9,7 +9,7 @@ import Salaries from "../pages/Salaries";
 import Projects from "../pages/Projects";
 import Project from "../pages/Project";
 
-import HelloWorld from "../pages/HelloWorld";
+
 import Employers from "../pages/Employers";
 import EmployerDetails from "../pages/EmployerDetails"
 
@@ -31,7 +31,7 @@ const AppRoutes = () => {
 
       <Route path="/employers/:id" element={<EmployerDetails/>}/>
       <Route path="/employers" element={<Employers/>}/>
-      <Route path="/a" element={<HelloWorld />}/>
+
       <Route path="/project/:id" element={<Project />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />

@@ -1,5 +1,6 @@
 package ma.barakatouna.company_management.repos;
 
+import java.util.Collection;
 import java.util.List;
 import ma.barakatouna.company_management.entities.Employer;
 import ma.barakatouna.company_management.entities.Project;
@@ -18,4 +19,6 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
     long countTasksByProjectId(Long projectId);
     long countTasksByProjectIdAndDone(Long projectId, boolean done);
     List<Task> findAllByTitleContaining(String title);
+
+   List<Task> findByEmployerId(Long employerId);
 }

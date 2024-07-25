@@ -126,4 +126,10 @@ public class TaskService {
                 .toList();
 
     }
+
+    public List<TaskDTO> getTaskByEmployerId(Long employerId) {
+        return taskRepository.findByEmployerId(employerId).stream()
+                .map(task -> mapToDTO(task, new TaskDTO()))
+                .toList();
+    }
 }

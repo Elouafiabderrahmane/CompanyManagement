@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import {  useNavigate } from "react-router-dom";
 import {
   Box,
   Grid,
@@ -80,6 +81,7 @@ const Project = () => {
   const [view, setView] = useState("projectDetails");
   const [tableData, setTableData] = useState([]);
   const [tableLoading, setTableLoading] = useState(false);
+  const navigate = useNavigate();
 
   const tableHeaders = {
     materials: ["", "Material Name", "Quantity", "Price", "Project"],
@@ -152,7 +154,7 @@ const Project = () => {
   const handleAddProject = () => {
     setAddModalOpen(true);
   };
-
+ 
   const addProject = () => {
     const formData = new FormData();
     formData.append("name", newProjectData.name);
@@ -207,6 +209,15 @@ const Project = () => {
     <Box padding={3}>
       {view === "projectDetails" ? (
         <>
+        <Button
+            variant="contained"
+            color="primary"
+            onClick={() => navigate(`/projects/`)}
+            startIcon={<ArrowBackIosIcon />}
+            sx={{ marginBottom: 2 }}
+          >
+            Return
+          </Button>
           <Box
             sx={{ marginBottom: "20px" }}
             display="flex"

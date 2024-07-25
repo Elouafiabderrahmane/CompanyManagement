@@ -133,6 +133,15 @@ const EmployersDetails = () => {
     <Box padding={3}>
       {view === "employerDetails" ? (
         <>
+        <Button
+            variant="contained"
+            color="primary"
+            onClick={() => navigate(`/employers/`)}
+            startIcon={<ArrowBackIosIcon />}
+            sx={{ marginBottom: 2 }}
+          >
+            Return
+          </Button>
           <Box
             sx={{ marginBottom: "20px" }}
             display="flex"
@@ -165,7 +174,7 @@ const EmployersDetails = () => {
               variant="contained"
               color="primary"
               startIcon={<AssignmentIcon />}
-              onClick={() => fetchData("tasks")}
+              onClick={() => setView("tasks")}
             >
               Tasks
             </Button>

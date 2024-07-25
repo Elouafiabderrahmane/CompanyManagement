@@ -19,9 +19,10 @@ import {
   MenuItem,
   Select,
   FormControl,
-  InputLabel, // Added InputLabel import
+  InputLabel,
 } from "@mui/material";
-import AddIcon from "@mui/icons-material/Add"; // Added AddIcon import
+import AddIcon from "@mui/icons-material/Add";
+import axios from "../components/Axios";
 
 const salariesTableHead = [
   "ID",
@@ -39,7 +40,6 @@ const salariesTableHead = [
 const renderHead = (item, index) => <th key={index}>{item}</th>;
 
 const Salaries = () => {
-  
   const [salaries, setSalaries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -52,7 +52,7 @@ const Salaries = () => {
     frequency: "",
     paid: false,
     startingDate: "",
-    endingDate: null,
+    endingDate: "",
     employers: "",
     material: "",
   });
@@ -61,106 +61,91 @@ const Salaries = () => {
     message: "",
     severity: "info",
   });
-  const [searchQuery, setSearchQuery] = useState(""); // Added state for search query
-  const [addModalOpen, setAddModalOpen] = useState(false); // Added state for add modal
-  const [tasks, setTasks] = useState([]); // Added state for tasks
-  
+  const [searchQuery, setSearchQuery] = useState("");
+  const [addModalOpen, setAddModalOpen] = useState(false);
 
   useEffect(() => {
     fetchSalaries();
   }, []);
 
-  const fetchSalaries = () => {
+  const fetchSalaries = async () => {
     setLoading(true);
-    fetch("http://localhost:8085/api/salaries")
-      .then((response) => response.json())
-      .then((data) => {
-        setSalaries(data);
-        setLoading(false);
-      })
-      .catch((error) => {
-        console.error("Error fetching salaries:", error);
-        setLoading(false);
-        showSnackbar("Failed to fetch salaries", "error");
-      });
+    try {
+      const response = await axios.get("http://localhost:8085/api/salaries");
+      setSalaries(response.data);
+    } catch (error) {
+      console.error("Error fetching salaries:", error);
+      showSnackbar("Failed to fetch salaries", "error");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleDelete = (id) => {
     setDeleteDialogOpen(true);
     setDeleteId(id);
-    // Optimistically remove the item from the list
     setSalaries(salaries.filter((salary) => salary.id !== id));
   };
 
-  const confirmDelete = () => {
-    fetch(`http://localhost:8085/api/salaries/${deleteId}`, {
-      method: "DELETE",
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Delete failed");
-        }
-        showSnackbar("Salary deleted successfully", "success");
-      })
-      .catch((error) => {
-        console.error("Error deleting salary:", error);
-        // Revert the optimistic update
-        fetchSalaries();
-        showSnackbar("Failed to delete salary", "error");
-      })
-      .finally(() => {
-        setDeleteDialogOpen(false);
-      });
+  const confirmDelete = async () => {
+    try {
+      await axios.delete(`http://localhost:8085/api/salaries/${deleteId}`);
+      showSnackbar("Salary deleted successfully", "success");
+    } catch (error) {
+      console.error("Error deleting salary:", error);
+      fetchSalaries(); // Revert optimistic update
+      showSnackbar("Failed to delete salary", "error");
+    } finally {
+      setDeleteDialogOpen(false);
+    }
   };
 
-  const handleUpdate = (id) => {
-    setUpdateId(id);
-    fetch(`http://localhost:8085/api/salaries/${id}`)
-      .then((response) => response.json())
-      .then((data) => {
-        setUpdateData({
-          id: data.id,
-          amount: data.amount,
-          frequency: data.frequency,
-          paid: data.paid,
-          startingDate: data.startingDate,
-          endingDate: data.endingDate,
-          employers: data.employers,
-          material: data.material,
-        });
-        setUpdateModalOpen(true);
-      })
-      .catch((error) => {
-        console.error("Error fetching salary for update:", error);
-        showSnackbar("Failed to fetch salary details", "error");
-      });
+  const handleUpdate = async (id) => {
+    try {
+      const response = await axios.get(
+        `http://localhost:8085/api/salaries/${id}`
+      );
+      setUpdateData(response.data);
+      setUpdateId(id);
+      setUpdateModalOpen(true);
+    } catch (error) {
+      console.error("Error fetching salary for update:", error);
+      showSnackbar("Failed to fetch salary details", "error");
+    }
   };
 
-  const updateSalary = () => {
-    fetch(`http://localhost:8085/api/salaries/${updateId}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(updateData),
-    })
-      .then((response) => {
-        if (response.ok) {
-          fetchSalaries();
-          setUpdateModalOpen(false);
-          showSnackbar("Salary updated successfully", "success");
-        } else {
-          throw new Error("Update failed");
-        }
-      })
-      .catch((error) => {
-        console.error("Error updating salary:", error);
-        showSnackbar("Failed to update salary", "error");
-      });
+  const updateSalary = async () => {
+    try {
+      await axios.put(
+        `http://localhost:8085/api/salaries/${updateId}`,
+        updateData
+      );
+      fetchSalaries();
+      setUpdateModalOpen(false);
+      showSnackbar("Salary updated successfully", "success");
+    } catch (error) {
+      console.error("Error updating salary:", error);
+      showSnackbar("Failed to update salary", "error");
+    }
   };
 
   const showSnackbar = (message, severity) => {
     setSnackbar({ open: true, message, severity });
+  };
+
+  const handleSearch = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.get(
+        `http://localhost:8085/api/salaries/keyword/${searchQuery}`
+      );
+      setSalaries(response.data);
+    } catch (error) {
+      console.error("Error searching salaries:", error);
+      showSnackbar("Failed to search salaries", "error");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const renderBody = (item, index) => (
@@ -202,21 +187,6 @@ const Salaries = () => {
       backgroundColor: theme.palette.mode === "light" ? "#1a90ff" : "#308fe8",
     },
   }));
-
-  const handleSearch = () => {
-    setLoading(true);
-    fetch(`http://localhost:8085/api/salaries/keyword/${searchQuery}`)
-      .then((response) => response.json())
-      .then((data) => {
-        setSalaries(data);
-        setLoading(false);
-      })
-      .catch((error) => {
-        console.error("Error searching salaries:", error);
-        setLoading(false);
-        showSnackbar("Failed to search salaries", "error");
-      });
-  };
 
   return (
     <div>
@@ -318,7 +288,6 @@ const Salaries = () => {
         <DialogTitle>Update Salary</DialogTitle>
         <DialogContent>
           <TextField
-            id="standard-basic"
             variant="standard"
             label="Amount"
             type="number"
@@ -329,12 +298,7 @@ const Salaries = () => {
             fullWidth
             margin="normal"
           />
-          <FormControl
-            fullWidth
-            margin="normal"
-            id="standard-basic"
-            variant="standard"
-          >
+          <FormControl fullWidth margin="normal" variant="standard">
             <InputLabel>Frequency</InputLabel>
             <Select
               value={updateData.frequency}
@@ -351,7 +315,10 @@ const Salaries = () => {
             <Select
               value={updateData.paid}
               onChange={(e) =>
-                setUpdateData({ ...updateData, paid: e.target.value })
+                setUpdateData({
+                  ...updateData,
+                  paid: e.target.value === "true",
+                })
               }
             >
               <MenuItem value={true}>Yes</MenuItem>
@@ -359,7 +326,6 @@ const Salaries = () => {
             </Select>
           </FormControl>
           <TextField
-            id="standard-basic"
             variant="standard"
             label="Starting Date"
             type="date"
@@ -374,7 +340,6 @@ const Salaries = () => {
             }}
           />
           <TextField
-            id="standard-basic"
             variant="standard"
             label="Ending Date"
             type="date"

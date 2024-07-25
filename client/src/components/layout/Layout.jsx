@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { BrowserRouter, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import ThemeAction from "../../redux/actions/ThemeAction";
 import Sidebar from "../sidebar/Sidebar";
@@ -35,10 +35,4 @@ const Layout = () => {
   );
 };
 
-const LayoutWrapper = () => (
-  <BrowserRouter>
-    <Layout />
-  </BrowserRouter>
-);
-
-export default LayoutWrapper;
+export default Layout;

@@ -30,6 +30,7 @@ import Table from "../components/table/Table";
 import Tasks from "./Tasks";
 import Materials from "./Materials"; // Import the Materials component
 import Employers from "./Employers";
+import axios from "../components/Axios";
 
 const StyledImage = styled("img")({
   width: "100%",
@@ -100,14 +101,11 @@ const Project = () => {
   };
 
   useEffect(() => {
-    fetch(`http://localhost:8085/api/projects/${id}`)
+    axios
+      .get(`http://localhost:8085/api/projects/${id}`)
       .then((response) => {
-        if (!response.ok) throw new Error("Project not found");
-        return response.json();
-      })
-      .then((data) => {
-        setProject(data);
-        fetchImage(data.id);
+        setProject(response.data);
+        fetchImage(response.data.id);
         setLoading(false);
       })
       .catch((error) => {
@@ -117,15 +115,12 @@ const Project = () => {
   }, [id]);
 
   const fetchImage = (projectId) => {
-    fetch(`http://localhost:8085/api/projects/${projectId}/image`)
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Failed to fetch image");
-        }
-        return response.blob();
+    axios
+      .get(`http://localhost:8085/api/projects/${projectId}/image`, {
+        responseType: "blob",
       })
-      .then((imageBlob) => {
-        const imageUrl = URL.createObjectURL(imageBlob);
+      .then((response) => {
+        const imageUrl = URL.createObjectURL(response.data);
         setImage(imageUrl);
       })
       .catch((error) => {
@@ -136,10 +131,10 @@ const Project = () => {
 
   const fetchData = (dataType) => {
     setTableLoading(true);
-    fetch(`http://localhost:8085/api/projects/${id}/${dataType}`)
-      .then((response) => response.json())
-      .then((data) => {
-        setTableData(data);
+    axios
+      .get(`http://localhost:8085/api/projects/${id}/${dataType}`)
+      .then((response) => {
+        setTableData(response.data);
         setView(dataType);
         setTableLoading(false);
       })
@@ -166,11 +161,8 @@ const Project = () => {
       formData.append("image", newProjectData.image);
     }
 
-    fetch("http://localhost:8085/api/projects", {
-      method: "POST",
-      body: formData,
-    })
-      .then((response) => response.json())
+    axios
+      .post("http://localhost:8085/api/projects", formData)
       .then(() => {
         setAddModalOpen(false);
         showSnackbar("Project added successfully", "success");
@@ -446,19 +438,19 @@ const Project = () => {
           </Button>
           <Materials projectId={id} /> {/* Render Materials component */}
         </>
-         ) : view === "employers" ? ( // Updated to render employers component
-          <>
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={() => setView("projectDetails")}
-              startIcon={<ArrowBackIosIcon />}
-              sx={{ marginBottom: 2 }}
-            >
-              Return
-            </Button>
-            <Employers projectId={id} /> {/* Render Materials component */}
-          </>
+      ) : view === "employers" ? ( // Updated to render employers component
+        <>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => setView("projectDetails")}
+            startIcon={<ArrowBackIosIcon />}
+            sx={{ marginBottom: 2 }}
+          >
+            Return
+          </Button>
+          <Employers projectId={id} /> {/* Render Employers component */}
+        </>
       ) : (
         <>
           <Button

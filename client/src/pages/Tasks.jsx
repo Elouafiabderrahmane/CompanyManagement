@@ -5,6 +5,7 @@ import LinearProgress, {
 } from "@mui/material/LinearProgress";
 import { styled } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
+import axios from "../components/Axios"; // Adjust import according to your setup
 
 import {
   Button,
@@ -79,7 +80,7 @@ const Tasks = ({ projectId, employerId }) => {
     fetchTasks();
   }, [projectId, employerId]);
 
-  const fetchTasks = () => {
+  const fetchTasks = async () => {
     setLoading(true);
     let url;
     if (projectId) {
@@ -90,35 +91,33 @@ const Tasks = ({ projectId, employerId }) => {
       url = "http://localhost:8085/api/tasks";
     }
 
-    fetch(url)
-      .then((response) => response.json())
-      .then((data) => {
-        setTasks(data);
-        setLoading(false);
-      })
-      .catch((error) => {
-        console.error("Error fetching tasks:", error);
-        setLoading(false);
-        showSnackbar("Failed to fetch tasks", "error");
-      });
+    try {
+      const response = await axios.get(url);
+      setTasks(response.data);
+    } catch (error) {
+      console.error("Error fetching tasks:", error);
+      showSnackbar("Failed to fetch tasks", "error");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleSearch = () => {
+  const handleSearch = async () => {
     if (searchQuery.trim() === "") {
       fetchTasks();
     } else {
       setLoading(true);
-      fetch(`http://localhost:8085/api/tasks/keyword/${searchQuery}`)
-        .then((response) => response.json())
-        .then((data) => {
-          setTasks([data]);
-          setLoading(false);
-        })
-        .catch((error) => {
-          console.error("Error searching tasks by name:", error);
-          setLoading(false);
-          showSnackbar("Failed to search tasks", "error");
-        });
+      try {
+        const response = await axios.get(
+          `http://localhost:8085/api/tasks/keyword/${searchQuery}`
+        );
+        setTasks([response.data]);
+      } catch (error) {
+        console.error("Error searching tasks by name:", error);
+        showSnackbar("Failed to search tasks", "error");
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -132,24 +131,16 @@ const Tasks = ({ projectId, employerId }) => {
     setAddModalOpen(true);
   };
 
-  const addTask = () => {
-    fetch("http://localhost:8085/api/tasks", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(newTaskData),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        fetchTasks();
-        setAddModalOpen(false);
-        showSnackbar("Task added successfully", "success");
-      })
-      .catch((error) => {
-        console.error("Error adding task:", error);
-        showSnackbar("Failed to add task", "error");
-      });
+  const addTask = async () => {
+    try {
+      await axios.post("http://localhost:8085/api/tasks", newTaskData);
+      fetchTasks();
+      setAddModalOpen(false);
+      showSnackbar("Task added successfully", "success");
+    } catch (error) {
+      console.error("Error adding task:", error);
+      showSnackbar("Failed to add task", "error");
+    }
   };
 
   const handleDelete = (id) => {
@@ -157,71 +148,54 @@ const Tasks = ({ projectId, employerId }) => {
     setDeleteId(id);
   };
 
-  const confirmDelete = () => {
-    fetch(`http://localhost:8085/api/tasks/${deleteId}`, {
-      method: "DELETE",
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Delete failed");
-        }
-        fetchTasks(); // Refetch the tasks to reflect the deletion
-        showSnackbar("Task deleted successfully", "success");
-      })
-      .catch((error) => {
-        console.error("Error deleting task:", error);
-        showSnackbar("Failed to delete task", "error");
-      })
-      .finally(() => {
-        setDeleteDialogOpen(false);
-      });
+  const confirmDelete = async () => {
+    try {
+      await axios.delete(`http://localhost:8085/api/tasks/${deleteId}`);
+      fetchTasks(); // Refetch the tasks to reflect the deletion
+      showSnackbar("Task deleted successfully", "success");
+    } catch (error) {
+      console.error("Error deleting task:", error);
+      showSnackbar("Failed to delete task", "error");
+    } finally {
+      setDeleteDialogOpen(false);
+    }
   };
 
-  const handleUpdate = (id) => {
+  const handleUpdate = async (id) => {
     setUpdateId(id);
-    fetch(`http://localhost:8085/api/tasks/${id}`)
-      .then((response) => response.json())
-      .then((data) => {
-        setUpdateData({
-          id: data.id,
-          tasktype: data.tasktype,
-          done: data.done,
-          title: data.title,
-          description: data.description,
-          startingDate: data.startingDate,
-          endingDate: data.endingDate,
-          project: data.project,
-          employer: data.employer,
-        });
-        setUpdateModalOpen(true);
-      })
-      .catch((error) => {
-        console.error("Error fetching task for update:", error);
-        showSnackbar("Failed to fetch task details", "error");
+    try {
+      const response = await axios.get(`http://localhost:8085/api/tasks/${id}`);
+      setUpdateData({
+        id: response.data.id,
+        tasktype: response.data.tasktype,
+        done: response.data.done,
+        title: response.data.title,
+        description: response.data.description,
+        startingDate: response.data.startingDate,
+        endingDate: response.data.endingDate,
+        project: response.data.project,
+        employer: response.data.employer,
       });
+      setUpdateModalOpen(true);
+    } catch (error) {
+      console.error("Error fetching task for update:", error);
+      showSnackbar("Failed to fetch task details", "error");
+    }
   };
 
-  const updateTask = () => {
-    fetch(`http://localhost:8085/api/tasks/${updateId}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(updateData),
-    })
-      .then((response) => {
-        if (response.ok) {
-          fetchTasks();
-          setUpdateModalOpen(false);
-          showSnackbar("Task updated successfully", "success");
-        } else {
-          throw new Error("Update failed");
-        }
-      })
-      .catch((error) => {
-        console.error("Error updating task:", error);
-        showSnackbar("Failed to update task", "error");
-      });
+  const updateTask = async () => {
+    try {
+      await axios.put(
+        `http://localhost:8085/api/tasks/${updateId}`,
+        updateData
+      );
+      fetchTasks();
+      setUpdateModalOpen(false);
+      showSnackbar("Task updated successfully", "success");
+    } catch (error) {
+      console.error("Error updating task:", error);
+      showSnackbar("Failed to update task", "error");
+    }
   };
 
   const showSnackbar = (message, severity) => {
@@ -320,7 +294,11 @@ const Tasks = ({ projectId, employerId }) => {
           </Box>
           <Box mb={"20px"}>
             <Card
-              sx={{ width: "200px", height: "60px", backgroundColor: "#1976d2" }}
+              sx={{
+                width: "200px",
+                height: "60px",
+                backgroundColor: "#1976d2",
+              }}
             >
               <CardContent sx={{ height: "100%" }}>
                 <Box display="flex" justifyContent="center" alignItems="center">
@@ -332,324 +310,273 @@ const Tasks = ({ projectId, employerId }) => {
                       textAlign: "center",
                     }}
                   >
-                    tasks {tasks.length}
+                    {tasks.length} tasks
                   </Typography>
                 </Box>
               </CardContent>
             </Card>
           </Box>
-          {tasks.length === 0 ?  (
-    <Box
-      display="flex"
-      justifyContent="center"
-      alignItems="center"
-      flexDirection="column"
-      mt={5}
-    >
-      <img
-        src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRtUVYATWPrDOHE_R5qO_XBS5VyJ6Sx78bSUw&s"
-        alt="No tasks "
-        style={{ maxWidth: "100%", height: "auto" }}
-      />
-      <Typography variant="h6" color="textSecondary" align="center" mt={2}>
-        There are no tasks here.
-      </Typography>
-    </Box>
-  ) : (
-            <div className="row">
-              <div className="col-12">
-                <div className="card">
-                  <div className="card__body">
-                    {loading ? (
-                      <BorderLinearProgress />
-                    ) : (
-                      <Box sx={{ marginTop: "20px" }}>
-                        <Table
-                          limit="10"
-                          headData={tasksTableHead}
-                          renderHead={(item, index) =>
-                            renderHead(item, index)
-                          }
-                          bodyData={tasks}
-                          renderBody={(item, index) =>
-                            renderBody(item, index)
-                          }
-                        />
-                      </Box>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
+          <Table
+            headData={tasksTableHead}
+            renderHead={renderHead}
+            bodyData={tasks}
+            renderBody={renderBody}
+          />
+          {/* Add Task Modal */}
+          <Dialog open={addModalOpen} onClose={() => setAddModalOpen(false)}>
+            <DialogTitle>Add New Task</DialogTitle>
+            <DialogContent>
+              {/* Add Task Form */}
+              <TextField
+                margin="normal"
+                required
+                fullWidth
+                label="Task Type"
+                value={newTaskData.tasktype}
+                onChange={(e) =>
+                  setNewTaskData({ ...newTaskData, tasktype: e.target.value })
+                }
+              />
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={newTaskData.done}
+                    onChange={(e) =>
+                      setNewTaskData({ ...newTaskData, done: e.target.checked })
+                    }
+                  />
+                }
+                label="Done"
+              />
+              <TextField
+                margin="normal"
+                required
+                fullWidth
+                label="Title"
+                value={newTaskData.title}
+                onChange={(e) =>
+                  setNewTaskData({ ...newTaskData, title: e.target.value })
+                }
+              />
+              <TextField
+                margin="normal"
+                required
+                fullWidth
+                label="Description"
+                value={newTaskData.description}
+                onChange={(e) =>
+                  setNewTaskData({
+                    ...newTaskData,
+                    description: e.target.value,
+                  })
+                }
+              />
+              <TextField
+                margin="normal"
+                required
+                fullWidth
+                label="Starting Date"
+                type="date"
+                InputLabelProps={{ shrink: true }}
+                value={newTaskData.startingDate}
+                onChange={(e) =>
+                  setNewTaskData({
+                    ...newTaskData,
+                    startingDate: e.target.value,
+                  })
+                }
+              />
+              <TextField
+                margin="normal"
+                required
+                fullWidth
+                label="Ending Date"
+                type="date"
+                InputLabelProps={{ shrink: true }}
+                value={newTaskData.endingDate}
+                onChange={(e) =>
+                  setNewTaskData({ ...newTaskData, endingDate: e.target.value })
+                }
+              />
+              <TextField
+                margin="normal"
+                required
+                fullWidth
+                label="Project"
+                value={newTaskData.project}
+                onChange={(e) =>
+                  setNewTaskData({ ...newTaskData, project: e.target.value })
+                }
+              />
+              <TextField
+                margin="normal"
+                required
+                fullWidth
+                label="Employer"
+                value={newTaskData.employer.join(", ")}
+                onChange={(e) =>
+                  setNewTaskData({
+                    ...newTaskData,
+                    employer: e.target.value
+                      .split(", ")
+                      .map((item) => item.trim()),
+                  })
+                }
+              />
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={() => setAddModalOpen(false)} color="primary">
+                Cancel
+              </Button>
+              <Button onClick={addTask} color="primary">
+                Add
+              </Button>
+            </DialogActions>
+          </Dialog>
+          {/* Update Task Modal */}
+          <Dialog
+            open={updateModalOpen}
+            onClose={() => setUpdateModalOpen(false)}
+          >
+            <DialogTitle>Update Task</DialogTitle>
+            <DialogContent>
+              {/* Update Task Form */}
+              <TextField
+                margin="normal"
+                required
+                fullWidth
+                label="Task Type"
+                value={updateData.tasktype}
+                onChange={(e) =>
+                  setUpdateData({ ...updateData, tasktype: e.target.value })
+                }
+              />
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={updateData.done}
+                    onChange={(e) =>
+                      setUpdateData({ ...updateData, done: e.target.checked })
+                    }
+                  />
+                }
+                label="Done"
+              />
+              <TextField
+                margin="normal"
+                required
+                fullWidth
+                label="Title"
+                value={updateData.title}
+                onChange={(e) =>
+                  setUpdateData({ ...updateData, title: e.target.value })
+                }
+              />
+              <TextField
+                margin="normal"
+                required
+                fullWidth
+                label="Description"
+                value={updateData.description}
+                onChange={(e) =>
+                  setUpdateData({ ...updateData, description: e.target.value })
+                }
+              />
+              <TextField
+                margin="normal"
+                required
+                fullWidth
+                label="Starting Date"
+                type="date"
+                InputLabelProps={{ shrink: true }}
+                value={updateData.startingDate}
+                onChange={(e) =>
+                  setUpdateData({
+                    ...updateData,
+                    startingDate: e.target.value,
+                  })
+                }
+              />
+              <TextField
+                margin="normal"
+                required
+                fullWidth
+                label="Ending Date"
+                type="date"
+                InputLabelProps={{ shrink: true }}
+                value={updateData.endingDate}
+                onChange={(e) =>
+                  setUpdateData({ ...updateData, endingDate: e.target.value })
+                }
+              />
+              <TextField
+                margin="normal"
+                required
+                fullWidth
+                label="Project"
+                value={updateData.project}
+                onChange={(e) =>
+                  setUpdateData({ ...updateData, project: e.target.value })
+                }
+              />
+              <TextField
+                margin="normal"
+                required
+                fullWidth
+                label="Employer"
+                value={updateData.employer.join(", ")}
+                onChange={(e) =>
+                  setUpdateData({
+                    ...updateData,
+                    employer: e.target.value
+                      .split(", ")
+                      .map((item) => item.trim()),
+                  })
+                }
+              />
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={() => setUpdateModalOpen(false)} color="primary">
+                Cancel
+              </Button>
+              <Button onClick={updateTask} color="primary">
+                Update
+              </Button>
+            </DialogActions>
+          </Dialog>
+          {/* Delete Confirmation Dialog */}
+          <Dialog
+            open={deleteDialogOpen}
+            onClose={() => setDeleteDialogOpen(false)}
+          >
+            <DialogTitle>Confirm Deletion</DialogTitle>
+            <DialogContent>
+              <Typography>
+                Are you sure you want to delete this task?
+              </Typography>
+            </DialogContent>
+            <DialogActions>
+              <Button
+                onClick={() => setDeleteDialogOpen(false)}
+                color="primary"
+              >
+                Cancel
+              </Button>
+              <Button onClick={confirmDelete} color="primary">
+                Delete
+              </Button>
+            </DialogActions>
+          </Dialog>
+          {/* Snackbar */}
+          <Snackbar
+            open={snackbar.open}
+            autoHideDuration={6000}
+            onClose={() => setSnackbar({ ...snackbar, open: false })}
+            message={snackbar.message}
+            severity={snackbar.severity}
+          />
         </>
       )}
-      <Dialog
-        open={deleteDialogOpen}
-        onClose={() => setDeleteDialogOpen(false)}
-      >
-        <DialogTitle>Confirm Delete</DialogTitle>
-        <DialogContent>
-          Are you sure you want to delete this task?
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setDeleteDialogOpen(false)} color="primary">
-            Cancel
-          </Button>
-          <Button onClick={confirmDelete} style={{ color: "red" }}>
-            Delete
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      <Dialog open={updateModalOpen} onClose={() => setUpdateModalOpen(false)}>
-        <DialogTitle>Update Task</DialogTitle>
-        <DialogContent>
-          <Select
-            value={updateData.tasktype}
-            onChange={(e) =>
-              setUpdateData({ ...updateData, tasktype: e.target.value })
-            }
-            fullWidth
-            margin="normal"
-          >
-            <MenuItem value="BUILDING">BUILDING</MenuItem>
-            {/* Add other task types as needed */}
-          </Select>
-          <FormControlLabel
-            control={
-              <Switch
-                checked={updateData.done}
-                onChange={(e) =>
-                  setUpdateData({ ...updateData, done: e.target.checked })
-                }
-                color="primary"
-              />
-            }
-            label="Done"
-            style={{ marginBottom: 0 }}
-          />
-          <TextField
-            id="standard-basic"
-            variant="standard"
-            label="Title"
-            value={updateData.title}
-            onChange={(e) =>
-              setUpdateData({ ...updateData, title: e.target.value })
-            }
-            fullWidth
-            margin="normal"
-          />
-          <TextField
-            id="standard-basic"
-            variant="standard"
-            label="Description"
-            value={updateData.description}
-            onChange={(e) =>
-              setUpdateData({ ...updateData, description: e.target.value })
-            }
-            fullWidth
-            margin="normal"
-          />
-          <TextField
-            id="standard-basic"
-            variant="standard"
-            label="Starting Date"
-            type="date"
-            value={updateData.startingDate}
-            onChange={(e) =>
-              setUpdateData({ ...updateData, startingDate: e.target.value })
-            }
-            fullWidth
-            margin="normal"
-            InputLabelProps={{
-              shrink: true,
-            }}
-          />
-          <TextField
-            id="standard-basic"
-            variant="standard"
-            label="Ending Date"
-            type="date"
-            value={updateData.endingDate}
-            onChange={(e) =>
-              setUpdateData({ ...updateData, endingDate: e.target.value })
-            }
-            fullWidth
-            margin="normal"
-            InputLabelProps={{
-              shrink: true,
-            }}
-          />
-          <TextField
-            id="standard-basic"
-            variant="standard"
-            label="Project"
-            type="number"
-            value={updateData.project}
-            onChange={(e) =>
-              setUpdateData({ ...updateData, project: e.target.value })
-            }
-            fullWidth
-            margin="normal"
-          />
-          <TextField
-            id="standard-basic"
-            variant="standard"
-            label="Employer"
-            value={updateData.employer}
-            onChange={(e) =>
-              setUpdateData({ ...updateData, employer: e.target.value })
-            }
-            fullWidth
-            margin="normal"
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setUpdateModalOpen(false)} color="primary">
-            Cancel
-          </Button>
-          <Button onClick={updateTask} color="primary">
-            Update
-          </Button>
-        </DialogActions>
-      </Dialog>
-      <Dialog open={addModalOpen} onClose={() => setAddModalOpen(false)}>
-      <DialogTitle>Add New Task</DialogTitle>
-      <DialogContent>
-        <TextField
-          id="standard-basic"
-          variant="standard"
-          label="Task Type"
-          value={newTaskData.tasktype}
-          onChange={(e) =>
-            setNewTaskData({ ...newTaskData, tasktype: e.target.value })
-          }
-          fullWidth
-          margin="normal"
-        />
-        <FormControlLabel
-          control={
-            <Switch
-              checked={newTaskData.done}
-              onChange={(e) =>
-                setNewTaskData({
-                  ...newTaskData,
-                  done: e.target.checked,
-                })
-              }
-              color="primary"
-            />
-          }
-          label="Done"
-          style={{ marginBottom: 0 }}
-        />
-        <TextField
-          id="standard-basic"
-          variant="standard"
-          label="Title"
-          value={newTaskData.title}
-          onChange={(e) =>
-            setNewTaskData({
-              ...newTaskData,
-              title: e.target.value,
-            })
-          }
-          fullWidth
-          margin="normal"
-        />
-        <TextField
-          id="standard-basic"
-          variant="standard"
-          label="Description"
-          value={newTaskData.description}
-          onChange={(e) =>
-            setNewTaskData({
-              ...newTaskData,
-              description: e.target.value,
-            })
-          }
-          fullWidth
-          margin="normal"
-        />
-        <TextField
-          id="standard-basic"
-          variant="standard"
-          label="Starting Date"
-          type="date"
-          InputLabelProps={{ shrink: true }}
-          value={newTaskData.startingDate}
-          onChange={(e) =>
-            setNewTaskData({
-              ...newTaskData,
-              startingDate: e.target.value,
-            })
-          }
-          fullWidth
-          margin="normal"
-        />
-        <TextField
-          id="standard-basic"
-          variant="standard"
-          label="Ending Date"
-          type="date"
-          InputLabelProps={{ shrink: true }}
-          value={newTaskData.endingDate}
-          onChange={(e) =>
-            setNewTaskData({
-              ...newTaskData,
-              endingDate: e.target.value,
-            })
-          }
-          fullWidth
-          margin="normal"
-        />
-        <TextField
-          id="standard-basic"
-          variant="standard"
-          label="Project"
-          value={newTaskData.project}
-          onChange={(e) =>
-            setNewTaskData({
-              ...newTaskData,
-              project: e.target.value,
-            })
-          }
-          fullWidth
-          margin="normal"
-        />
-        <TextField
-          id="standard-basic"
-          variant="standard"
-          label="Employers (comma-separated)"
-          value={newTaskData.employer.join(", ")}
-          onChange={(e) =>
-            setNewTaskData({
-              ...newTaskData,
-              employer: e.target.value.split(",").map((emp) => emp.trim()),
-            })
-          }
-          fullWidth
-          margin="normal"
-        />
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={() => setAddModalOpen(false)} color="primary">
-          Cancel
-        </Button>
-        <Button onClick={addTask} color="primary">
-          Add
-        </Button>
-      </DialogActions>
-    </Dialog>
-
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={6000}
-        onClose={() => setSnackbar({ ...snackbar, open: false })}
-        message={snackbar.message}
-        severity={snackbar.severity}
-      />
     </div>
   );
 };

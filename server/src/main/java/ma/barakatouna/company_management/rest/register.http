@@ -1,0 +1,12 @@
+GET http://localhost:8085/auth/profile
+Accept: application/json
+Authorization: bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1c2VyMTIiLCJleHAiOjE3MjE4NTM3OTQsImlhdCI6MTcyMTg1MzE5NCwic2NvcGUiOiJBRE1JTiJ9.XkkTzgtaCSgXUdQj8GnDGA7A4fPw64hDh4_gI6SYjqQ
+
+###login
+POST http://localhost:8085/auth/login
+Content-Type: application/json
+
+    {
+        "username": "user12",
+        "password": "user12"
+    }

@@ -20,6 +20,7 @@ import {
   Typography,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
+import axios from "../components/Axios";
 
 const materialsTableHead = [
   "",
@@ -30,7 +31,6 @@ const materialsTableHead = [
   "Update",
   "Delete",
 ];
-
 
 const renderHead = (item, index) => <th key={index}>{item}</th>;
 const Materials = () => {
@@ -67,10 +67,10 @@ const Materials = () => {
 
   const fetchMaterials = () => {
     setLoading(true);
-    fetch("http://localhost:8085/api/materials")
-      .then((response) => response.json())
-      .then((data) => {
-        setMaterials(data);
+    axios
+      .get("http://localhost:8085/api/materials")
+      .then((response) => {
+        setMaterials(response.data);
         setLoading(false);
       })
       .catch((error) => {
@@ -86,13 +86,9 @@ const Materials = () => {
   };
 
   const confirmDelete = () => {
-    fetch(`http://localhost:8085/api/materials/${deleteId}`, {
-      method: "DELETE",
-    })
+    axios
+      .delete(`http://localhost:8085/api/materials/${deleteId}`)
       .then((response) => {
-        if (!response.ok) {
-          throw new Error("Delete failed");
-        }
         fetchMaterials();
         showSnackbar("Material deleted successfully", "success");
       })
@@ -107,15 +103,15 @@ const Materials = () => {
 
   const handleUpdate = (id) => {
     setUpdateId(id);
-    fetch(`http://localhost:8085/api/materials/${id}`)
-      .then((response) => response.json())
-      .then((data) => {
+    axios
+      .get(`http://localhost:8085/api/materials/${id}`)
+      .then((response) => {
         setUpdateData({
-          id: data.id,
-          name: data.name,
-          owned: data.owned,
-          reference: data.reference,
-          tasks: data.tasks,
+          id: response.data.id,
+          name: response.data.name,
+          owned: response.data.owned,
+          reference: response.data.reference,
+          tasks: response.data.tasks,
         });
         setUpdateModalOpen(true);
       })
@@ -126,21 +122,12 @@ const Materials = () => {
   };
 
   const updateMaterial = () => {
-    fetch(`http://localhost:8085/api/materials/${updateId}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(updateData),
-    })
+    axios
+      .put(`http://localhost:8085/api/materials/${updateId}`, updateData)
       .then((response) => {
-        if (response.ok) {
-          fetchMaterials();
-          setUpdateModalOpen(false);
-          showSnackbar("Material updated successfully", "success");
-        } else {
-          throw new Error("Update failed");
-        }
+        fetchMaterials();
+        setUpdateModalOpen(false);
+        showSnackbar("Material updated successfully", "success");
       })
       .catch((error) => {
         console.error("Error updating material:", error);
@@ -153,15 +140,9 @@ const Materials = () => {
   };
 
   const addMaterial = () => {
-    fetch("http://localhost:8085/api/materials", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(newMaterialData),
-    })
-      .then((response) => response.json())
-      .then((data) => {
+    axios
+      .post("http://localhost:8085/api/materials", newMaterialData)
+      .then((response) => {
         fetchMaterials();
         setAddModalOpen(false);
         showSnackbar("Material added successfully", "success");
@@ -177,10 +158,10 @@ const Materials = () => {
       fetchMaterials();
     } else {
       setLoading(true);
-      fetch(`http://localhost:8085/api/materials/name/${searchQuery}`)
-        .then((response) => response.json())
-        .then((data) => {
-          setMaterials(data.length ? data : []);
+      axios
+        .get(`http://localhost:8085/api/materials/name/${searchQuery}`)
+        .then((response) => {
+          setMaterials(response.data.length ? response.data : []);
           setLoading(false);
         })
         .catch((error) => {

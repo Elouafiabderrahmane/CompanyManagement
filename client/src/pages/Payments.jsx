@@ -20,10 +20,9 @@ import {
   Card,
   CardContent,
   Typography,
-  Switch,
-  FormControlLabel,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
+import axios from "../components/Axios";
 
 const paymentsTableHead = [
   "ID",
@@ -77,10 +76,10 @@ const Payments = () => {
 
   const fetchPayments = () => {
     setLoading(true);
-    fetch("http://localhost:8085/api/payments")
-      .then((response) => response.json())
-      .then((data) => {
-        setPayments(data);
+    axios
+      .get("http://localhost:8085/api/payments")
+      .then((response) => {
+        setPayments(response.data);
         setLoading(false);
       })
       .catch((error) => {
@@ -96,13 +95,9 @@ const Payments = () => {
   };
 
   const confirmDelete = () => {
-    fetch(`http://localhost:8085/api/payments/${deleteId}`, {
-      method: "DELETE",
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Delete failed");
-        }
+    axios
+      .delete(`http://localhost:8085/api/payments/${deleteId}`)
+      .then(() => {
         setPayments(payments.filter((payment) => payment.id !== deleteId));
         showSnackbar("Payment deleted successfully", "success");
       })
@@ -117,17 +112,17 @@ const Payments = () => {
 
   const handleUpdate = (id) => {
     setUpdateId(id);
-    fetch(`http://localhost:8085/api/payments/${id}`)
-      .then((response) => response.json())
-      .then((data) => {
+    axios
+      .get(`http://localhost:8085/api/payments/${id}`)
+      .then((response) => {
         setUpdateData({
-          id: data.id,
-          time: data.time,
-          type: data.type,
-          amount: data.amount,
-          project: data.project,
-          material: data.material,
-          employer: data.employer,
+          id: response.data.id,
+          time: response.data.time,
+          type: response.data.type,
+          amount: response.data.amount,
+          project: response.data.project,
+          material: response.data.material,
+          employer: response.data.employer,
         });
         setUpdateModalOpen(true);
       })
@@ -138,21 +133,12 @@ const Payments = () => {
   };
 
   const updatePayment = () => {
-    fetch(`http://localhost:8085/api/payments/${updateId}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(updateData),
-    })
-      .then((response) => {
-        if (response.ok) {
-          fetchPayments();
-          setUpdateModalOpen(false);
-          showSnackbar("Payment updated successfully", "success");
-        } else {
-          throw new Error("Update failed");
-        }
+    axios
+      .put(`http://localhost:8085/api/payments/${updateId}`, updateData)
+      .then(() => {
+        fetchPayments();
+        setUpdateModalOpen(false);
+        showSnackbar("Payment updated successfully", "success");
       })
       .catch((error) => {
         console.error("Error updating payment:", error);
@@ -165,29 +151,20 @@ const Payments = () => {
   };
 
   const addPayment = () => {
-    fetch("http://localhost:8085/api/payments", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(newPaymentData),
-    })
-      .then((response) => {
-        if (response.ok) {
-          fetchPayments();
-          setAddModalOpen(false);
-          setNewPaymentData({
-            time: "",
-            type: "",
-            amount: "",
-            project: "",
-            material: "",
-            employer: "",
-          });
-          showSnackbar("Payment added successfully", "success");
-        } else {
-          throw new Error("Add failed");
-        }
+    axios
+      .post("http://localhost:8085/api/payments", newPaymentData)
+      .then(() => {
+        fetchPayments();
+        setAddModalOpen(false);
+        setNewPaymentData({
+          time: "",
+          type: "",
+          amount: "",
+          project: "",
+          material: "",
+          employer: "",
+        });
+        showSnackbar("Payment added successfully", "success");
       })
       .catch((error) => {
         console.error("Error adding payment:", error);
@@ -243,10 +220,10 @@ const Payments = () => {
       fetchPayments();
     } else {
       setLoading(true);
-      fetch(`http://localhost:8085/api/payments/${searchQuery}`)
-        .then((response) => response.json())
-        .then((data) => {
-          setPayments([data]);
+      axios
+        .get(`http://localhost:8085/api/payments/${searchQuery}`)
+        .then((response) => {
+          setPayments([response.data]);
           setLoading(false);
         })
         .catch((error) => {

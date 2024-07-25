@@ -61,7 +61,7 @@ public class MaterialResource {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/{projectId}/material")
+    @GetMapping("/projects/{projectId}")
     public ResponseEntity<List<MaterialDTO>> getMaterialsByProjectId(@PathVariable Long projectId) {
         List<MaterialDTO> taskCount = materialService.getMaterialsByProjectId(projectId);
         return ResponseEntity.ok(taskCount);
@@ -91,7 +91,7 @@ public class MaterialResource {
         return ResponseEntity.ok(taskCount);
     }
 
-    @GetMapping("/{employerId}/employer")
+    @GetMapping("/employers/{employerId}")
     public ResponseEntity<List<MaterialDTO>> getMaterialsByEmployerId(@PathVariable Long employerId) {
         List<MaterialDTO> taskCount = materialService.getMaterialsByEmployerId(employerId);
         return ResponseEntity.ok(taskCount);

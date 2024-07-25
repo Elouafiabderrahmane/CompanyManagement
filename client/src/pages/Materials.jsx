@@ -1,26 +1,10 @@
 import React, { useState, useEffect } from "react";
 import Table from "../components/table/Table";
-import LinearProgress, {
-  linearProgressClasses,
-} from "@mui/material/LinearProgress";
+import LinearProgress, { linearProgressClasses } from "@mui/material/LinearProgress";
 import { styled } from "@mui/material";
-import {
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  FormControlLabel,
-  Switch,
-  TextField,
-  Snackbar,
-  Box,
-  Card,
-  CardContent,
-  Typography,
-} from "@mui/material";
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, FormControlLabel, Switch, TextField, Snackbar, Box, Card, CardContent, Typography } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
-import axios from "../components/Axios";
+import axios from "../components/Axios"; // Adjust import according to your setup
 
 const materialsTableHead = [
   "",
@@ -33,7 +17,8 @@ const materialsTableHead = [
 ];
 
 const renderHead = (item, index) => <th key={index}>{item}</th>;
-const Materials = () => {
+
+const Materials = ({ projectId, employerId }) => {
   const [materials, setMaterials] = useState([]);
   const [loading, setLoading] = useState(true);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -63,12 +48,18 @@ const Materials = () => {
 
   useEffect(() => {
     fetchMaterials();
-  }, []);
+  }, [projectId, employerId]);
 
   const fetchMaterials = () => {
     setLoading(true);
-    axios
-      .get("http://localhost:8085/api/materials")
+    let url = "http://localhost:8085/api/materials";
+    if (projectId) {
+      url += `/projects/${projectId}`;
+    } else if (employerId) {
+      url += `/employers/${employerId}`;
+    }
+
+    axios.get(url)
       .then((response) => {
         setMaterials(response.data);
         setLoading(false);
@@ -86,9 +77,8 @@ const Materials = () => {
   };
 
   const confirmDelete = () => {
-    axios
-      .delete(`http://localhost:8085/api/materials/${deleteId}`)
-      .then((response) => {
+    axios.delete(`http://localhost:8085/api/materials/${deleteId}`)
+      .then(() => {
         fetchMaterials();
         showSnackbar("Material deleted successfully", "success");
       })
@@ -103,8 +93,7 @@ const Materials = () => {
 
   const handleUpdate = (id) => {
     setUpdateId(id);
-    axios
-      .get(`http://localhost:8085/api/materials/${id}`)
+    axios.get(`http://localhost:8085/api/materials/${id}`)
       .then((response) => {
         setUpdateData({
           id: response.data.id,
@@ -122,9 +111,8 @@ const Materials = () => {
   };
 
   const updateMaterial = () => {
-    axios
-      .put(`http://localhost:8085/api/materials/${updateId}`, updateData)
-      .then((response) => {
+    axios.put(`http://localhost:8085/api/materials/${updateId}`, updateData)
+      .then(() => {
         fetchMaterials();
         setUpdateModalOpen(false);
         showSnackbar("Material updated successfully", "success");
@@ -140,9 +128,8 @@ const Materials = () => {
   };
 
   const addMaterial = () => {
-    axios
-      .post("http://localhost:8085/api/materials", newMaterialData)
-      .then((response) => {
+    axios.post("http://localhost:8085/api/materials", newMaterialData)
+      .then(() => {
         fetchMaterials();
         setAddModalOpen(false);
         showSnackbar("Material added successfully", "success");
@@ -158,8 +145,7 @@ const Materials = () => {
       fetchMaterials();
     } else {
       setLoading(true);
-      axios
-        .get(`http://localhost:8085/api/materials/name/${searchQuery}`)
+      axios.get(`http://localhost:8085/api/materials/name/${searchQuery}`)
         .then((response) => {
           setMaterials(response.data.length ? response.data : []);
           setLoading(false);
@@ -184,18 +170,10 @@ const Materials = () => {
       <td>{item.reference}</td>
       <td>{item.tasks.join(", ")}</td>
       <td>
-        <Button variant="contained" onClick={() => handleUpdate(item.id)}>
-          Update
-        </Button>
+        <Button variant="contained" onClick={() => handleUpdate(item.id)}>Update</Button>
       </td>
       <td>
-        <Button
-          variant="contained"
-          onClick={() => handleDelete(item.id)}
-          style={{ backgroundColor: "red" }}
-        >
-          Delete
-        </Button>
+        <Button variant="contained" onClick={() => handleDelete(item.id)} style={{ backgroundColor: "red" }}>Delete</Button>
       </td>
     </tr>
   );
@@ -204,8 +182,7 @@ const Materials = () => {
     height: 10,
     borderRadius: 5,
     [`& .${linearProgressClasses.colorPrimary}`]: {
-      backgroundColor:
-        theme.palette.grey[theme.palette.mode === "light" ? 200 : 800],
+      backgroundColor: theme.palette.grey[theme.palette.mode === "light" ? 200 : 800],
     },
     [`& .${linearProgressClasses.bar}`]: {
       borderRadius: 5,
@@ -215,12 +192,7 @@ const Materials = () => {
 
   return (
     <div>
-      <Box
-        mb={3}
-        display="flex"
-        justifyContent="space-between"
-        alignItems="center"
-      >
+      <Box mb={3} display="flex" justifyContent="space-between" alignItems="center">
         <Box display="flex" alignItems="center">
           <TextField
             id="outlined-basic"
@@ -230,41 +202,17 @@ const Materials = () => {
             onChange={(e) => setSearchQuery(e.target.value)}
             style={{ width: "1000px", marginRight: 10 }}
           />
-          <Button
-            sx={{ width: "150px", height: "60px" }}
-            variant="contained"
-            color="primary"
-            onClick={handleSearch}
-          >
-            Search
-          </Button>
+          <Button sx={{ width: "150px", height: "60px" }} variant="contained" color="primary" onClick={handleSearch}>Search</Button>
         </Box>
         <Box>
-          <Button
-            sx={{ width: "200px", height: "55px" }}
-            variant="contained"
-            color="primary"
-            onClick={handleAddMaterial}
-            startIcon={<AddIcon style={{ fontSize: "2rem" }} />}
-          >
-            Add Material
-          </Button>
+          <Button sx={{ width: "200px", height: "55px" }} variant="contained" color="primary" onClick={handleAddMaterial} startIcon={<AddIcon style={{ fontSize: "2rem" }} />}>Add Material</Button>
         </Box>
       </Box>
       <Box mb={"20px"}>
-        <Card
-          sx={{ width: "200px", height: "60px", backgroundColor: "#1976d2" }}
-        >
+        <Card sx={{ width: "200px", height: "60px", backgroundColor: "#1976d2" }}>
           <CardContent sx={{ height: "100%" }}>
             <Box display="flex" justifyContent="center" alignItems="center">
-              <Typography
-                variant="h6"
-                style={{
-                  color: "white",
-                  fontWeight: "bold",
-                  textAlign: "center",
-                }}
-              >
+              <Typography variant="h6" style={{ color: "white", fontWeight: "bold", textAlign: "center" }}>
                 Materials {materials.length}
               </Typography>
             </Box>
@@ -287,21 +235,12 @@ const Materials = () => {
           )}
         </div>
       </div>
-      <Dialog
-        open={deleteDialogOpen}
-        onClose={() => setDeleteDialogOpen(false)}
-      >
+      <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
         <DialogTitle>Confirm Delete</DialogTitle>
-        <DialogContent>
-          Are you sure you want to delete this material?
-        </DialogContent>
+        <DialogContent>Are you sure you want to delete this material?</DialogContent>
         <DialogActions>
-          <Button onClick={() => setDeleteDialogOpen(false)} color="primary">
-            Cancel
-          </Button>
-          <Button onClick={confirmDelete} style={{ color: "red" }}>
-            Delete
-          </Button>
+          <Button onClick={() => setDeleteDialogOpen(false)} color="primary">Cancel</Button>
+          <Button onClick={confirmDelete} style={{ color: "red" }}>Delete</Button>
         </DialogActions>
       </Dialog>
 
@@ -313,130 +252,70 @@ const Materials = () => {
             variant="standard"
             label="Name"
             value={updateData.name}
-            onChange={(e) =>
-              setUpdateData({ ...updateData, name: e.target.value })
-            }
+            onChange={(e) => setUpdateData({ ...updateData, name: e.target.value })}
             fullWidth
-            margin="normal"
           />
           <FormControlLabel
             control={
               <Switch
                 checked={updateData.owned}
-                onChange={(e) =>
-                  setUpdateData({ ...updateData, owned: e.target.checked })
-                }
-                color="primary"
+                onChange={(e) => setUpdateData({ ...updateData, owned: e.target.checked })}
               />
             }
             label="Owned"
-            style={{ marginBottom: 0 }}
           />
           <TextField
             id="standard-basic"
             variant="standard"
             label="Reference"
             value={updateData.reference}
-            onChange={(e) =>
-              setUpdateData({ ...updateData, reference: e.target.value })
-            }
+            onChange={(e) => setUpdateData({ ...updateData, reference: e.target.value })}
             fullWidth
-            margin="normal"
           />
-          <TextField
-            id="standard-basic"
-            variant="standard"
-            label="Tasks"
-            value={updateData.tasks.join(", ")}
-            onChange={(e) =>
-              setUpdateData({
-                ...updateData,
-                tasks: e.target.value.split(",").map((task) => task.trim()),
-              })
-            }
-            fullWidth
-            margin="normal"
-          />
+          {/* Add more fields as necessary */}
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setUpdateModalOpen(false)} color="primary">
-            Cancel
-          </Button>
-          <Button onClick={updateMaterial} color="primary">
-            Update
-          </Button>
+          <Button onClick={() => setUpdateModalOpen(false)} color="primary">Cancel</Button>
+          <Button onClick={updateMaterial} color="primary">Update</Button>
         </DialogActions>
       </Dialog>
-
+  
       <Dialog open={addModalOpen} onClose={() => setAddModalOpen(false)}>
-        <DialogTitle>Add New Material</DialogTitle>
+        <DialogTitle>Add Material</DialogTitle>
         <DialogContent>
           <TextField
             id="standard-basic"
             variant="standard"
             label="Name"
             value={newMaterialData.name}
-            onChange={(e) =>
-              setNewMaterialData({ ...newMaterialData, name: e.target.value })
-            }
+            onChange={(e) => setNewMaterialData({ ...newMaterialData, name: e.target.value })}
             fullWidth
-            margin="normal"
           />
           <FormControlLabel
             control={
               <Switch
                 checked={newMaterialData.owned}
-                onChange={(e) =>
-                  setNewMaterialData({
-                    ...newMaterialData,
-                    owned: e.target.checked,
-                  })
-                }
-                color="primary"
+                onChange={(e) => setNewMaterialData({ ...newMaterialData, owned: e.target.checked })}
               />
             }
             label="Owned"
-            style={{ marginBottom: 0 }}
           />
           <TextField
             id="standard-basic"
             variant="standard"
             label="Reference"
             value={newMaterialData.reference}
-            onChange={(e) =>
-              setNewMaterialData({
-                ...newMaterialData,
-                reference: e.target.value,
-              })
-            }
+            onChange={(e) => setNewMaterialData({ ...newMaterialData, reference: e.target.value })}
             fullWidth
-            margin="normal"
           />
-          <TextField
-            id="standard-basic"
-            variant="standard"
-            label="Tasks (comma-separated)"
-            value={newMaterialData.tasks.join(", ")}
-            onChange={(e) =>
-              setNewMaterialData({
-                ...newMaterialData,
-                tasks: e.target.value.split(",").map((task) => task.trim()),
-              })
-            }
-            fullWidth
-            margin="normal"
-          />
+          {/* Add more fields as necessary */}
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setAddModalOpen(false)} color="primary">
-            Cancel
-          </Button>
-          <Button onClick={addMaterial} color="primary">
-            Add
-          </Button>
+          <Button onClick={() => setAddModalOpen(false)} color="primary">Cancel</Button>
+          <Button onClick={addMaterial} color="primary">Add</Button>
         </DialogActions>
       </Dialog>
-
+  
       <Snackbar
         open={snackbar.open}
         autoHideDuration={6000}
@@ -445,7 +324,8 @@ const Materials = () => {
         severity={snackbar.severity}
       />
     </div>
-  );
-};
-
-export default Materials;
+    );
+  };
+  
+  export default Materials;
+  

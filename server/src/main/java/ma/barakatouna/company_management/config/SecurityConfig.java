@@ -69,7 +69,7 @@ public class SecurityConfig {
                         .requestMatchers("/swagger-ui/ui.html/**").permitAll()
                         .requestMatchers("/v3/api-docs/**").permitAll()
                         .requestMatchers("/").permitAll()
-                        .anyRequest().authenticated())
+                        .anyRequest().permitAll())
                 .oauth2ResourceServer(oa -> oa.jwt(Customizer.withDefaults()))
                 .userDetailsService(userDetailsService)
                 .build();

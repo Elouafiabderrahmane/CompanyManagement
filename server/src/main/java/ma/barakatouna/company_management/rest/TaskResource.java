@@ -71,6 +71,12 @@ public class TaskResource {
         List<TaskDTO> tasks = taskService.getTaskByProjectId(projectId);
         return ResponseEntity.ok(tasks);
     }
+    @GetMapping("/employers/{employerId}")
+    public ResponseEntity<List<TaskDTO>> getTasksByEmployer(@PathVariable Long employerId) {
+        List<TaskDTO> tasks = taskService.getTaskByEmployerId(employerId);
+        return ResponseEntity.ok(tasks);
+    }
+
 
     @GetMapping("/keyword/{keyword}")
     public ResponseEntity<List<TaskDTO>> getTasksByTitle(@PathVariable String keyword) {

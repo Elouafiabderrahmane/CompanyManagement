@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "../components/Axios"; // Import axios from your custom module
 import Table from "../components/table/Table";
 import LinearProgress, {
   linearProgressClasses,
@@ -81,10 +82,11 @@ const Employers = ({ projectId }) => {
     const url = projectId
       ? `http://localhost:8085/api/employers/projects/${projectId}`
       : "http://localhost:8085/api/employers";
-    fetch(url)
-      .then((response) => response.json())
-      .then((data) => {
-        setEmployers(data);
+
+    axios
+      .get(url)
+      .then((response) => {
+        setEmployers(response.data);
         setLoading(false);
       })
       .catch((error) => {
@@ -100,13 +102,9 @@ const Employers = ({ projectId }) => {
   };
 
   const confirmDelete = () => {
-    fetch(`http://localhost:8085/api/employers/${deleteId}`, {
-      method: "DELETE",
-    })
+    axios
+      .delete(`http://localhost:8085/api/employers/${deleteId}`)
       .then((response) => {
-        if (!response.ok) {
-          throw new Error("Delete failed");
-        }
         fetchEmployers();
         showSnackbar("Employer deleted successfully", "success");
       })
@@ -120,21 +118,20 @@ const Employers = ({ projectId }) => {
   };
 
   const handleUpdate = (id) => {
-  
     setUpdateId(id);
-    fetch(`http://localhost:8085/api/employers/${id}`)
-      .then((response) => response.json())
-      .then((data) => {
+    axios
+      .get(`http://localhost:8085/api/employers/${id}`)
+      .then((response) => {
         setUpdateData({
-          id: data.id,
-          name: data.name,
-          phone: data.phone,
-          cin: data.cin,
-          adress: data.adress,
-          email: data.email,
-          hireDate: data.hireDate,
-          birthDate: data.birthDate,
-          image: data.image,
+          id: response.data.id,
+          name: response.data.name,
+          phone: response.data.phone,
+          cin: response.data.cin,
+          adress: response.data.adress,
+          email: response.data.email,
+          hireDate: response.data.hireDate,
+          birthDate: response.data.birthDate,
+          image: response.data.image,
         });
         setUpdateModalOpen(true);
       })
@@ -150,18 +147,12 @@ const Employers = ({ projectId }) => {
       formData.append(key, updateData[key]);
     });
 
-    fetch(`http://localhost:8085/api/employers/${updateId}`, {
-      method: "PUT",
-      body: formData,
-    })
+    axios
+      .put(`http://localhost:8085/api/employers/${updateId}`, formData)
       .then((response) => {
-        if (response.ok) {
-          fetchEmployers();
-          setUpdateModalOpen(false);
-          showSnackbar("Employer updated successfully", "success");
-        } else {
-          throw new Error("Update failed");
-        }
+        fetchEmployers();
+        setUpdateModalOpen(false);
+        showSnackbar("Employer updated successfully", "success");
       })
       .catch((error) => {
         console.error("Error updating employer:", error);
@@ -179,12 +170,9 @@ const Employers = ({ projectId }) => {
       formData.append(key, newEmployerData[key]);
     });
 
-    fetch("http://localhost:8085/api/employers", {
-      method: "POST",
-      body: formData,
-    })
-      .then((response) => response.json())
-      .then((data) => {
+    axios
+      .post("http://localhost:8085/api/employers", formData)
+      .then((response) => {
         fetchEmployers();
         setAddModalOpen(false);
         showSnackbar("Employer added successfully", "success");
@@ -200,10 +188,10 @@ const Employers = ({ projectId }) => {
       fetchEmployers();
     } else {
       setLoading(true);
-      fetch(`http://localhost:8085/api/employers/name/${searchQuery}`)
-        .then((response) => response.json())
-        .then((data) => {
-          setEmployers([data]);
+      axios
+        .get(`http://localhost:8085/api/employers/name/${searchQuery}`)
+        .then((response) => {
+          setEmployers([response.data]);
           setLoading(false);
         })
         .catch((error) => {
@@ -327,7 +315,7 @@ const Employers = ({ projectId }) => {
                   textAlign: "center",
                 }}
               >
-               Employers {employers.length}
+                Employers {employers.length}
               </Typography>
             </Box>
           </CardContent>
@@ -340,7 +328,7 @@ const Employers = ({ projectId }) => {
           ) : (
             <Table
               limit="10"
-              headData={ employersTableHead}
+              headData={employersTableHead}
               renderHead={renderHead}
               bodyData={employers}
               renderBody={renderBody}
@@ -355,7 +343,9 @@ const Employers = ({ projectId }) => {
         onClose={() => setDeleteDialogOpen(false)}
       >
         <DialogTitle>Confirm Delete</DialogTitle>
-        <DialogContent>Are you sure you want to delete this employer?</DialogContent>
+        <DialogContent>
+          Are you sure you want to delete this employer?
+        </DialogContent>
         <DialogActions>
           <Button onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>
           <Button onClick={confirmDelete} color="secondary">
@@ -501,7 +491,10 @@ const Employers = ({ projectId }) => {
             margin="dense"
             value={newEmployerData.hireDate}
             onChange={(e) =>
-              setNewEmployerData({ ...newEmployerData, hireDate: e.target.value })
+              setNewEmployerData({
+                ...newEmployerData,
+                hireDate: e.target.value,
+              })
             }
           />
           <TextField
@@ -510,7 +503,19 @@ const Employers = ({ projectId }) => {
             margin="dense"
             value={newEmployerData.birthDate}
             onChange={(e) =>
-              setNewEmployerData({ ...newEmployerData, image: e.target.files[0] })
+              setNewEmployerData({
+                ...newEmployerData,
+                birthDate: e.target.value,
+              })
+            }
+          />
+          <input
+            type="file"
+            onChange={(e) =>
+              setNewEmployerData({
+                ...newEmployerData,
+                image: e.target.files[0],
+              })
             }
           />
         </DialogContent>
@@ -521,8 +526,6 @@ const Employers = ({ projectId }) => {
           </Button>
         </DialogActions>
       </Dialog>
-
-     
 
       {/* Snackbar for notifications */}
       <Snackbar

@@ -18,13 +18,39 @@ import { createTheme, ThemeProvider } from "@mui/material/styles";
 const theme = createTheme();
 
 const Login = () => {
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    // Handle login logic
-    console.log({ email, password });
+    setError(""); // Clear previous errors
+
+    try {
+      const response = await fetch("http://localhost:8085/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ username: username, password: password }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Login failed");
+      }
+
+      const data = await response.json();
+      console.log(data);
+
+      localStorage.setItem("token", data["access-token"]);
+
+      // Redirect or perform any other actions after successful login
+    } catch (error) {
+      setError("Login failed. Please check your credentials and try again.");
+      console.error("Login error:", error);
+      console.error("Username:", username);
+      console.error("Username:", password);
+    }
   };
 
   return (
@@ -60,8 +86,8 @@ const Login = () => {
               name="email"
               autoComplete="email"
               autoFocus
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
             />
             <TextField
               margin="normal"
@@ -79,6 +105,11 @@ const Login = () => {
               control={<Checkbox value="remember" color="primary" />}
               label="Remember me"
             />
+            {error && (
+              <Typography color="error" variant="body2" align="center">
+                {error}
+              </Typography>
+            )}
             <Button
               type="submit"
               fullWidth

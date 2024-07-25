@@ -41,7 +41,9 @@ public class SecurityController {
     }
 
     @PostMapping("/login")
-    public Map<String, String> login(String username, String password) {
+    public Map<String, String> login(@RequestBody Map<String, String> loginRequest) {
+        String username = loginRequest.get("username");
+        String password = loginRequest.get("password");
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(username, password)
         );

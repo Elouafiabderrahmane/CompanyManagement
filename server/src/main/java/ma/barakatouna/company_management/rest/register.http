@@ -1,6 +1,6 @@
 GET http://localhost:8085/auth/profile
 Accept: application/json
-Authorization: bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1c2VyMTIiLCJleHAiOjE3MjE4NTM3OTQsImlhdCI6MTcyMTg1MzE5NCwic2NvcGUiOiJBRE1JTiJ9.XkkTzgtaCSgXUdQj8GnDGA7A4fPw64hDh4_gI6SYjqQ
+Authorization: bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1c2VyMTIiLCJleHAiOjE3MjIwMDY5MzYsImlhdCI6MTcyMjAwNjMzNiwic2NvcGUiOiJBRE1JTiJ9.Ha7JD3w3Ml2iqoMlUubs4a8-1zncy23f6D2i0_JBANc
 
 ###login
 POST http://localhost:8085/auth/login

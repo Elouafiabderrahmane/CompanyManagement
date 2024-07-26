@@ -163,9 +163,9 @@ public class EmployerResource {
         return ResponseEntity.ok(employers);
     }
 
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<EmployerDTO> getEmployerByUserId(@PathVariable Long userId) {
-        EmployerDTO employer = employerService.getEmployerByUserId(userId);
+    @GetMapping("/user/{userName}")
+    public ResponseEntity<EmployerDTO> getEmployerByUserName(@PathVariable String userName) {
+        EmployerDTO employer = employerService.getEmployerByUserName(userName);
         return ResponseEntity.ok(employer);
     }
 }

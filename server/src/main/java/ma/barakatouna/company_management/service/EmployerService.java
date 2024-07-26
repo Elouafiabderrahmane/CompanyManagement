@@ -18,7 +18,9 @@ import ma.barakatouna.company_management.repos.UserRepository;
 import ma.barakatouna.company_management.util.NotFoundException;
 import ma.barakatouna.company_management.util.ReferencedWarning;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 
 @Service
@@ -84,6 +86,9 @@ public class EmployerService {
     }
 
     private EmployerDTO mapToDTO(final Employer employer, final EmployerDTO employerDTO) {
+        if (employer == null) {
+            throw new IllegalArgumentException("Employer cannot be null");
+        }
         employerDTO.setId(employer.getId());
         employerDTO.setName(employer.getName());
         employerDTO.setPhone(employer.getPhone());
@@ -189,8 +194,16 @@ public class EmployerService {
 
     }
 
-    public EmployerDTO getEmployerByUserId(Long userId) {
-        User user = userRepository.findById(userId).orElseThrow(NotFoundException::new);
-        return mapToDTO(employerRepository.findByUser(user), new EmployerDTO());
+    public EmployerDTO getEmployerByUserName(String userName) {
+        User user = userRepository.findByUsernameContaining(userName);
+        if (user == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+        }
+        Employer employer = employerRepository.findByUser(user);
+        if (employer == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Employer not found");
+        }
+        return mapToDTO(employer, new EmployerDTO());
     }
+
 }

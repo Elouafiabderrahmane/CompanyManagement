@@ -107,11 +107,11 @@ public class UserService {
         return null;
     }
     public User getUserByUsername(String username) {
-        return userRepository.findByUsername(username);
+        return userRepository.findByUsernameContaining(username);
     }
 
     public User addNewUser(User user) {
-        User existingUser = userRepository.findByUsername(user.getUsername());
+        User existingUser = userRepository.findByUsernameContaining(user.getUsername());
         if (existingUser != null) throw new RuntimeException("User already exists");
 
         // Ensure roles exist in the database

@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "../components/Axios";
 import ProjectCard from "../components/project-card/ProjectCard";
 import {
   Box,
@@ -19,7 +18,9 @@ import {
 import AddIcon from "@mui/icons-material/Add";
 import image from "../assets/images/AxeoFM_Maquette3D_Drone-3.jpg";
 
+
 const Projects = ({ employerId }) => {
+  
   const [projects, setProjects] = useState([]);
   const [images, setImages] = useState({});
   const [searchQuery, setSearchQuery] = useState("");
@@ -49,55 +50,59 @@ const Projects = ({ employerId }) => {
     fetchProjects();
   }, [employerId]);
 
-  const fetchProjects = async () => {
+  const fetchProjects = () => {
     setLoading(true);
 
-    try {
-      const url = employerId
-        ? `http://localhost:8085/api/projects/employers/${employerId}`
-        : "http://localhost:8085/api/projects";
-      const { data } = await axios.get(url);
-      setProjects(data);
-
-      // Fetch project images
-      const imagePromises = data.map((project) =>
-        axios
-          .get(`http://localhost:8085/api/projects/${project.id}/image`, {
-            responseType: "blob",
-          })
-          .then((response) => {
-            const imageUrl = URL.createObjectURL(response.data);
-            return { id: project.id, imageUrl };
-          })
-          .catch(() => ({ id: project.id, imageUrl: null }))
-      );
-
-      const imagesData = await Promise.all(imagePromises);
-      const imagesMap = imagesData.reduce((acc, { id, imageUrl }) => {
-        acc[id] = imageUrl;
-        return acc;
-      }, {});
-
-      setImages(imagesMap);
-    } catch (error) {
-      console.error("Error fetching projects:", error);
-    } finally {
-      setLoading(false);
-    }
+    const url = employerId
+      ? `http://localhost:8085/api/projects/employers/${employerId}`
+      : "http://localhost:8085/api/projects";
+    fetch(url)
+      .then((response) => response.json())
+      .then((data) => {
+        setProjects(data);
+        data.forEach((project) => {
+          fetch(`http://localhost:8085/api/projects/${project.id}/image`)
+            .then((response) => {
+              if (!response.ok) {
+                throw new Error("Failed to fetch");
+              }
+              return response.blob();
+            })
+            .then((imageBlob) => {
+              const imageUrl = URL.createObjectURL(imageBlob);
+              setImages((prevImages) => ({
+                ...prevImages,
+                [project.id]: imageUrl,
+              }));
+            })
+            .catch((error) => {
+              console.error("Error fetching project image:", error);
+              setImages((prevImages) => ({
+                ...prevImages,
+                [project.id]: null,
+              }));
+            });
+        });
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error("Error fetching projects:", error);
+        setLoading(false);
+      });
   };
 
-  const handleSearch = async () => {
+  const handleSearch = () => {
     if (searchQuery.trim() === "") {
       fetchProjects();
     } else {
-      try {
-        const { data } = await axios.get(
-          `http://localhost:8085/api/projects/name/${searchQuery}`
-        );
-        setProjects(data);
-      } catch (error) {
-        console.error("Error searching projects:", error);
-      }
+      fetch(`http://localhost:8085/api/projects/name/${searchQuery}`)
+        .then((response) => response.json())
+        .then((data) => {
+          setProjects(data);
+        })
+        .catch((error) => {
+          console.error("Error searching projects by ID:", error);
+        });
     }
   };
 
@@ -105,7 +110,7 @@ const Projects = ({ employerId }) => {
     setAddModalOpen(true);
   };
 
-  const addProject = async () => {
+  const addProject = () => {
     const formData = new FormData();
     formData.append("name", newProjectData.name);
     formData.append("description", newProjectData.description);
@@ -118,15 +123,20 @@ const Projects = ({ employerId }) => {
       formData.append("image", newProjectData.image);
     }
 
-    try {
-      await axios.post("http://localhost:8085/api/projects", formData);
-      fetchProjects();
-      setAddModalOpen(false);
-      showSnackbar("Project added successfully", "success");
-    } catch (error) {
-      console.error("Error adding project:", error);
-      showSnackbar("Failed to add project", "error");
-    }
+    fetch("http://localhost:8085/api/projects", {
+      method: "POST",
+      body: formData,
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        fetchProjects();
+        setAddModalOpen(false);
+        showSnackbar("Project added successfully", "success");
+      })
+      .catch((error) => {
+        console.error("Error adding project:", error);
+        showSnackbar("Failed to add project", "error");
+      });
   };
 
   const showSnackbar = (message, severity) => {
@@ -176,46 +186,41 @@ const Projects = ({ employerId }) => {
         </Box>
       </Box>
       <Box sx={{ flexGrow: 1, padding: 3 }}>
-        {projects.length > 0 ? (
-          <Grid container spacing={4}>
-            {projects.map((project) => (
-              <Grid item xs={12} sm={6} md={4} key={project.id}>
-                <ProjectCard
-                  img={images[project.id] || image}
-                  title={project.name}
-                  description={project.description}
-                  endingDate={project.endDate}
-                  done={project.done}
-                  budget={project.budget}
-                  onClick={() => handleCardClick(project.id)}
-                />
-              </Grid>
-            ))}
-          </Grid>
-        ) : (
-          <Box
-            display="flex"
-            justifyContent="center"
-            alignItems="center"
-            flexDirection="column"
-            mt={5}
-          >
-            <img
-              src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRtUVYATWPrDOHE_R5qO_XBS5VyJ6Sx78bSUw&s"
-              alt="No projects"
-              style={{ maxWidth: "100%", height: "auto" }}
-            />
-            <Typography
-              variant="h6"
-              color="textSecondary"
-              align="center"
-              mt={2}
-            >
-              There are no projects here.
-            </Typography>
-          </Box>
-        )}
-      </Box>
+  {projects.length > 0 ? (
+    <Grid container spacing={4}>
+      {projects.map((project) => (
+        <Grid item xs={12} sm={6} md={4} key={project.id}>
+          <ProjectCard
+            img={images[project.id] || image}
+            title={project.name}
+            description={project.description}
+            endingDate={project.endDate}
+            done={project.done}
+            budget={project.budget}
+            onClick={() => handleCardClick(project.id)}
+          />
+        </Grid>
+      ))}
+    </Grid>
+  ) : (
+    <Box
+      display="flex"
+      justifyContent="center"
+      alignItems="center"
+      flexDirection="column"
+      mt={5}
+    >
+      <img
+        src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRtUVYATWPrDOHE_R5qO_XBS5VyJ6Sx78bSUw&s"
+        alt="No projects"
+        style={{ maxWidth: "100%", height: "auto" }}
+      />
+      <Typography variant="h6" color="textSecondary" align="center" mt={2}>
+        There are no projects here.
+      </Typography>
+    </Box>
+  )}
+</Box>
 
       {/* Add Project Modal */}
       <Dialog open={addModalOpen} onClose={() => setAddModalOpen(false)}>
@@ -236,10 +241,7 @@ const Projects = ({ employerId }) => {
             margin="dense"
             value={newProjectData.description}
             onChange={(e) =>
-              setNewProjectData({
-                ...newProjectData,
-                description: e.target.value,
-              })
+              setNewProjectData({ ...newProjectData, description: e.target.value })
             }
           />
           <TextField
@@ -257,10 +259,7 @@ const Projects = ({ employerId }) => {
               <Switch
                 checked={newProjectData.paid}
                 onChange={(e) =>
-                  setNewProjectData({
-                    ...newProjectData,
-                    paid: e.target.checked,
-                  })
+                  setNewProjectData({ ...newProjectData, paid: e.target.checked })
                 }
               />
             }
@@ -271,10 +270,7 @@ const Projects = ({ employerId }) => {
               <Switch
                 checked={newProjectData.done}
                 onChange={(e) =>
-                  setNewProjectData({
-                    ...newProjectData,
-                    done: e.target.checked,
-                  })
+                  setNewProjectData({ ...newProjectData, done: e.target.checked })
                 }
               />
             }
@@ -286,10 +282,7 @@ const Projects = ({ employerId }) => {
             margin="dense"
             value={newProjectData.startDate}
             onChange={(e) =>
-              setNewProjectData({
-                ...newProjectData,
-                startDate: e.target.value,
-              })
+              setNewProjectData({ ...newProjectData, startDate: e.target.value })
             }
           />
           <TextField

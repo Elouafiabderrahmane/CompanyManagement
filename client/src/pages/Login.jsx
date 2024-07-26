@@ -33,8 +33,8 @@ const Login = () => {
 
     try {
       const response = await axios.post("http://localhost:8085/auth/login", {
-        username: username,
-        password: password,
+        "username": username,
+        "password": password,
       });
 
       if (response.status !== 200) {

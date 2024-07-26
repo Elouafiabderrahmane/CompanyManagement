@@ -1,55 +1,43 @@
-// components/AppRoutes.jsx
-import React from "react";
-import { Routes, Route } from "react-router-dom";
-import AuthRoute from "./AuthRoute";
-import Dashboard from "../pages/Dashboard";
-import Customers from "../pages/Customers";
-import Materials from "../pages/Materials";
-import Tasks from "../pages/Tasks";
-import Payments from "../pages/Payments";
-import Salaries from "../pages/Salaries";
-import Projects from "../pages/Projects";
-import Project from "../pages/Project";
-import Employers from "../pages/Employers";
-import EmployerDetails from "../pages/EmployerDetails";
-import Login from "../pages/Login";
-import Register from "../pages/Register";
+import React, { Suspense, lazy } from "react";
+import { Routes, Route, Navigate } from "react-router-dom";
+import ProtectedRoute from "../components/ProtectedRoute"; // Adjust the path as needed
+
+const Dashboard = lazy(() => import("../pages/Dashboard"));
+const Customers = lazy(() => import("../pages/Customers"));
+const Materials = lazy(() => import("../pages/Materials"));
+const Tasks = lazy(() => import("../pages/Tasks"));
+const Payments = lazy(() => import("../pages/Payments"));
+const Salaries = lazy(() => import("../pages/Salaries"));
+const Projects = lazy(() => import("../pages/Projects"));
+const Project = lazy(() => import("../pages/Project"));
+const Employers = lazy(() => import("../pages/Employers"));
+const EmployerDetails = lazy(() => import("../pages/EmployerDetails"));
+const Login = lazy(() => import("../pages/Login"));
+const Register = lazy(() => import("../pages/Register"));
+const Unauthorized = lazy(() => import("../pages/Unauthorized")); // Add an Unauthorized page if needed
 
 const AppRoutes = () => {
   return (
-    <Routes>
-      <Route path="/" element={<AuthRoute element={<Dashboard />} />} />
-      <Route
-        path="/dashboard"
-        element={<AuthRoute element={<Dashboard />} />}
-      />
-      <Route
-        path="/customers"
-        element={<AuthRoute element={<Customers />} />}
-      />
-      <Route
-        path="/materials"
-        element={<AuthRoute element={<Materials />} />}
-      />
-      <Route path="/tasks" element={<AuthRoute element={<Tasks />} />} />
-      <Route path="/payments" element={<AuthRoute element={<Payments />} />} />
-      <Route path="/salaries" element={<AuthRoute element={<Salaries />} />} />
-      <Route path="/projects" element={<AuthRoute element={<Projects />} />} />
-      <Route
-        path="/project/:id"
-        element={<AuthRoute element={<Project />} />}
-      />
-      <Route
-        path="/employers"
-        element={<AuthRoute element={<Employers />} />}
-      />
-      <Route
-        path="/employers/:id"
-        element={<AuthRoute element={<EmployerDetails />} />}
-      />
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
-    </Routes>
+    <Suspense fallback={<div>Loading...</div>}>
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/" element={<Navigate to="/dashboard" />} />
+        <Route element={<ProtectedRoute />}>
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/customers" element={<Customers />} />
+          <Route path="/materials" element={<Materials />} />
+          <Route path="/tasks" element={<Tasks />} />
+          <Route path="/payments" element={<Payments />} />
+          <Route path="/salaries" element={<Salaries />} />
+          <Route path="/projects" element={<Projects />} />
+          <Route path="/project/:id" element={<Project />} />
+          <Route path="/employers" element={<Employers />} />
+          <Route path="/employers/:id" element={<EmployerDetails />} />
+          <Route path="/unauthorized" element={<Unauthorized />} />
+        </Route>
+      </Routes>
+    </Suspense>
   );
 };
 

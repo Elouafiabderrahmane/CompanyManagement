@@ -22,7 +22,7 @@ import {
   InputLabel,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
-import axios from "../components/Axios";
+import axios from "axios";
 
 const salariesTableHead = [
   "ID",

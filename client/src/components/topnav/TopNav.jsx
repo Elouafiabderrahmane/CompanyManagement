@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { getUserDataFromToken } from "../jwtUtils";
 import "./topnav.css";
 import { Link } from "react-router-dom";
 import Dropdown from "../dropdown/Dropdown";
 import ThemeMenu from "../thememenu/ThemeMenu";
 import notifications from "../../assets/JsonData/notification.json";
-import user_image from "../../assets/images/tuat.png"; // This can be removed if user image comes from API
-import user_menu from "../../assets/JsonData/user_menus.json"; // Import user_menu
-
+import user_image from "../../assets/images/tuat.png";
+import user_menu from "../../assets/JsonData/user_menus.json";
 
 const Topnav = () => {
   const [currUser, setCurrUser] = useState(null);
@@ -15,15 +15,33 @@ const Topnav = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const response = await axios.get("http://localhost:8085/api/user"); // Update with your API endpoint
+        const token = localStorage.getItem("token");
+        if (!token) {
+          console.error("No token found");
+          return;
+        }
+
+        const { username } = getUserDataFromToken(token);
+        console.log("Username from token:", username);
+
+        if (username === "Guest") {
+          console.error("No valid username found in token");
+          return;
+        }
+
+        const response = await axios.get(
+          `http://localhost:8085/api/employers/user/${username}`
+        );
+
+        console.log("API Response:", response.data);
         const userData = response.data;
+
         setCurrUser({
-          display_name: userData.name || "User", // Adjust based on API response
-          image: userData.image || user_image, // Adjust based on API response
+          display_name: userData.name || "User",
+          image: userData.url || user_image,
         });
       } catch (error) {
         console.error("Failed to fetch user data:", error);
-        // Handle error as needed
       }
     };
 
@@ -31,7 +49,7 @@ const Topnav = () => {
   }, []);
 
   if (!currUser) {
-    return <div>Loading...</div>; // Or a spinner/loading indicator
+    return <div>Loading...</div>;
   }
 
   const renderNotificationItem = (item, index) => (
@@ -44,7 +62,7 @@ const Topnav = () => {
   const renderUserToggle = (user) => (
     <div className="topnav__right-user">
       <div className="topnav__right-user__image">
-        <img src={user.image} alt="" />
+        <img src={user.image} alt="User" />
       </div>
       <div className="topnav__right-user__name">{user.display_name}</div>
     </div>

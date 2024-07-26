@@ -1,27 +1,37 @@
-// reducers/userReducer.js
+import { LOGIN_SUCCESS, LOGIN_FAILURE, LOGOUT } from "../actions/UserAction";
+
 const initialState = {
+  isAuthenticated: false,
   user: null,
-  loading: true,
   error: null,
 };
 
-const userReducer = (state = initialState, action) => {
+const UserReducer = (state = initialState, action) => {
   switch (action.type) {
-    case "SET_USER":
+    case LOGIN_SUCCESS:
+      console.log("LOGIN_SUCCESS action received");
       return {
         ...state,
+        isAuthenticated: true,
         user: action.payload,
-        loading: false,
+        error: null,
       };
-    case "SET_USER_ERROR":
+    case LOGIN_FAILURE:
       return {
         ...state,
+        isAuthenticated: false,
+        user: null,
         error: action.payload,
-        loading: false,
+      };
+    case LOGOUT:
+      return {
+        ...state,
+        isAuthenticated: false,
+        user: null,
       };
     default:
       return state;
   }
 };
 
-export default userReducer;
+export default UserReducer;

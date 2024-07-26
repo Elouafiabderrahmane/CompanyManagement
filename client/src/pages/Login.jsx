@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useSelector } from "react-redux";
 import {
   Avatar,
   Button,
@@ -16,8 +17,8 @@ import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
-import { fetchUserData } from "../redux/actions/UserAction";
+import { login } from "../redux/actions/UserAction";
+
 const theme = createTheme();
 
 const Login = () => {
@@ -27,28 +28,17 @@ const Login = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
+ 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    setError(""); // Clear previous errors
-
+    setError("");
     try {
-      const response = await axios.post("http://localhost:8085/auth/login", {
-        username: username,
-        password: password,
-      });
-
-      if (response.status !== 200) {
-        throw new Error("Login failed");
-      }
-
-      localStorage.setItem("token", response.data["access-token"]);
-
-      // Fetch user data and then navigate
-      dispatch(fetchUserData());
-      navigate("/dashboard"); // Redirect to the dashboard or any other page
+      await dispatch(login(username, password));
+      // Add a console.log here to check if this point is reached
+      console.log("Login successful, attempting to navigate");
+      navigate("/dashboard");
     } catch (error) {
       setError("Login failed. Please check your credentials and try again.");
-      console.error("Login error:", error);
     }
   };
 

@@ -1,9 +1,8 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import { createStore, applyMiddleware } from "redux";
 import { Provider } from "react-redux";
-import { thunk } from "redux-thunk"; // Correct import for redux-thunk
-import rootReducer from "./redux/reducers";
+import { thunk } from "redux-thunk";
+import { createStore, applyMiddleware } from "redux";import rootReducer from "./redux/reducers";
 import { BrowserRouter } from "react-router-dom";
 
 import "./assets/boxicons-2.0.7/css/boxicons.min.css";

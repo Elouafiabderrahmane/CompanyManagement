@@ -55,14 +55,22 @@ const Topnav = () => {
     </div>
   );
 
-  const renderUserToggle = (user) => (
-    <div className="topnav__right-user">
-      <div className="topnav__right-user__image">
-        <img src={user.image} alt="User" />
+  const renderUserToggle = (user) =>
+    user ? (
+      <div className="topnav__right-user">
+        <div className="topnav__right-user__image">
+          <img src={user.image} alt="User" />
+        </div>
+        <div className="topnav__right-user__name">{user.display_name}</div>
       </div>
-      <div className="topnav__right-user__name">{user.display_name}</div>
-    </div>
-  );
+    ) : (
+      <div className="topnav__right-user">
+        <div className="topnav__right-user__image">
+          <img src={user_image} alt="Default User" />
+        </div>
+        <div className="topnav__right-user__name">User</div>
+      </div>
+    );
 
   const renderUserMenu = (item, index) => (
     <Link to="/" key={index}>

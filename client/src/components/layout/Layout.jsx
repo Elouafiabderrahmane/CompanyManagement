@@ -20,17 +20,23 @@ const Layout = () => {
     dispatch(ThemeAction.setColor(colorClass));
   }, [dispatch]);
 
-  const isAuthRoute = ["/login", "/register"].includes(location.pathname);
+  const isAuthRoute = ["/login", "/register","/"].includes(location.pathname);
 
   return (
     <div className={`layout ${themeReducer.mode} ${themeReducer.color}`}>
-      {!isAuthRoute && <Sidebar />}
-      <div className="layout__content">
-        {!isAuthRoute && <TopNav />}
-        <div className="layout__content-main">
-          <AppRoutes />
-        </div>
-      </div>
+      {isAuthRoute ? (
+        <AppRoutes /> // Only render AppRoutes for authentication routes
+      ) : (
+        <>
+          <Sidebar />
+          <div className="layout__content">
+            <TopNav />
+            <div className="layout__content-main">
+              <AppRoutes /> 
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 };

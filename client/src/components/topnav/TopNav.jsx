@@ -48,10 +48,6 @@ const Topnav = () => {
     fetchUserData();
   }, []);
 
-  if (!currUser) {
-    return <div>Loading...</div>;
-  }
-
   const renderNotificationItem = (item, index) => (
     <div className="notification-item" key={index}>
       <i className={item.icon}></i>

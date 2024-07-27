@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Avatar,
   Button,
@@ -14,7 +14,8 @@ import {
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import axios from "axios";
-import { useNavigate } from "react-router-dom"; // Import useNavigate
+import { useNavigate } from "react-router-dom";
+import { getUserDataFromToken } from "../components/jwtUtils";
 
 const theme = createTheme();
 
@@ -22,7 +23,7 @@ const Register = () => {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState(""); // New state for confirm password
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [employerName, setEmployerName] = useState("");
   const [employerPhone, setEmployerPhone] = useState("");
   const [employerCin, setEmployerCin] = useState("");
@@ -31,21 +32,26 @@ const Register = () => {
   const [employerBirthDate, setEmployerBirthDate] = useState("");
   const [employerUrl, setEmployerUrl] = useState("");
 
-  const [error, setError] = useState(""); // New state for general error message
-  const [fieldErrors, setFieldErrors] = useState({}); // New state for field-specific errors
+  const [error, setError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState({});
 
-  const navigate = useNavigate(); // Initialize useNavigate
+  const navigate = useNavigate();
+    const token = localStorage.getItem("token");
+  const { role } = getUserDataFromToken(token);
+
+  useEffect(() => {
+    if (role && role !== "ADMIN") {
+      navigate("/unauthorized"); // Redirect if the user is not an ADMIN
+    }
+  }, [role, navigate]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    // Clear previous field errors
     setFieldErrors({});
 
-    // Initialize error object
     const errors = {};
 
-    // Check if any field is empty
     if (!username) errors.username = "Username is required.";
     if (!email) errors.email = "Email is required.";
     if (!password) errors.password = "Password is required.";
@@ -62,22 +68,18 @@ const Register = () => {
       errors.employerBirthDate = "Employer Birth Date is required.";
     if (!employerUrl) errors.employerUrl = "Employer URL is required.";
 
-    // Check if passwords match
     if (password !== confirmPassword) {
       errors.confirmPassword = "Passwords do not match.";
     }
 
-    // If there are errors, set them and return
     if (Object.keys(errors).length > 0) {
       setFieldErrors(errors);
-      setError(""); // Clear general error
+      setError("");
       return;
     }
 
-    // Clear previous general error
     setError("");
 
-    // Prepare the form data
     const formData = new FormData();
     formData.append("username", username);
     formData.append("email", email);
@@ -105,7 +107,6 @@ const Register = () => {
       navigate("/login"); // Redirect to login page
     } catch (error) {
       if (error.response && error.response.data) {
-        // Handle specific error from backend
         if (error.response.data.message === "Username already exists") {
           setError("Username already exists. Please choose another one.");
         } else {
@@ -121,11 +122,11 @@ const Register = () => {
   return (
     <ThemeProvider theme={theme}>
       <Container component="main" maxWidth="md">
-        {/* Use 'md' to accommodate the two-column layout */}
         <CssBaseline />
         <Box
           sx={{
             marginTop: 8,
+            marginBottom: 8,
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
@@ -232,7 +233,6 @@ const Register = () => {
                   onChange={(e) => setEmployerBirthDate(e.target.value)}
                 />
               </Grid>
-
               <Grid item xs={12}>
                 <TextField
                   required

@@ -1,7 +1,10 @@
 package ma.barakatouna.company_management.rest;
 
+import ma.barakatouna.company_management.entities.Employer;
 import ma.barakatouna.company_management.entities.Role;
 import ma.barakatouna.company_management.entities.User;
+import ma.barakatouna.company_management.repos.EmployerRepository;
+import ma.barakatouna.company_management.service.EmployerService;
 import ma.barakatouna.company_management.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -17,6 +20,7 @@ import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.HashSet;
 import java.util.Map;
@@ -34,7 +38,8 @@ public class SecurityController {
     private UserService userService;
     @Autowired
     private PasswordEncoder passwordEncoder;
-
+    @Autowired
+    private EmployerRepository employerRepository;
     @GetMapping("/profile")
     public Authentication authentication(Authentication authentication) {
         return authentication;
@@ -73,13 +78,22 @@ public class SecurityController {
             @RequestParam String username,
             @RequestParam String email,
             @RequestParam String password,
-            @RequestParam Set<String> roles) {
+            @RequestParam Set<String> roles,
+            @RequestParam String employerName,
+            @RequestParam String employerPhone,
+            @RequestParam String employerCin,
+            @RequestParam String employerAddress,
+            @RequestParam LocalDate employerHireDate,
+            @RequestParam LocalDate employerBirthDate,
+            @RequestParam String employerUrl) {
 
+        // Create User
         User user = new User();
         user.setUsername(username);
         user.setEmail(email);
         user.setPassword(passwordEncoder.encode(password));
-
+        user.setEnabled(true); // Assuming new users are enabled by default
+        // Set Roles
         Set<Role> roleSet = new HashSet<>();
         for (String roleName : roles) {
             Role role = new Role();
@@ -88,7 +102,27 @@ public class SecurityController {
         }
         user.setRoles(roleSet);
 
+        // Save User
         userService.addNewUser(user);
-        return Map.of("message", "User registered successfully");
+
+        // Create Employer
+        Employer employer = new Employer();
+        employer.setName(employerName);
+        employer.setPhone(employerPhone);
+        employer.setCin(employerCin);
+        employer.setEmail(email); // Assuming email is the same as user email
+        employer.setAdress(employerAddress);
+        employer.setHireDate(employerHireDate);
+        employer.setBirthDate(employerBirthDate);
+        employer.setUrl(employerUrl);
+
+        // Link Employer to User
+        employer.setUser(user);
+
+        // Save Employer
+        employerRepository.save(employer);
+
+        return Map.of("message", "User and Employer registered successfully");
     }
+
 }

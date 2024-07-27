@@ -1,9 +1,10 @@
 import React, { Suspense, lazy } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import ProtectedRoute from "../components/ProtectedRoute"; // Adjust the path as needed
+import Home from "../pages/Home";
 
 const Dashboard = lazy(() => import("../pages/Dashboard"));
-const Customers = lazy(() => import("../pages/Customers"));
+const Customers = lazy(() => import("../pages/Home"));
 const Materials = lazy(() => import("../pages/Materials"));
 const Tasks = lazy(() => import("../pages/Tasks"));
 const Payments = lazy(() => import("../pages/Payments"));
@@ -22,7 +23,7 @@ const AppRoutes = () => {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/" element={<Navigate to="/dashboard" />} />
+        <Route path="/" element={<Home />} />
         <Route element={<ProtectedRoute />}>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/customers" element={<Customers />} />

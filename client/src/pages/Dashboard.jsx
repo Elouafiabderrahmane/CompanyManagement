@@ -1,29 +1,21 @@
-import React, {useEffect} from 'react'
+import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import Chart from 'react-apexcharts';
+import { useSelector } from 'react-redux';
+import StatusCard from '../components/status-card/StatusCard';
+import Table from '../components/table/Table';
+import Badge from '../components/badge/Badge';
+import axios from 'axios';
 
-import { Link } from 'react-router-dom'
+import LinearProgress, { linearProgressClasses } from "@mui/material/LinearProgress";
+import { styled } from "@mui/material";
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, FormControlLabel, Switch, TextField, Snackbar, Box, Card, CardContent, Typography } from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
 
-import Chart from 'react-apexcharts'
 
-import { useSelector } from 'react-redux'
-
-import StatusCard from '../components/status-card/StatusCard'
-
-import Table from '../components/table/Table'
-
-import Badge from '../components/badge/Badge'
-
-import statusCards from '../assets/JsonData/status-card-data.json'
-
+// Chart options
 const chartOptions = {
-    series: [{
-        name: 'Online Customers',
-        data: [40,70,20,90,36,80,30,91,60]
-    }, {
-        name: 'Store Customers',
-        data: [40, 30, 70, 80, 40, 16, 40, 20, 51, 10]
-    }],
     options: {
-        color: ['#6ab04c', '#2980b9'],
         chart: {
             background: 'transparent'
         },
@@ -34,7 +26,7 @@ const chartOptions = {
             curve: 'smooth'
         },
         xaxis: {
-            categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep']
+            categories: [] // Placeholder for x-axis categories
         },
         legend: {
             position: 'top'
@@ -43,160 +35,151 @@ const chartOptions = {
             show: false
         }
     }
-}
-
-const topCustomers = {
-    head: [
-        'user',
-        'total orders',
-        'total spending'
-    ],
-    body: [
-        {
-            "username": "john doe",
-            "order": "490",
-            "price": "$15,870"
-        },
-        {
-            "username": "frank iva",
-            "order": "250",
-            "price": "$12,251"
-        },
-        {
-            "username": "anthony baker",
-            "order": "120",
-            "price": "$10,840"
-        },
-        {
-            "username": "frank iva",
-            "order": "110",
-            "price": "$9,251"
-        },
-        {
-            "username": "anthony baker",
-            "order": "80",
-            "price": "$8,840"
-        }
-    ]
-}
-
-const renderCusomerHead = (item, index) => (
-    <th key={index}>{item}</th>
-)
-
-const renderCusomerBody = (item, index) => (
-    <tr key={index}>
-        <td>{item.username}</td>
-        <td>{item.order}</td>
-        <td>{item.price}</td>
-    </tr>
-)
-
-const latestOrders = {
-    header: [
-        "order id",
-        "user",
-        "total price",
-        "date",
-        "status"
-    ],
-    body: [
-        {
-            id: "#OD1711",
-            user: "john doe",
-            date: "17 Jun 2021",
-            price: "$900",
-            status: "shipping"
-        },
-        {
-            id: "#OD1712",
-            user: "frank iva",
-            date: "1 Jun 2021",
-            price: "$400",
-            status: "paid"
-        },
-        {
-            id: "#OD1713",
-            user: "anthony baker",
-            date: "27 Jun 2021",
-            price: "$200",
-            status: "pending"
-        },
-        {
-            id: "#OD1712",
-            user: "frank iva",
-            date: "1 Jun 2021",
-            price: "$400",
-            status: "paid"
-        },
-        {
-            id: "#OD1713",
-            user: "anthony baker",
-            date: "27 Jun 2021",
-            price: "$200",
-            status: "refund"
-        }
-    ]
-}
-
-const orderStatus = {
-    "shipping": "primary",
-    "pending": "warning",
-    "paid": "success",
-    "refund": "danger"
-}
-
-const renderOrderHead = (item, index) => (
-    <th key={index}>{item}</th>
-)
-
-const renderOrderBody = (item, index) => (
-    <tr key={index}>
-        <td>{item.id}</td>
-        <td>{item.user}</td>
-        <td>{item.price}</td>
-        <td>{item.date}</td>
-        <td>
-            <Badge type={orderStatus[item.status]} content={item.status}/>
-        </td>
-    </tr>
-)
+};
 
 const Dashboard = () => {
+    const renderHead = (item, index) => <th key={index}>{item}</th>;
+    const renderBody = (item, index) => (
+        <tr key={index} >
+          <td>{item.name}</td>
+          <td>{item.phone}</td>
+       
+          <td>{item.email}</td>
+          
+        </tr>
+      );
+      const renderHeadd = (item, index) => <th key={index}>{item}</th>;
+      const renderBodyy = (item, index) => (
+          <tr key={index} >
+            <td>{item.name}</td>
+            <td>{item.budget}</td>
+         
+            <td>{item.startDate}</td>
+            <td>{item.endDate}</td>
+            
+          </tr>
+        );
+      
+      const BorderLinearProgress = styled(LinearProgress)(({ theme }) => ({
+        height: 10,
+        borderRadius: 5,
+        [`& .${linearProgressClasses.colorPrimary}`]: {
+          backgroundColor:
+            theme.palette.grey[theme.palette.mode === "light" ? 200 : 800],
+        },
+        [`& .${linearProgressClasses.bar}`]: {
+          borderRadius: 5,
+          backgroundColor: theme.palette.mode === "light" ? "#1a90ff" : "#308fe8",
+        },
+      }));
+    const [projectsCount, setProjectsCount] = useState(0);
+    const [employersCount, setEmployersCount] = useState(0);
+    const [materialsCount, setMaterialsCount] = useState(0);
+    const [salariesCount, setSalariesCount] = useState(0);
 
-    const themeReducer = useSelector(state => state.ThemeReducer.mode)
+    const [projectData, setProjectData] = useState({ categories: [], series: [] });
+    const [topEmployers, setTopEmployers] = useState([]);
+    const [latestProjects, setLatestProjects] = useState([]);
+
+    const themeReducer = useSelector(state => state.ThemeReducer.mode);
+
+    useEffect(() => {
+        // Fetch counts for cards
+        axios.get('http://localhost:8085/api/projects/count').then(response => setProjectsCount(response.data));
+        axios.get('http://localhost:8085/api/employers/count').then(response => setEmployersCount(response.data));
+        axios.get('http://localhost:8085/api/materials/count').then(response => setMaterialsCount(response.data));
+        axios.get('http://localhost:8085/api/salaries/count').then(response => setSalariesCount(response.data));
+        
+        // Fetch data for chart
+        axios.get('http://localhost:8085/api/projects/stats').then(response => {
+            setProjectData({
+                categories: response.data.categories,
+                series: [{
+                    name: 'Projects',
+                    data: response.data.data
+                }]
+            });
+        });
+
+        // Fetch top employers
+        axios.get('http://localhost:8085/api/employers')
+        .then(response => {
+            setTopEmployers(response.data);
+            console.log("Top Employers:", response.data);
+        })
+        .catch(error => {
+            console.error("Error fetching top employers:", error);
+        });
+
+    // Fetch latest projects
+    axios.get('http://localhost:8085/api/projects')
+        .then(response => {
+            setLatestProjects(response.data);
+            console.log("Latest Projects:", response.data);
+        })
+        .catch(error => {
+            console.error("Error fetching latest projects:", error);
+        });
+    }, []);
 
     return (
         <div>
-            <h2 className="page-header">Dashboard</h2>
+            <Box mb={"20px"}>
+        <Card sx={{ width: "200px", height: "60px", backgroundColor: "#1976d2" }}>
+          <CardContent sx={{ height: "100%" }}>
+            <Box display="flex" justifyContent="center" alignItems="center">
+              <Typography variant="h6" style={{ color: "white", fontWeight: "bold", textAlign: "center" }}>
+                Dashboard
+              </Typography>
+            </Box>
+          </CardContent>
+        </Card>
+      </Box>
             <div className="row">
                 <div className="col-6">
                     <div className="row">
-                        {
-                            statusCards.map((item, index) => (
-                                <div className="col-6" key={index}>
-                                    <StatusCard
-                                        icon={item.icon}
-                                        count={item.count}
-                                        title={item.title}
-                                    />
-                                </div>
-                            ))
-                        }
+                        <div className="col-6">
+                        <StatusCard
+     icon="bx bxs-briefcase"
+    count={projectsCount}
+    title="Projects"
+/>
+                        </div>
+                        <div className="col-6">
+                        <StatusCard
+   icon="bx bxs-user-detail"
+    count={employersCount}
+    title="Employers"
+/>
+                        </div>
+                        <div className="col-6">
+                        <StatusCard
+   icon="bx bxs-package"
+    count={materialsCount}
+    title="Materials"
+/>
+                        </div>
+                        <div className="col-6">
+                        <StatusCard
+   icon="bx bxs-dock-left"
+    count={salariesCount}
+    title="Salaries"
+/>
+                        </div>
                     </div>
                 </div>
                 <div className="col-6">
                     <div className="card full-height">
-                        {/* chart */}
+                        {/* Chart */}
                         <Chart
-                            options={themeReducer === 'theme-mode-dark' ? {
+                            options={{
                                 ...chartOptions.options,
-                                theme: { mode: 'dark'}
-                            } : {
-                                ...chartOptions.options,
-                                theme: { mode: 'light'}
+                                theme: { mode: themeReducer === 'theme-mode-dark' ? 'dark' : 'light' },
+                                xaxis: {
+                                    categories: projectData.categories
+                                }
                             }}
-                            series={chartOptions.series}
+                            series={projectData.series}
                             type='line'
                             height='100%'
                         />
@@ -205,42 +188,45 @@ const Dashboard = () => {
                 <div className="col-4">
                     <div className="card">
                         <div className="card__header">
-                            <h3>top customers</h3>
+                            <h3>Top Employers</h3>
                         </div>
                         <div className="card__body">
-                            <Table
-                                headData={topCustomers.head}
-                                renderHead={(item, index) => renderCusomerHead(item, index)}
-                                bodyData={topCustomers.body}
-                                renderBody={(item, index) => renderCusomerBody(item, index)}
-                            />
+                        <Table
+              limit="5"
+              headData={['Name', 'Phone', 'Email']}
+              renderHead={renderHead}
+              bodyData={topEmployers}
+              renderBody={renderBody}
+            />
                         </div>
                         <div className="card__footer">
-                            <Link to='/'>view all</Link>
+                            <Link to='/employers'>view all</Link>
                         </div>
                     </div>
                 </div>
                 <div className="col-8">
                     <div className="card">
                         <div className="card__header">
-                            <h3>latest orders</h3>
+                            <h3>Latest Projects</h3>
                         </div>
                         <div className="card__body">
-                            <Table
-                                headData={latestOrders.header}
-                                renderHead={(item, index) => renderOrderHead(item, index)}
-                                bodyData={latestOrders.body}
-                                renderBody={(item, index) => renderOrderBody(item, index)}
-                            />
+                        <Table
+              limit="6"
+              headData={['Name', 'Budget', 'Start Date', 'End Date']}
+              renderHead={renderHeadd}
+              bodyData={latestProjects}
+              renderBody={renderBodyy}
+            />
+
                         </div>
                         <div className="card__footer">
-                            <Link to='/'>view all</Link>
+                            <Link to='/projects'>view all</Link>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    )
-}
+    );
+};
 
-export default Dashboard
+export default Dashboard;

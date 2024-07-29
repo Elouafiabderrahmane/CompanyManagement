@@ -3,6 +3,7 @@ package ma.barakatouna.company_management.rest;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 import ma.barakatouna.company_management.entities.Project;
+import ma.barakatouna.company_management.entities.ProjectStatsDTO;
 import ma.barakatouna.company_management.model.MaterialDTO;
 import ma.barakatouna.company_management.model.ProjectDTO;
 import ma.barakatouna.company_management.repos.EmployerRepository;
@@ -27,6 +28,7 @@ import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 
 @RestController
@@ -157,5 +159,25 @@ public class ProjectResource {
         return ResponseEntity.ok(projects);
     }
 
+    @GetMapping("/count")
+    public ResponseEntity<Long> countAll() {
+        return ResponseEntity.ok(projectRepository.count());
+    }
+    @GetMapping("/stats")
+    public ProjectStatsDTO getProjectStats() {
+        List<Object[]> rawStats = projectRepository.findProjectCountsGroupedByStartDate();
 
+        List<String> categories = rawStats.stream()
+                .map(stat -> stat[0].toString()) // Assuming startDate is a LocalDate, adjust as necessary
+                .collect(Collectors.toList());
+
+        List<Integer> data = rawStats.stream()
+                .map(stat -> ((Long) stat[1]).intValue()) // Assuming the count is returned as Long
+                .collect(Collectors.toList());
+
+        ProjectStatsDTO stats = new ProjectStatsDTO();
+        stats.setCategories(categories);
+        stats.setData(data);
+        return stats;
+    }
 }

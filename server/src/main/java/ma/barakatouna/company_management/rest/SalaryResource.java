@@ -3,6 +3,7 @@ package ma.barakatouna.company_management.rest;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 import ma.barakatouna.company_management.model.SalaryDTO;
+import ma.barakatouna.company_management.repos.SalaryRepository;
 import ma.barakatouna.company_management.service.SalaryService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -19,9 +20,11 @@ import java.util.List;
 public class SalaryResource {
 
     private final SalaryService salaryService;
+    private final SalaryRepository salaryRepository;
 
-    public SalaryResource(final SalaryService salaryService) {
+    public SalaryResource(final SalaryService salaryService, SalaryRepository salaryRepository) {
         this.salaryService = salaryService;
+        this.salaryRepository = salaryRepository;
     }
 
     @GetMapping
@@ -54,5 +57,10 @@ public class SalaryResource {
         salaryService.delete(id);
         return ResponseEntity.noContent().build();
     }
+    @GetMapping("/count")
+    public ResponseEntity<Long> countAll() {
+        return ResponseEntity.ok(salaryRepository.count());
+    }
+
 
 }

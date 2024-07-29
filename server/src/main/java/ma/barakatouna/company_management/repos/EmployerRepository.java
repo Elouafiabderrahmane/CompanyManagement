@@ -21,4 +21,7 @@ public interface EmployerRepository extends JpaRepository<Employer, Long> {
 
     Employer getEmployerByNameContaining(String name);
     Employer findByUser( User user);
+
+
+
 }

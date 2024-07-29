@@ -168,4 +168,9 @@ public class EmployerResource {
         EmployerDTO employer = employerService.getEmployerByUserName(userName);
         return ResponseEntity.ok(employer);
     }
+    @GetMapping("/count")
+    public ResponseEntity<Long> countAll() {
+        return ResponseEntity.ok(employerRepository.count());
+    }
+
 }

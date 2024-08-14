@@ -23,7 +23,6 @@ import ma.barakatouna.company_management.model.Tasktype;
 @Getter
 @Setter
 public class Task {
-
     @Id
     @Column(nullable = false, updatable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)

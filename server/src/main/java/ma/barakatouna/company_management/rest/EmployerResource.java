@@ -50,6 +50,7 @@ public class EmployerResource {
         return ResponseEntity.ok(employerService.get(id));
     }
 
+
     @PostMapping
     public ResponseEntity<Long> createEmployer(@RequestParam("name") String name,
                                                @RequestParam("phone") String phone,
@@ -67,6 +68,7 @@ public class EmployerResource {
                                                @RequestParam(value = "image", required = false) MultipartFile image) throws IOException {
 
         Employer employer = employerService.createEmployer(name, phone, cin, email, address, hireDate, birthDate, projectIds, taskIds, materialIds, salaryIds, paymentIds, userId, image);
+
 
         return new ResponseEntity<>(employer.getId(), HttpStatus.CREATED);
     }

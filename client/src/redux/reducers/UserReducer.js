@@ -1,7 +1,7 @@
 import { LOGIN_SUCCESS, LOGIN_FAILURE, LOGOUT } from "../actions/UserAction";
 
 const initialState = {
-  isAuthenticated: false,
+  isAuthenticated: true, //// change to false when done testing
   user: null,
   error: null,
 };

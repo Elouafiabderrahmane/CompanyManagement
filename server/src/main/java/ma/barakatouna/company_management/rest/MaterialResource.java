@@ -2,8 +2,10 @@ package ma.barakatouna.company_management.rest;
 
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import ma.barakatouna.company_management.entities.*;
 import ma.barakatouna.company_management.model.MaterialDTO;
-import ma.barakatouna.company_management.repos.MaterialRepository;
+import ma.barakatouna.company_management.repos.*;
 import ma.barakatouna.company_management.service.MaterialService;
 import ma.barakatouna.company_management.util.ReferencedException;
 import ma.barakatouna.company_management.util.ReferencedWarning;
@@ -13,6 +15,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 
 @RestController
@@ -21,9 +25,22 @@ import java.util.List;
 public class MaterialResource {
 
     private final MaterialService materialService;
+    private final MaterialRepository materialRepository;
+    private final ProjectRepository projectRepository;
+    private final EmployerRepository employerRepository;
+    private final SalaryRepository salaryRepository;
+    private final PaymentRepository paymentRepository;
+    private final TaskRepository taskRepository;
 
-    public MaterialResource(final MaterialService materialService, MaterialRepository materialRepository) {
+
+    public MaterialResource(final MaterialService materialService, MaterialRepository materialRepository, MaterialRepository materialRepository1, ProjectRepository projectRepository, EmployerRepository employerRepository, SalaryRepository salaryRepository, PaymentRepository paymentRepository, TaskRepository taskRepository) {
         this.materialService = materialService;
+        this.materialRepository = materialRepository1;
+        this.projectRepository = projectRepository;
+        this.employerRepository = employerRepository;
+        this.salaryRepository = salaryRepository;
+        this.paymentRepository = paymentRepository;
+        this.taskRepository = taskRepository;
     }
 
     @GetMapping
@@ -38,10 +55,44 @@ public class MaterialResource {
 
     @PostMapping
     @ApiResponse(responseCode = "201")
-    public ResponseEntity<Long> createMaterial(@RequestBody @Valid final MaterialDTO materialDTO) {
-        final Long createdId = materialService.create(materialDTO);
+    public ResponseEntity<Long> createMaterial(@RequestBody @Valid MaterialDTO materialDTO) {
+        Material material = new Material();
+        material.setName(materialDTO.getName());
+        material.setOwned(materialDTO.getOwned());
+        material.setReference(materialDTO.getReference());
+
+        // Fetch related entities
+        List<Project> projects = projectRepository.findAllById(materialDTO.getProjectIds());
+        List<Employer> employers = employerRepository.findAllById(materialDTO.getEmployerIds());
+        List<Salary> salaries = salaryRepository.findAllById(materialDTO.getSalaryIds());
+        List<Payment> payments = paymentRepository.findAllById(materialDTO.getPaymentIds());
+        List<Task> tasks = taskRepository.findAllById(materialDTO.getTaskIds());
+
+        material.setTasks(tasks);
+
+        Long createdId = materialRepository.save(material).getId();
+
+        // Update relationships
+        projects.forEach(project -> {
+            project.setMaterials(Set.of(material));
+            projectRepository.save(project);
+        });
+        employers.forEach(employer -> {
+            employer.setMaterials(Set.of(material));
+            employerRepository.save(employer);
+        });
+        salaries.forEach(salary -> {
+            salary.setMaterial(material);
+            salaryRepository.save(salary);
+        });
+        payments.forEach(payment -> {
+            payment.setMaterial(material);
+            paymentRepository.save(payment);
+        });
+
         return new ResponseEntity<>(createdId, HttpStatus.CREATED);
     }
+
 
     @PutMapping("/{id}")
     public ResponseEntity<Long> updateMaterial(@PathVariable(name = "id") final Long id,

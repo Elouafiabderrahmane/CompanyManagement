@@ -86,7 +86,6 @@ public class EmployerResource {
         employer.setHireDate(hireDate);
         employer.setBirthDate(birthDate);
         employer.setUrl(imagePath.toUri().toString());
-
         // Assuming you have associations properly handled in your service layer
         // Set materials, user, etc.
 

@@ -49,5 +49,4 @@ public class Salary {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "material_id")
     private Material material;
-
 }

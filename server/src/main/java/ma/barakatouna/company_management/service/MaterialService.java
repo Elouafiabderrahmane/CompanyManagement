@@ -1,6 +1,8 @@
 package ma.barakatouna.company_management.service;
 
 import jakarta.transaction.Transactional;
+
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -56,6 +58,7 @@ public class MaterialService {
                 .orElseThrow(NotFoundException::new);
     }
 
+
     public Long create(final MaterialDTO materialDTO) {
         final Material material = new Material();
         mapToEntity(materialDTO, material);
@@ -100,9 +103,16 @@ public class MaterialService {
         if (tasks.size() != (materialDTO.getTasks() == null ? 0 : materialDTO.getTasks().size())) {
             throw new NotFoundException("one of tasks not found");
         }
-        material.setTasks(new HashSet<>(tasks));
+        material.setTasks(new ArrayList<>(tasks));
         return material;
     }
+
+    // Optional: Method to validate that all referenced entities exist
+    private void validateEntities(final MaterialDTO materialDTO) {
+        // Validation logic here if needed
+    }
+
+
 
     public ReferencedWarning getReferencedWarning(final Long id) {
         final ReferencedWarning referencedWarning = new ReferencedWarning();

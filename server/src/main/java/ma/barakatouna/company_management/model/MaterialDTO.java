@@ -22,4 +22,11 @@ public class MaterialDTO {
 
     private List<Long> tasks;
 
+
+    private List<Long> projectIds;
+    private List<Long> employerIds;
+    private List<Long> salaryIds;
+    private List<Long> paymentIds;
+    private List<Long> taskIds;
+
 }

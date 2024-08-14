@@ -51,7 +51,7 @@ public class Employer {
     @Column
     private String url;
 
-    @ManyToMany(mappedBy = "employers")
+    @ManyToMany(mappedBy = "employers",fetch = FetchType.LAZY)
     private Set<Project> projets;
 
     @ManyToMany(mappedBy = "employer")
@@ -74,5 +74,6 @@ public class Employer {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", unique = true)
     private User user;
+
 
 }

@@ -2,19 +2,22 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "../components/Axios";
 import ProjectCard from "../components/project-card/ProjectCard";
+import { Grid, Typography } from "@mui/material";
 import {
   Box,
-  Grid,
-  Button,
-  TextField,
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogActions,
-  Snackbar,
+  TextField,
   FormControlLabel,
   Switch,
-  Typography,
+  Button,
+  DialogActions,
+  Snackbar,
+  Select,
+  MenuItem,
+  InputLabel,
+  FormControl,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import image from "../assets/images/AxeoFM_Maquette3D_Drone-3.jpg";
@@ -34,8 +37,15 @@ const Projects = ({ employerId }) => {
     endDate: "",
     employers: [],
     materials: [],
+    tasks: [],
+    payment: null,
     image: null,
   });
+  const [employers, setEmployers] = useState([]);
+  const [materials, setMaterials] = useState([]);
+  const [tasks, setTasks] = useState([]);
+  const [payments, setPayments] = useState([]);
+
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
@@ -44,6 +54,27 @@ const Projects = ({ employerId }) => {
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [employersRes, materialsRes, tasksRes, paymentsRes] =
+          await Promise.all([
+            axios.get("http://localhost:8085/api/employers"),
+            axios.get("http://localhost:8085/api/materials"),
+            axios.get("http://localhost:8085/api/tasks"),
+            axios.get("http://localhost:8085/api/payments"),
+          ]);
+        setEmployers(employersRes.data);
+        setMaterials(materialsRes.data);
+        setTasks(tasksRes.data);
+        setPayments(paymentsRes.data);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchData();
+  }, [employerId]);
 
   useEffect(() => {
     fetchProjects();
@@ -117,6 +148,10 @@ const Projects = ({ employerId }) => {
     if (newProjectData.image) {
       formData.append("image", newProjectData.image);
     }
+    formData.append("employers", newProjectData.employers);
+    formData.append("materials", newProjectData.materials);
+    formData.append("tasks", newProjectData.tasks);
+    formData.append("payment", newProjectData.payment);
 
     try {
       await axios.post("http://localhost:8085/api/projects", formData);
@@ -216,7 +251,6 @@ const Projects = ({ employerId }) => {
           </Box>
         )}
       </Box>
-
       {/* Add Project Modal */}
       <Dialog open={addModalOpen} onClose={() => setAddModalOpen(false)}>
         <DialogTitle>Add Project</DialogTitle>
@@ -301,6 +335,79 @@ const Projects = ({ employerId }) => {
               setNewProjectData({ ...newProjectData, endDate: e.target.value })
             }
           />
+          <FormControl fullWidth margin="dense">
+            <InputLabel>Employers</InputLabel>
+            <Select
+              multiple
+              value={newProjectData.employers}
+              onChange={(e) =>
+                setNewProjectData({
+                  ...newProjectData,
+                  employers: e.target.value,
+                })
+              }
+            >
+              {employers.map((employer) => (
+                <MenuItem key={employer.id} value={employer.id}>
+                  {employer.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          <FormControl fullWidth margin="dense">
+            <InputLabel>Materials</InputLabel>
+            <Select
+              multiple
+              value={newProjectData.materials}
+              onChange={(e) =>
+                setNewProjectData({
+                  ...newProjectData,
+                  materials: e.target.value,
+                })
+              }
+            >
+              {materials.map((material) => (
+                <MenuItem key={material.id} value={material.id}>
+                  {material.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <FormControl fullWidth margin="dense">
+            <InputLabel>Tasks</InputLabel>
+            <Select
+              multiple
+              value={newProjectData.tasks}
+              onChange={(e) =>
+                setNewProjectData({ ...newProjectData, tasks: e.target.value })
+              }
+            >
+              {tasks.map((task) => (
+                <MenuItem key={task.id} value={task.id}>
+                  {task.tasktype}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <FormControl fullWidth margin="dense">
+            <InputLabel>Payment</InputLabel>
+            <Select
+              value={newProjectData.payment}
+              onChange={(e) =>
+                setNewProjectData({
+                  ...newProjectData,
+                  payment: e.target.value,
+                })
+              }
+            >
+              {payments.map((payment) => (
+                <MenuItem key={payment.id} value={payment.id}>
+                  {payment.type}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
           <input
             type="file"
             onChange={(e) =>

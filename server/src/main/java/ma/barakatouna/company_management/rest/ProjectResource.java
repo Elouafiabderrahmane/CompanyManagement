@@ -27,6 +27,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -61,51 +62,24 @@ public class ProjectResource {
         return ResponseEntity.ok(projectService.get(id));
     }
 
-    @PostMapping(value = "", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ApiResponse(ref = "201")
-    public ResponseEntity<Long> createProject(
-            @RequestParam("image") MultipartFile image,
-            @RequestParam("name") String name,
-            @RequestParam("description") String description,
-            @RequestParam("budget") Double budget,
-            @RequestParam("paid") Boolean paid,
-            @RequestParam("done") Boolean done,
-            @RequestParam("startDate") LocalDate startDate,
-            @RequestParam("endDate") LocalDate endDate
-    ) throws IOException {
+    @PostMapping
+    public ResponseEntity<Long> createProject(@RequestParam("name") String name,
+                                              @RequestParam("description") String description,
+                                              @RequestParam("budget") Double budget,
+                                              @RequestParam("paid") Boolean paid,
+                                              @RequestParam("done") Boolean done,
+                                              @RequestParam("startDate") LocalDate startDate,
+                                              @RequestParam("endDate") LocalDate endDate,
+                                              @RequestParam(value = "employers", required = false) Set<Long> employerIds,
+                                              @RequestParam(value = "materials", required = false) Set<Long> materialIds,
+                                              @RequestParam(value = "tasks", required = false) Set<Long> taskIds,
+                                              @RequestParam(value = "payment", required = false) Long paymentId,
+                                              @RequestParam(value = "image", required = false) MultipartFile image) throws IOException {
 
-        // Create directory for storing images if it does not exist
-        Path path = Paths.get(System.getProperty("user.home"),"Company-Management", "projects-images");
-        if (!Files.exists(path)) {
-            Files.createDirectories(path);
-        }
+        // Call service to create a new project
+        Project project = projectService.createProject(name, description, budget, paid, done, startDate, endDate, employerIds, materialIds, taskIds, paymentId, image);
 
-        // Generate unique image name
-        String imageId = UUID.randomUUID().toString();
-        String imageName = imageId + "-" + image.getOriginalFilename();
-        Path imagePath = Paths.get(System.getProperty("user.home"), "Company-Management","projects-images", imageName);
-
-        // Save the image to the specified directory
-        Files.copy(image.getInputStream(), imagePath);
-
-        // Map request parameters to Project entity
-        Project project = new Project();
-        project.setName(name);
-        project.setDescription(description);
-        project.setBudget(budget);
-        project.setPaid(paid);
-        project.setDone(done);
-        project.setStartDate(startDate);
-        project.setEndDate(endDate);
-        project.setUrl(imagePath.toUri().toString());
-
-        // Assuming you have associations properly handled in your service layer
-        // Set employers, materials, etc.
-
-        // Save the Project entity
-        project = projectRepository.save(project);
-
-        // Return the ID of the created project
+        // Return the ID of the created project with HTTP status 201 Created
         return new ResponseEntity<>(project.getId(), HttpStatus.CREATED);
     }
 

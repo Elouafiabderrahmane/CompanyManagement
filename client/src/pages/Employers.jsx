@@ -6,18 +6,18 @@ import LinearProgress, {
   linearProgressClasses,
 } from "@mui/material/LinearProgress";
 import { styled } from "@mui/material";
+import { Snackbar, Box, Card, CardContent, Typography } from "@mui/material";
 import {
-  Button,
   Dialog,
-  DialogActions,
-  DialogContent,
   DialogTitle,
+  DialogContent,
+  DialogActions,
   TextField,
-  Snackbar,
-  Box,
-  Card,
-  CardContent,
-  Typography,
+  Button,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 
@@ -58,12 +58,25 @@ const Employers = ({ projectId }) => {
     name: "",
     phone: "",
     cin: "",
-    adress: "",
     email: "",
+    adress: "",
     hireDate: "",
     birthDate: "",
+    projects: [],
+    tasks: [],
+    materials: [],
+    salaries: [],
+    payments: [],
+    user: "",
     image: null,
   });
+
+  const [projects, setProjects] = useState([]);
+  const [tasks, setTasks] = useState([]);
+  const [materials, setMaterials] = useState([]);
+  const [salaries, setSalaries] = useState([]);
+  const [payments, setPayments] = useState([]);
+  const [users, setUsers] = useState([]);
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
@@ -72,9 +85,37 @@ const Employers = ({ projectId }) => {
   const [searchQuery, setSearchQuery] = useState("");
 
   const navigate = useNavigate();
-
   useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [
+          projectsRes,
+          tasksRes,
+          materialsRes,
+          salariesRes,
+          paymentsRes,
+          usersRes,
+        ] = await Promise.all([
+          axios.get("http://localhost:8085/api/projects"),
+          axios.get("http://localhost:8085/api/tasks"),
+          axios.get("http://localhost:8085/api/materials"),
+          axios.get("http://localhost:8085/api/salaries"),
+          axios.get("http://localhost:8085/api/payments"),
+          axios.get("http://localhost:8085/api/users"),
+        ]);
+
+        setProjects(projectsRes.data);
+        setTasks(tasksRes.data);
+        setMaterials(materialsRes.data);
+        setSalaries(salariesRes.data);
+        setPayments(paymentsRes.data);
+        setUsers(usersRes.data);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
     fetchEmployers();
+    fetchData();
   }, [projectId]);
 
   const fetchEmployers = () => {
@@ -94,6 +135,13 @@ const Employers = ({ projectId }) => {
         setLoading(false);
         showSnackbar("Failed to fetch employers", "error");
       });
+  };
+  const handleChange = (field) => (event) => {
+    const value = event.target.value;
+    setNewEmployerData({
+      ...newEmployerData,
+      [field]: Array.isArray(value) ? value : event.target.value,
+    });
   };
 
   const handleDelete = (id) => {
@@ -164,23 +212,23 @@ const Employers = ({ projectId }) => {
     setAddModalOpen(true);
   };
 
-  const addEmployer = () => {
+  const addEmployer = async () => {
     const formData = new FormData();
     Object.keys(newEmployerData).forEach((key) => {
-      formData.append(key, newEmployerData[key]);
+      if (key === "image" && newEmployerData[key]) {
+        formData.append(key, newEmployerData[key]);
+      } else if (key !== "image") {
+        formData.append(key, newEmployerData[key]);
+      }
     });
 
-    axios
-      .post("http://localhost:8085/api/employers", formData)
-      .then((response) => {
-        fetchEmployers();
-        setAddModalOpen(false);
-        showSnackbar("Employer added successfully", "success");
-      })
-      .catch((error) => {
-        console.error("Error adding employer:", error);
-        showSnackbar("Failed to add employer", "error");
-      });
+    try {
+      await axios.post("http://localhost:8085/api/employers", formData);
+      setAddModalOpen(false);
+      fetchEmployers(); // Refresh employer list or perform necessary updates
+    } catch (error) {
+      console.error("Error adding employer:", error);
+    }
   };
 
   const handleSearch = () => {
@@ -445,70 +493,144 @@ const Employers = ({ projectId }) => {
             fullWidth
             margin="dense"
             value={newEmployerData.name}
-            onChange={(e) =>
-              setNewEmployerData({ ...newEmployerData, name: e.target.value })
-            }
+            onChange={handleChange("name")}
           />
           <TextField
             label="Phone"
             fullWidth
             margin="dense"
             value={newEmployerData.phone}
-            onChange={(e) =>
-              setNewEmployerData({ ...newEmployerData, phone: e.target.value })
-            }
+            onChange={handleChange("phone")}
           />
           <TextField
             label="CIN"
             fullWidth
             margin="dense"
             value={newEmployerData.cin}
-            onChange={(e) =>
-              setNewEmployerData({ ...newEmployerData, cin: e.target.value })
-            }
-          />
-          <TextField
-            label="Address"
-            fullWidth
-            margin="dense"
-            value={newEmployerData.adress}
-            onChange={(e) =>
-              setNewEmployerData({ ...newEmployerData, adress: e.target.value })
-            }
+            onChange={handleChange("cin")}
           />
           <TextField
             label="Email"
             fullWidth
             margin="dense"
             value={newEmployerData.email}
-            onChange={(e) =>
-              setNewEmployerData({ ...newEmployerData, email: e.target.value })
-            }
+            onChange={handleChange("email")}
+          />
+          <TextField
+            label="Address"
+            fullWidth
+            margin="dense"
+            value={newEmployerData.adress}
+            onChange={handleChange("adress")}
           />
           <TextField
             label="Hire Date"
             fullWidth
             margin="dense"
+            type="date"
+            InputLabelProps={{ shrink: true }}
             value={newEmployerData.hireDate}
-            onChange={(e) =>
-              setNewEmployerData({
-                ...newEmployerData,
-                hireDate: e.target.value,
-              })
-            }
+            onChange={handleChange("hireDate")}
           />
           <TextField
             label="Birth Date"
             fullWidth
             margin="dense"
+            type="date"
+            InputLabelProps={{ shrink: true }}
             value={newEmployerData.birthDate}
-            onChange={(e) =>
-              setNewEmployerData({
-                ...newEmployerData,
-                birthDate: e.target.value,
-              })
-            }
+            onChange={handleChange("birthDate")}
           />
+
+          <FormControl fullWidth margin="dense">
+            <InputLabel>Projects</InputLabel>
+            <Select
+              multiple
+              value={newEmployerData.projects}
+              onChange={handleChange("projects")}
+            >
+              {projects.map((project) => (
+                <MenuItem key={project.id} value={project.id}>
+                  {project.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          <FormControl fullWidth margin="dense">
+            <InputLabel>Tasks</InputLabel>
+            <Select
+              multiple
+              value={newEmployerData.tasks}
+              onChange={handleChange("tasks")}
+            >
+              {tasks.map((task) => (
+                <MenuItem key={task.id} value={task.id}>
+                  {task.tasktype}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          <FormControl fullWidth margin="dense">
+            <InputLabel>Materials</InputLabel>
+            <Select
+              multiple
+              value={newEmployerData.materials}
+              onChange={handleChange("materials")}
+            >
+              {materials.map((material) => (
+                <MenuItem key={material.id} value={material.id}>
+                  {material.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          <FormControl fullWidth margin="dense">
+            <InputLabel>Salaries</InputLabel>
+            <Select
+              multiple
+              value={newEmployerData.salaries}
+              onChange={handleChange("salaries")}
+            >
+              {salaries.map((salary) => (
+                <MenuItem key={salary.id} value={salary.id}>
+                  {salary.amount}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          <FormControl fullWidth margin="dense">
+            <InputLabel>Payments</InputLabel>
+            <Select
+              multiple
+              value={newEmployerData.payments}
+              onChange={handleChange("payments")}
+            >
+              {payments.map((payment) => (
+                <MenuItem key={payment.id} value={payment.id}>
+                  {payment.amount}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          <FormControl fullWidth margin="dense">
+            <InputLabel>User</InputLabel>
+            <Select
+              value={newEmployerData.user}
+              onChange={handleChange("user")}
+            >
+              {users.map((user) => (
+                <MenuItem key={user.id} value={user.id}>
+                  {user.username}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
           <input
             type="file"
             onChange={(e) =>
@@ -526,7 +648,6 @@ const Employers = ({ projectId }) => {
           </Button>
         </DialogActions>
       </Dialog>
-
       {/* Snackbar for notifications */}
       <Snackbar
         open={snackbar.open}

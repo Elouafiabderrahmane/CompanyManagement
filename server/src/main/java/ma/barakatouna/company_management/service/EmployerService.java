@@ -1,9 +1,14 @@
 package ma.barakatouna.company_management.service;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.time.LocalDate;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import ma.barakatouna.company_management.entities.*;
@@ -20,6 +25,7 @@ import ma.barakatouna.company_management.util.ReferencedWarning;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 
@@ -61,10 +67,71 @@ public class EmployerService {
                 .orElseThrow(NotFoundException::new);
     }
 
-    public Long create(final EmployerDTO employerDTO) {
-        final Employer employer = new Employer();
-        mapToEntity(employerDTO, employer);
-        return employerRepository.save(employer).getId();
+    public Employer createEmployer(String name, String phone, String cin, String email, String address, LocalDate hireDate, LocalDate birthDate,
+                                   Set<Long> projectIds, Set<Long> taskIds, Set<Long> materialIds, Set<Long> salaryIds, Set<Long> paymentIds, Long userId, MultipartFile image) throws IOException, IOException {
+
+        Employer employer = new Employer();
+        employer.setName(name);
+        employer.setPhone(phone);
+        employer.setCin(cin);
+        employer.setEmail(email);
+        employer.setAdress(address);
+        employer.setHireDate(hireDate);
+        employer.setBirthDate(birthDate);
+
+        // Handle image upload
+        if (image != null && !image.isEmpty()) {
+            Path path = Paths.get(System.getProperty("user.home"), "Company-Management", "employer-images");
+            if (!Files.exists(path)) {
+                Files.createDirectories(path);
+            }
+
+            // Generate unique image name
+            String imageId = UUID.randomUUID().toString();
+            String imageName = imageId + "-" + image.getOriginalFilename();
+            Path imagePath = Paths.get(System.getProperty("user.home"), "Company-Management", "employer-images", imageName);
+
+            // Save the image to the specified directory
+            Files.copy(image.getInputStream(), imagePath);
+
+            // Set image URL in employer
+            employer.setUrl(imagePath.toUri().toString());
+        }
+
+        // Handle relations
+
+        employerRepository.save(employer);
+        if (projectIds != null && !projectIds.isEmpty()) {
+            Set<Project> projects = new HashSet<>(projectRepository.findAllById(projectIds));
+            projects.forEach(project -> project.getEmployers().add(employer));
+        }
+
+        if (taskIds != null && !taskIds.isEmpty()) {
+            Set<Task> tasks = new HashSet<>(taskRepository.findAllById(taskIds));
+            tasks.forEach(task -> task.getEmployer().add(employer));
+        }
+
+        if (materialIds != null && !materialIds.isEmpty()) {
+            Set<Material> materials = new HashSet<>(materialRepository.findAllById(materialIds));
+          employer.setMaterials(materials);
+        }
+
+        if (salaryIds != null && !salaryIds.isEmpty()) {
+            Set<Salary> salaries = new HashSet<>(salaryRepository.findAllById(salaryIds));
+            salaries.forEach(salary -> salary.setEmployers(employer));
+        }
+
+        if (paymentIds != null && !paymentIds.isEmpty()) {
+            Set<Payment> payments = new HashSet<>(paymentRepository.findAllById(paymentIds));
+            payments.forEach(payment -> payment.setEmployer(employer));
+        }
+
+        if (userId != null) {
+            User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User not found"));
+            user.setEmployer(employer);
+        }
+
+        return employer;
     }
 
     public void update(final Long id, final EmployerDTO employerDTO) {

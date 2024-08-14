@@ -51,7 +51,7 @@ public class Project {
     @Column
     private String url;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "ProjectEmployer",
             joinColumns = @JoinColumn(name = "projectId"),

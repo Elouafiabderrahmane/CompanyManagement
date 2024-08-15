@@ -54,6 +54,11 @@ const Payments = () => {
     material: "",
     employer: "",
   });
+  const [fieldsDisabled, setFieldsDisabled] = useState({
+    project: false,
+    material: false,
+    employer: false,
+  });
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [newPaymentData, setNewPaymentData] = useState({
     time: "",
@@ -63,6 +68,7 @@ const Payments = () => {
     material: "",
     employer: "",
   });
+
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
@@ -70,9 +76,35 @@ const Payments = () => {
   });
   const [searchQuery, setSearchQuery] = useState("");
 
+  const [employers, setEmployers] = useState([]);
+  const [materials, setMaterials] = useState([]);
+  const [projects, setProjects] = useState([]);
+
+  // Fetch data when the component mounts
   useEffect(() => {
     fetchPayments();
+    fetchProjects();
+    fetchMaterials();
+    fetchEmployers();
   }, []);
+
+  const fetchProjects = async () => {
+    const response = await fetch("http://localhost:8085/api/projects");
+    const data = await response.json();
+    setProjects(data); // Update the state with the fetched data
+  };
+
+  const fetchMaterials = async () => {
+    const response = await fetch("http://localhost:8085/api/materials");
+    const data = await response.json();
+    setMaterials(data); // Update the state with the fetched data
+  };
+
+  const fetchEmployers = async () => {
+    const response = await fetch("http://localhost:8085/api/employers");
+    const data = await response.json();
+    setEmployers(data); // Update the state with the fetched data
+  };
 
   const fetchPayments = () => {
     setLoading(true);
@@ -150,26 +182,32 @@ const Payments = () => {
     setAddModalOpen(true);
   };
 
-  const addPayment = () => {
-    axios
-      .post("http://localhost:8085/api/payments", newPaymentData)
-      .then(() => {
-        fetchPayments();
-        setAddModalOpen(false);
-        setNewPaymentData({
-          time: "",
-          type: "",
-          amount: "",
-          project: "",
-          material: "",
-          employer: "",
-        });
-        showSnackbar("Payment added successfully", "success");
-      })
-      .catch((error) => {
-        console.error("Error adding payment:", error);
-        showSnackbar("Failed to add payment", "error");
+  const addPayment = async () => {
+    const formData = new FormData();
+    formData.append("time", newPaymentData.time);
+    formData.append("type", newPaymentData.type);
+    formData.append("amount", newPaymentData.amount);
+    formData.append("project", newPaymentData.project);
+    formData.append("material", newPaymentData.material);
+    formData.append("employer", newPaymentData.employer);
+
+    try {
+      const response = await fetch("http://localhost:8085/api/payments", {
+        method: "POST",
+        body: formData,
       });
+
+      if (response.ok) {
+        setAddModalOpen(false);
+        fetchPayments(); // Refresh your payment list
+        showSnackbar("Payment added successfully", "success");
+      } else {
+        throw new Error("Failed to add payment");
+      }
+    } catch (error) {
+      console.error("Error adding payment:", error);
+      showSnackbar("Failed to add payment", "error");
+    }
   };
 
   const showSnackbar = (message, severity) => {
@@ -386,54 +424,118 @@ const Payments = () => {
         <DialogTitle>Add Payment</DialogTitle>
         <DialogContent>
           <TextField
-            id="standard-basic"
-            variant="standard"
-            label="Time"
+            fullWidth
             type="date"
+            margin="dense"
             value={newPaymentData.time}
             onChange={(e) =>
               setNewPaymentData({ ...newPaymentData, time: e.target.value })
             }
-            fullWidth
-            margin="normal"
-            InputLabelProps={{
-              shrink: true,
-            }}
           />
-          <FormControl fullWidth margin="normal" variant="standard">
+
+          <FormControl fullWidth margin="dense">
             <InputLabel>Type</InputLabel>
             <Select
               value={newPaymentData.type}
-              onChange={(e) =>
-                setNewPaymentData({ ...newPaymentData, type: e.target.value })
-              }
+              onChange={(e) => {
+                setNewPaymentData({
+                  ...newPaymentData,
+                  type: e.target.value,
+                  material: "",
+                  employer: "",
+                  project: "",
+                });
+                setFieldsDisabled({
+                  project: e.target.value !== "PROJECT",
+                  material: e.target.value !== "MATERIAL",
+                  employer: e.target.value !== "EMPLOYER",
+                });
+              }}
             >
-              <MenuItem value="EMPLOYER">EMPLOYER</MenuItem>
-              <MenuItem value="PROJECT">PROJECT</MenuItem>
-              <MenuItem value="MATERIAL">MATERIAL</MenuItem>
+              <MenuItem value="MATERIALl">Material</MenuItem>
+              <MenuItem value="EMPLOYER">Employer</MenuItem>
+              <MenuItem value="PROJECT">Project</MenuItem>
             </Select>
           </FormControl>
+
           <TextField
-            id="standard-basic"
-            variant="standard"
             label="Amount"
+            fullWidth
+            margin="dense"
             value={newPaymentData.amount}
             onChange={(e) =>
               setNewPaymentData({ ...newPaymentData, amount: e.target.value })
             }
-            fullWidth
-            margin="normal"
           />
+
+          <FormControl fullWidth margin="dense">
+            <InputLabel>Project</InputLabel>
+            <Select
+              value={newPaymentData.project}
+              onChange={(e) =>
+                setNewPaymentData({
+                  ...newPaymentData,
+                  project: e.target.value,
+                })
+              }
+              disabled={fieldsDisabled.project}
+            >
+              {projects.map((project) => (
+                <MenuItem key={project.id} value={project.id}>
+                  {project.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          <FormControl fullWidth margin="dense">
+            <InputLabel>Material</InputLabel>
+            <Select
+              value={newPaymentData.material}
+              onChange={(e) =>
+                setNewPaymentData({
+                  ...newPaymentData,
+                  material: e.target.value,
+                })
+              }
+              disabled={fieldsDisabled.material}
+            >
+              {materials.map((material) => (
+                <MenuItem key={material.id} value={material.id}>
+                  {material.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          <FormControl fullWidth margin="dense">
+            <InputLabel>Employer</InputLabel>
+            <Select
+              value={newPaymentData.employer}
+              onChange={(e) =>
+                setNewPaymentData({
+                  ...newPaymentData,
+                  employer: e.target.value,
+                })
+              }
+              disabled={fieldsDisabled.employer}
+            >
+              {employers.map((employer) => (
+                <MenuItem key={employer.id} value={employer.id}>
+                  {employer.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setAddModalOpen(false)} color="primary">
-            Cancel
-          </Button>
+          <Button onClick={() => setAddModalOpen(false)}>Cancel</Button>
           <Button onClick={addPayment} color="primary">
             Add
           </Button>
         </DialogActions>
       </Dialog>
+
       <Snackbar
         open={snackbar.open}
         autoHideDuration={6000}

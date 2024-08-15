@@ -315,7 +315,7 @@ const Projects = ({ employerId }) => {
             label="Done"
           />
           <TextField
-            label="Start Date"
+            type="date"
             fullWidth
             margin="dense"
             value={newProjectData.startDate}
@@ -327,7 +327,7 @@ const Projects = ({ employerId }) => {
             }
           />
           <TextField
-            label="End Date"
+            type="date"
             fullWidth
             margin="dense"
             value={newProjectData.endDate}

@@ -1,11 +1,15 @@
 package ma.barakatouna.company_management.service;
 
+import java.time.LocalDate;
 import java.util.List;
+
+import jakarta.persistence.EntityNotFoundException;
 import ma.barakatouna.company_management.entities.Employer;
 import ma.barakatouna.company_management.entities.Material;
 import ma.barakatouna.company_management.entities.Payment;
 import ma.barakatouna.company_management.entities.Project;
 import ma.barakatouna.company_management.model.PaymentDTO;
+import ma.barakatouna.company_management.model.Type;
 import ma.barakatouna.company_management.repos.EmployerRepository;
 import ma.barakatouna.company_management.repos.MaterialRepository;
 import ma.barakatouna.company_management.repos.PaymentRepository;
@@ -32,6 +36,32 @@ public class PaymentService {
         this.employerRepository = employerRepository;
     }
 
+
+    public Payment createPayment(LocalDate time, Type type, Double amount, Long projectId, Long materialId, Long employerId) {
+        Payment payment = new Payment();
+        payment.setTime(time);
+        payment.setType(type);
+        payment.setAmount(amount);
+
+        // Handle relations
+        if (projectId != null) {
+            Project project = projectRepository.findById(projectId).orElseThrow(() -> new EntityNotFoundException("Project not found"));
+            payment.setProject(project);
+        }
+
+        if (materialId != null) {
+            Material material = materialRepository.findById(materialId).orElseThrow(() -> new EntityNotFoundException("Material not found"));
+            payment.setMaterial(material);
+        }
+
+        if (employerId != null) {
+            Employer employer = employerRepository.findById(employerId).orElseThrow(() -> new EntityNotFoundException("Employer not found"));
+            payment.setEmployer(employer);
+        }
+
+        paymentRepository.save(payment);
+        return payment;
+    }
     public List<PaymentDTO> findAll() {
         final List<Payment> payments = paymentRepository.findAll(Sort.by("id"));
         return payments.stream()

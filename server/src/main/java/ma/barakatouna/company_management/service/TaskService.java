@@ -1,6 +1,8 @@
 package ma.barakatouna.company_management.service;
 
 import jakarta.transaction.Transactional;
+
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -100,7 +102,7 @@ public class TaskService {
         if (employer.size() != (taskDTO.getEmployer() == null ? 0 : taskDTO.getEmployer().size())) {
             throw new NotFoundException("one of employer not found");
         }
-        task.setEmployer(new HashSet<>(employer));
+        task.setEmployer(new ArrayList<>(employer));
         return task;
     }
 

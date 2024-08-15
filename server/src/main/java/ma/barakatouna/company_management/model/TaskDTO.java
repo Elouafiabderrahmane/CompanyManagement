@@ -29,5 +29,6 @@ public class TaskDTO {
     private Long project;
 
     private List<Long> employer;
+    private List<Long> material;
 
 }

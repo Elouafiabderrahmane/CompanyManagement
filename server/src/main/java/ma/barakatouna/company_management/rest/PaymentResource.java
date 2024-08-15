@@ -2,13 +2,17 @@ package ma.barakatouna.company_management.rest;
 
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
+import ma.barakatouna.company_management.entities.Payment;
 import ma.barakatouna.company_management.model.PaymentDTO;
+import ma.barakatouna.company_management.model.Type;
 import ma.barakatouna.company_management.service.PaymentService;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 
@@ -32,13 +36,18 @@ public class PaymentResource {
     public ResponseEntity<PaymentDTO> getPayment(@PathVariable(name = "id") final Long id) {
         return ResponseEntity.ok(paymentService.get(id));
     }
-
     @PostMapping
-    @ApiResponse(responseCode = "201")
-    public ResponseEntity<Long> createPayment(@RequestBody @Valid final PaymentDTO paymentDTO) {
-        final Long createdId = paymentService.create(paymentDTO);
-        return new ResponseEntity<>(createdId, HttpStatus.CREATED);
+    public ResponseEntity<Long> createPayment(@RequestParam("time") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate time,
+                                              @RequestParam("type") Type type,
+                                              @RequestParam("amount") Double amount,
+                                              @RequestParam(value = "project", required = false) Long projectId,
+                                              @RequestParam(value = "material", required = false) Long materialId,
+                                              @RequestParam(value = "employer", required = false) Long employerId) {
+
+        Payment payment = paymentService.createPayment(time, type, amount, projectId, materialId, employerId);
+        return new ResponseEntity<>(payment.getId(), HttpStatus.CREATED);
     }
+
 
     @PutMapping("/{id}")
     public ResponseEntity<Long> updatePayment(@PathVariable(name = "id") final Long id,

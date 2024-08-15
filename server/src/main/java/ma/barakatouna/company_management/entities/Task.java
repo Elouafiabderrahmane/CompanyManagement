@@ -13,6 +13,7 @@ import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Set;
 import lombok.Getter;
 import lombok.Setter;
@@ -57,9 +58,9 @@ public class Task {
             joinColumns = @JoinColumn(name = "taskId"),
             inverseJoinColumns = @JoinColumn(name = "employerId")
     )
-    private Set<Employer> employer;
+    private List<Employer> employer;
 
     @ManyToMany(mappedBy = "tasks")
-    private Set<Material> materials;
+    private List<Material> materials;
 
 }

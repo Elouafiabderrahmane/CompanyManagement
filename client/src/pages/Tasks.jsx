@@ -5,24 +5,26 @@ import LinearProgress, {
 } from "@mui/material/LinearProgress";
 import { styled } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
-import axios from "../components/Axios"; // Adjust import according to your setup
+import axios from "../components/Axios";
 
 import {
   Button,
   Dialog,
   DialogActions,
+  Card,
+  CardContent,
   DialogContent,
   DialogTitle,
+  FormControl,
+  InputLabel,
+  Select,
   FormControlLabel,
+  MenuItem,
   Switch,
   Box,
   TextField,
   Snackbar,
-  Select,
   Typography,
-  Card,
-  CardContent,
-  MenuItem,
 } from "@mui/material";
 
 const tasksTableHead = [
@@ -64,6 +66,7 @@ const Tasks = ({ projectId, employerId }) => {
     message: "",
     severity: "info",
   });
+
   const [searchQuery, setSearchQuery] = useState("");
   const [newTaskData, setNewTaskData] = useState({
     tasktype: "",
@@ -75,11 +78,32 @@ const Tasks = ({ projectId, employerId }) => {
     project: "",
     employer: [],
   });
+  const [projects, setProjects] = useState([]);
+  const [employers, setEmployers] = useState([]);
+  const [materials, setMaterials] = useState([]);
 
   useEffect(() => {
     fetchTasks();
+    fetchDropdownData();
   }, [projectId, employerId]);
 
+    const fetchDropdownData = async () => {
+      try {
+        const [projectsResponse, employersResponse, materialsResponse] =
+          await Promise.all([
+            axios.get("http://localhost:8085/api/projects"),
+            axios.get("http://localhost:8085/api/employers"),
+            axios.get("http://localhost:8085/api/materials"),
+          ]);
+
+        setProjects(projectsResponse.data);
+        setEmployers(employersResponse.data);
+        setMaterials(materialsResponse.data);
+      } catch (error) {
+        console.error("Error fetching dropdown data:", error);
+        showSnackbar("Failed to fetch dropdown data", "error");
+      }
+    };
   const fetchTasks = async () => {
     setLoading(true);
     let url;
@@ -91,6 +115,7 @@ const Tasks = ({ projectId, employerId }) => {
       url = "http://localhost:8085/api/tasks";
     }
 
+    
     try {
       const response = await axios.get(url);
       setTasks(response.data);
@@ -120,13 +145,19 @@ const Tasks = ({ projectId, employerId }) => {
       }
     }
   };
-
+const TaskTypes = [
+  { value: "BUILDING", label: "BUILDING" },
+  { value: "PAINTING", label: "PAINTING" },
+];
   const handleKeyDown = (event) => {
     if (event.key === "Enter") {
       handleSearch();
     }
   };
-
+ const handleTaskTypeChange = (event) => {
+   setNewTaskData({ ...newTaskData, tasktype: event.target.value });
+   setUpdateData({ ...updateData, tasktype: event.target.value });
+ };
   const handleAddTask = () => {
     setAddModalOpen(true);
   };
@@ -200,6 +231,19 @@ const Tasks = ({ projectId, employerId }) => {
 
   const showSnackbar = (message, severity) => {
     setSnackbar({ open: true, message, severity });
+  };
+
+  const handleProjectChange = (event) => {
+    setNewTaskData({ ...newTaskData, project: event.target.value });
+    setUpdateData({ ...updateData, project: event.target.value });
+  };
+
+  const handleEmployerChange = (event) => {
+    setNewTaskData({
+      ...newTaskData,
+      employer: event.target.value,
+    });
+    setUpdateData({ ...updateData, employer: event.target.value });
   };
 
   const renderBody = (item, index) => (
@@ -310,241 +354,287 @@ const Tasks = ({ projectId, employerId }) => {
                       textAlign: "center",
                     }}
                   >
-                    {tasks.length} tasks
+                    Tasks {materials.length}
                   </Typography>
                 </Box>
               </CardContent>
             </Card>
           </Box>
-          <Table
-            headData={tasksTableHead}
-            renderHead={renderHead}
-            bodyData={tasks}
-            renderBody={renderBody}
-          />
-          {/* Add Task Modal */}
-          <Dialog open={addModalOpen} onClose={() => setAddModalOpen(false)}>
-            <DialogTitle>Add New Task</DialogTitle>
+          <div className="card">
+            <div className="card__body">
+              {loading ? (
+                <BorderLinearProgress />
+              ) : (
+                <Table
+                  limit="10"
+                  headData={tasksTableHead}
+                  renderHead={renderHead}
+                  bodyData={tasks}
+                  renderBody={renderBody}
+                />
+              )}
+            </div>
+          </div>
+
+          {/* Add Modal */}
+          <Dialog
+            open={addModalOpen}
+            onClose={() => setAddModalOpen(false)}
+            fullWidth
+          >
+            <DialogTitle>Add Task</DialogTitle>
             <DialogContent>
-              {/* Add Task Form */}
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                label="Task Type"
-                value={newTaskData.tasktype}
-                onChange={(e) =>
-                  setNewTaskData({ ...newTaskData, tasktype: e.target.value })
-                }
-              />
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={newTaskData.done}
-                    onChange={(e) =>
-                      setNewTaskData({ ...newTaskData, done: e.target.checked })
-                    }
-                  />
-                }
-                label="Done"
-              />
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                label="Title"
-                value={newTaskData.title}
-                onChange={(e) =>
-                  setNewTaskData({ ...newTaskData, title: e.target.value })
-                }
-              />
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                label="Description"
-                value={newTaskData.description}
-                onChange={(e) =>
-                  setNewTaskData({
-                    ...newTaskData,
-                    description: e.target.value,
-                  })
-                }
-              />
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                label="Starting Date"
-                type="date"
-                InputLabelProps={{ shrink: true }}
-                value={newTaskData.startingDate}
-                onChange={(e) =>
-                  setNewTaskData({
-                    ...newTaskData,
-                    startingDate: e.target.value,
-                  })
-                }
-              />
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                label="Ending Date"
-                type="date"
-                InputLabelProps={{ shrink: true }}
-                value={newTaskData.endingDate}
-                onChange={(e) =>
-                  setNewTaskData({ ...newTaskData, endingDate: e.target.value })
-                }
-              />
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                label="Project"
-                value={newTaskData.project}
-                onChange={(e) =>
-                  setNewTaskData({ ...newTaskData, project: e.target.value })
-                }
-              />
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                label="Employer"
-                value={newTaskData.employer.join(", ")}
-                onChange={(e) =>
-                  setNewTaskData({
-                    ...newTaskData,
-                    employer: e.target.value
-                      .split(", ")
-                      .map((item) => item.trim()),
-                  })
-                }
-              />
+              <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                <FormControl fullWidth margin="normal">
+                  <InputLabel>Task Type</InputLabel>
+                  <Select
+                    value={newTaskData.tasktype}
+                    onChange={handleTaskTypeChange}
+                  >
+                    {TaskTypes.map((type) => (
+                      <MenuItem key={type.value} value={type.value}>
+                        {type.label}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={newTaskData.done}
+                      onChange={(e) =>
+                        setNewTaskData({
+                          ...newTaskData,
+                          done: e.target.checked,
+                        })
+                      }
+                    />
+                  }
+                  label="Done"
+                />
+                <TextField
+                  fullWidth
+                  label="Title"
+                  variant="standard"
+                  onChange={(e) =>
+                    setNewTaskData({ ...newTaskData, title: e.target.value })
+                  }
+                />
+                <TextField
+                  fullWidth
+                  label="Description"
+                  variant="standard"
+                  onChange={(e) =>
+                    setNewTaskData({
+                      ...newTaskData,
+                      description: e.target.value,
+                    })
+                  }
+                />
+                <TextField
+                  fullWidth
+                  label="Starting Date"
+                  type="date"
+                  InputLabelProps={{ shrink: true }}
+                  onChange={(e) =>
+                    setNewTaskData({
+                      ...newTaskData,
+                      startingDate: e.target.value,
+                    })
+                  }
+                />
+                <TextField
+                  fullWidth
+                  label="Ending Date"
+                  type="date"
+                  InputLabelProps={{ shrink: true }}
+                  onChange={(e) =>
+                    setNewTaskData({
+                      ...newTaskData,
+                      endingDate: e.target.value,
+                    })
+                  }
+                />
+                <FormControl fullWidth margin="normal">
+                  <InputLabel>Project</InputLabel>
+                  <Select
+                    value={newTaskData.project}
+                    onChange={handleProjectChange}
+                  >
+                    {projects.map((project) => (
+                      <MenuItem key={project.id} value={project.id}>
+                        {project.name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+                <FormControl fullWidth margin="normal">
+                  <InputLabel>Employer</InputLabel>
+                  <Select
+                    multiple
+                    value={newTaskData.employer}
+                    onChange={handleEmployerChange}
+                  >
+                    {employers.map((employer) => (
+                      <MenuItem key={employer.id} value={employer.id}>
+                        {employer.name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+                <FormControl fullWidth margin="normal">
+                  <InputLabel>Material</InputLabel>
+                  <Select
+                    multiple
+                    value={newTaskData.employer}
+                    onChange={handleEmployerChange}
+                  >
+                    {materials.map((material) => (
+                      <MenuItem key={material.id} value={material.id}>
+                        {material.name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Box>
             </DialogContent>
             <DialogActions>
-              <Button onClick={() => setAddModalOpen(false)} color="primary">
-                Cancel
-              </Button>
-              <Button onClick={addTask} color="primary">
-                Add
-              </Button>
+              <Button onClick={() => setAddModalOpen(false)}>Cancel</Button>
+              <Button onClick={addTask}>Add Task</Button>
             </DialogActions>
           </Dialog>
-          {/* Update Task Modal */}
+          {/* Update Modal */}
           <Dialog
             open={updateModalOpen}
             onClose={() => setUpdateModalOpen(false)}
+            fullWidth
           >
             <DialogTitle>Update Task</DialogTitle>
             <DialogContent>
-              {/* Update Task Form */}
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                label="Task Type"
-                value={updateData.tasktype}
-                onChange={(e) =>
-                  setUpdateData({ ...updateData, tasktype: e.target.value })
-                }
-              />
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={updateData.done}
-                    onChange={(e) =>
-                      setUpdateData({ ...updateData, done: e.target.checked })
-                    }
-                  />
-                }
-                label="Done"
-              />
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                label="Title"
-                value={updateData.title}
-                onChange={(e) =>
-                  setUpdateData({ ...updateData, title: e.target.value })
-                }
-              />
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                label="Description"
-                value={updateData.description}
-                onChange={(e) =>
-                  setUpdateData({ ...updateData, description: e.target.value })
-                }
-              />
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                label="Starting Date"
-                type="date"
-                InputLabelProps={{ shrink: true }}
-                value={updateData.startingDate}
-                onChange={(e) =>
-                  setUpdateData({
-                    ...updateData,
-                    startingDate: e.target.value,
-                  })
-                }
-              />
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                label="Ending Date"
-                type="date"
-                InputLabelProps={{ shrink: true }}
-                value={updateData.endingDate}
-                onChange={(e) =>
-                  setUpdateData({ ...updateData, endingDate: e.target.value })
-                }
-              />
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                label="Project"
-                value={updateData.project}
-                onChange={(e) =>
-                  setUpdateData({ ...updateData, project: e.target.value })
-                }
-              />
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                label="Employer"
-                value={updateData.employer.join(", ")}
-                onChange={(e) =>
-                  setUpdateData({
-                    ...updateData,
-                    employer: e.target.value
-                      .split(", ")
-                      .map((item) => item.trim()),
-                  })
-                }
-              />
+              <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                <FormControl fullWidth margin="normal">
+                  <InputLabel>Task Type</InputLabel>
+                  <Select
+                    value={newTaskData.tasktype}
+                    onChange={handleTaskTypeChange}
+                  >
+                    {TaskTypes.map((type) => (
+                      <MenuItem key={type.value} value={type.value}>
+                        {type.label}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={updateData.done}
+                      onChange={(e) =>
+                        setUpdateData({
+                          ...updateData,
+                          done: e.target.checked,
+                        })
+                      }
+                    />
+                  }
+                  label="Done"
+                />
+                <TextField
+                  fullWidth
+                  label="Title"
+                  variant="standard"
+                  value={updateData.title}
+                  onChange={(e) =>
+                    setUpdateData({ ...updateData, title: e.target.value })
+                  }
+                />
+                <TextField
+                  fullWidth
+                  label="Description"
+                  variant="standard"
+                  value={updateData.description}
+                  onChange={(e) =>
+                    setUpdateData({
+                      ...updateData,
+                      description: e.target.value,
+                    })
+                  }
+                />
+                <TextField
+                  fullWidth
+                  label="Starting Date"
+                  type="date"
+                  InputLabelProps={{ shrink: true }}
+                  value={updateData.startingDate}
+                  onChange={(e) =>
+                    setUpdateData({
+                      ...updateData,
+                      startingDate: e.target.value,
+                    })
+                  }
+                />
+                <TextField
+                  fullWidth
+                  label="Ending Date"
+                  type="date"
+                  InputLabelProps={{ shrink: true }}
+                  value={updateData.endingDate}
+                  onChange={(e) =>
+                    setUpdateData({
+                      ...updateData,
+                      endingDate: e.target.value,
+                    })
+                  }
+                />
+                <FormControl fullWidth margin="normal">
+                  <InputLabel>Project</InputLabel>
+                  <Select
+                    value={newTaskData.project}
+                    onChange={handleProjectChange}
+                  >
+                    {projects.map((project) => (
+                      <MenuItem key={project.id} value={project.id}>
+                        {project.name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+                <FormControl fullWidth margin="normal">
+                  <InputLabel>Employer</InputLabel>
+                  <Select
+                    multiple
+                    value={newTaskData.employer}
+                    onChange={handleEmployerChange}
+                  >
+                    {employers.map((employer) => (
+                      <MenuItem key={employer.id} value={employer.id}>
+                        {employer.name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+                <FormControl fullWidth margin="normal">
+                  <InputLabel>Material</InputLabel>
+                  <Select
+                    multiple
+                    value={newTaskData.employer}
+                    onChange={handleEmployerChange}
+                  >
+                    {materials.map((material) => (
+                      <MenuItem key={material.id} value={material.id}>
+                        {material.name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Box>
             </DialogContent>
             <DialogActions>
-              <Button onClick={() => setUpdateModalOpen(false)} color="primary">
-                Cancel
-              </Button>
-              <Button onClick={updateTask} color="primary">
-                Update
-              </Button>
+              <Button onClick={() => setUpdateModalOpen(false)}>Cancel</Button>
+              <Button onClick={updateTask}>Update Task</Button>
             </DialogActions>
           </Dialog>
-          {/* Delete Confirmation Dialog */}
+          {/* Delete Dialog */}
           <Dialog
             open={deleteDialogOpen}
             onClose={() => setDeleteDialogOpen(false)}
@@ -556,15 +646,8 @@ const Tasks = ({ projectId, employerId }) => {
               </Typography>
             </DialogContent>
             <DialogActions>
-              <Button
-                onClick={() => setDeleteDialogOpen(false)}
-                color="primary"
-              >
-                Cancel
-              </Button>
-              <Button onClick={confirmDelete} color="primary">
-                Delete
-              </Button>
+              <Button onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>
+              <Button onClick={confirmDelete}>Confirm</Button>
             </DialogActions>
           </Dialog>
           {/* Snackbar */}
@@ -573,6 +656,14 @@ const Tasks = ({ projectId, employerId }) => {
             autoHideDuration={6000}
             onClose={() => setSnackbar({ ...snackbar, open: false })}
             message={snackbar.message}
+            action={
+              <Button
+                color="inherit"
+                onClick={() => setSnackbar({ ...snackbar, open: false })}
+              >
+                Close
+              </Button>
+            }
             severity={snackbar.severity}
           />
         </>

@@ -2,7 +2,13 @@ package ma.barakatouna.company_management.rest;
 
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
+import ma.barakatouna.company_management.entities.Employer;
+import ma.barakatouna.company_management.entities.Material;
+import ma.barakatouna.company_management.entities.Project;
+import ma.barakatouna.company_management.entities.Task;
 import ma.barakatouna.company_management.model.TaskDTO;
+import ma.barakatouna.company_management.repos.*;
+import ma.barakatouna.company_management.service.MaterialService;
 import ma.barakatouna.company_management.service.TaskService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -10,6 +16,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @RestController
 @CrossOrigin ("*")
@@ -17,9 +25,22 @@ import java.util.List;
 public class TaskResource {
 
     private final TaskService taskService;
-
-    public TaskResource(TaskService taskService) {
+    private final MaterialService materialService;
+    private final MaterialRepository materialRepository;
+    private final ProjectRepository projectRepository;
+    private final EmployerRepository employerRepository;
+    private final SalaryRepository salaryRepository;
+    private final PaymentRepository paymentRepository;
+    private final TaskRepository taskRepository;
+    public TaskResource(TaskService taskService, MaterialService materialService, MaterialRepository materialRepository, ProjectRepository projectRepository, EmployerRepository employerRepository, SalaryRepository salaryRepository, PaymentRepository paymentRepository, TaskRepository taskRepository) {
         this.taskService = taskService;
+        this.materialService = materialService;
+        this.materialRepository = materialRepository;
+        this.projectRepository = projectRepository;
+        this.employerRepository = employerRepository;
+        this.salaryRepository = salaryRepository;
+        this.paymentRepository = paymentRepository;
+        this.taskRepository = taskRepository;
     }
 
     @GetMapping
@@ -36,10 +57,40 @@ public class TaskResource {
 
     @PostMapping
     @ApiResponse(responseCode = "201")
-    public ResponseEntity<Long> createTask(@RequestBody @Valid TaskDTO taskDTO) {
-        Long createdId = taskService.create(taskDTO);
+    public ResponseEntity<Long> createTask(@RequestBody @Valid Task task) {
+        // Fetch related entities based on the relationships in Task
+        Project project = projectRepository.findById(task.getProject().getId()).orElse(null);
+        List<Employer> employers = employerRepository.findAllById(
+                task.getEmployer().stream().map(Employer::getId).collect(Collectors.toSet()));
+        List<Material> materials = materialRepository.findAllById(
+                task.getMaterials().stream().map(Material::getId).collect(Collectors.toSet()));
+
+        if (project != null) {
+            task.setProject(project);
+        }
+
+        task.setEmployer(employers);
+        task.setMaterials(materials);
+
+        // Save the task
+        Long createdId = taskRepository.save(task).getId();
+
+        // Update relationships if needed
+        if (project != null) {
+            project.getTasks().add(task);
+            projectRepository.save(project);
+        }
+        employers.forEach(employer -> {
+            employer.getTasks().add(task);
+            employerRepository.save(employer);
+        });
+        materials.forEach(material -> {
+            material.getTasks().add(task);
+            materialRepository.save(material);
+        });
         return ResponseEntity.status(HttpStatus.CREATED).body(createdId);
     }
+
 
     @PutMapping("/{id}")
     public ResponseEntity<Void> updateTask(@PathVariable Long id, @RequestBody @Valid TaskDTO taskDTO) {

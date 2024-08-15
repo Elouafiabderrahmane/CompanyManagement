@@ -63,9 +63,13 @@ const Salaries = () => {
   });
   const [searchQuery, setSearchQuery] = useState("");
   const [addModalOpen, setAddModalOpen] = useState(false);
+  const [employers, setEmployers] = useState([]);
+  const [materials, setMaterials] = useState([]);
 
   useEffect(() => {
     fetchSalaries();
+    fetchEmployers();
+    fetchMaterials();
   }, []);
 
   const fetchSalaries = async () => {
@@ -81,38 +85,57 @@ const Salaries = () => {
     }
   };
 
+  const fetchEmployers = async () => {
+    try {
+      const response = await axios.get("http://localhost:8085/api/employers");
+      setEmployers(response.data);
+    } catch (error) {
+      console.error("Error fetching employers:", error);
+    }
+  };
+
+  const fetchMaterials = async () => {
+    try {
+      const response = await axios.get("http://localhost:8085/api/materials");
+      setMaterials(response.data);
+    } catch (error) {
+      console.error("Error fetching materials:", error);
+    }
+  };
+
   const handleDelete = (id) => {
     setDeleteDialogOpen(true);
     setDeleteId(id);
-    setSalaries(salaries.filter((salary) => salary.id !== id));
   };
 
   const confirmDelete = async () => {
     try {
       await axios.delete(`http://localhost:8085/api/salaries/${deleteId}`);
       showSnackbar("Salary deleted successfully", "success");
+      fetchSalaries();
     } catch (error) {
       console.error("Error deleting salary:", error);
-      fetchSalaries(); // Revert optimistic update
       showSnackbar("Failed to delete salary", "error");
     } finally {
       setDeleteDialogOpen(false);
     }
   };
 
-  const handleUpdate = async (id) => {
-    try {
-      const response = await axios.get(
-        `http://localhost:8085/api/salaries/${id}`
-      );
-      setUpdateData(response.data);
-      setUpdateId(id);
-      setUpdateModalOpen(true);
-    } catch (error) {
-      console.error("Error fetching salary for update:", error);
-      showSnackbar("Failed to fetch salary details", "error");
-    }
-  };
+const handleUpdate = async (id) => {
+  try {
+    const response = await axios.get(
+      `http://localhost:8085/api/salaries/${id}`
+    );
+    setUpdateData(response.data);
+    setUpdateId(id);
+    setUpdateModalOpen(true);
+  } catch (error) {
+    console.error("Error fetching salary for update:", error);
+    showSnackbar("Failed to fetch salary details", "error");
+  }
+};
+
+
 
   const updateSalary = async () => {
     try {
@@ -128,6 +151,32 @@ const Salaries = () => {
       showSnackbar("Failed to update salary", "error");
     }
   };
+
+  const addSalary = async () => {
+    try {
+      await axios.post("http://localhost:8085/api/salaries", updateData);
+      fetchSalaries();
+      setAddModalOpen(false);
+      showSnackbar("Salary added successfully", "success");
+    } catch (error) {
+      console.error("Error adding salary:", error);
+      showSnackbar("Failed to add salary", "error");
+    }
+  };
+
+  const resetUpdateData = () => {
+    setUpdateData({
+      id: "",
+      amount: "",
+      frequency: "",
+      paid: false,
+      startingDate: "",
+      endingDate: "",
+      employers: "",
+      material: "",
+    });
+  };
+
 
   const showSnackbar = (message, severity) => {
     setSnackbar({ open: true, message, severity });
@@ -156,7 +205,7 @@ const Salaries = () => {
       <td>{item.paid ? "Yes" : "No"}</td>
       <td>{item.startingDate}</td>
       <td>{item.endingDate ? item.endingDate : "⊘"}</td>
-      <td>{item.employers}</td>
+      <td>{item.employers ? item.employers : "⊘"}</td>
       <td>{item.material ? item.material : "⊘"}</td>
       <td>
         <Button variant="contained" onClick={() => handleUpdate(item.id)}>
@@ -219,7 +268,10 @@ const Salaries = () => {
             sx={{ width: "200px", height: "55px" }}
             variant="contained"
             color="primary"
-            onClick={() => setAddModalOpen(true)}
+            onClick={() => {
+              resetUpdateData();
+              setAddModalOpen(true);
+            }}
             startIcon={<AddIcon style={{ fontSize: "2rem" }} />}
           >
             Add Salary
@@ -246,7 +298,6 @@ const Salaries = () => {
           </CardContent>
         </Card>
       </Box>
-      <h2 className="page-header">Salaries</h2>
       <div className="row">
         <div className="col-12">
           <div className="card">
@@ -307,7 +358,8 @@ const Salaries = () => {
               }
             >
               <MenuItem value="MONTHLY">Monthly</MenuItem>
-              <MenuItem value="ANNUAL">Annual</MenuItem>
+              <MenuItem value="WEEKLY">Weekly</MenuItem>
+              <MenuItem value="BYTASK">By Task</MenuItem>
             </Select>
           </FormControl>
           <FormControl fullWidth margin="normal" variant="standard">
@@ -353,6 +405,36 @@ const Salaries = () => {
               shrink: true,
             }}
           />
+          <FormControl fullWidth margin="normal" variant="standard">
+            <InputLabel>Employer</InputLabel>
+            <Select
+              value={updateData.employers}
+              onChange={(e) =>
+                setUpdateData({ ...updateData, employers: e.target.value })
+              }
+            >
+              {employers.map((employer) => (
+                <MenuItem key={employer.id} value={employer.id}>
+                  {employer.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <FormControl fullWidth margin="normal" variant="standard">
+            <InputLabel>Material</InputLabel>
+            <Select
+              value={updateData.material}
+              onChange={(e) =>
+                setUpdateData({ ...updateData, material: e.target.value })
+              }
+            >
+              {materials.map((material) => (
+                <MenuItem key={material.id} value={material.id}>
+                  {material.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setUpdateModalOpen(false)} color="primary">
@@ -360,6 +442,117 @@ const Salaries = () => {
           </Button>
           <Button onClick={updateSalary} color="primary">
             Update
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={addModalOpen} onClose={() => setAddModalOpen(false)}>
+        <DialogTitle>Add Salary</DialogTitle>
+        <DialogContent>
+          <TextField
+            variant="standard"
+            label="Amount"
+            type="number"
+            value={updateData.amount}
+            onChange={(e) =>
+              setUpdateData({ ...updateData, amount: e.target.value })
+            }
+            fullWidth
+            margin="normal"
+          />
+          <FormControl fullWidth margin="normal" variant="standard">
+            <InputLabel>Frequency</InputLabel>
+            <Select
+              value={updateData.frequency}
+              onChange={(e) =>
+                setUpdateData({ ...updateData, frequency: e.target.value })
+              }
+            >
+              <MenuItem value="MONTHLY">Monthly</MenuItem>
+              <MenuItem value="WEEKLY">Weekly</MenuItem>
+              <MenuItem value="BYTASK">By Task</MenuItem>
+            </Select>
+          </FormControl>
+          <FormControl fullWidth margin="normal" variant="standard">
+            <InputLabel>Paid</InputLabel>
+            <Select
+              value={updateData.paid}
+              onChange={(e) =>
+                setUpdateData({
+                  ...updateData,
+                  paid: e.target.value === "true",
+                })
+              }
+            >
+              <MenuItem value={true}>Yes</MenuItem>
+              <MenuItem value={false}>No</MenuItem>
+            </Select>
+          </FormControl>
+          <TextField
+            variant="standard"
+            label="Starting Date"
+            type="date"
+            value={updateData.startingDate}
+            onChange={(e) =>
+              setUpdateData({ ...updateData, startingDate: e.target.value })
+            }
+            fullWidth
+            margin="normal"
+            InputLabelProps={{
+              shrink: true,
+            }}
+          />
+          <TextField
+            variant="standard"
+            label="Ending Date"
+            type="date"
+            value={updateData.endingDate}
+            onChange={(e) =>
+              setUpdateData({ ...updateData, endingDate: e.target.value })
+            }
+            fullWidth
+            margin="normal"
+            InputLabelProps={{
+              shrink: true,
+            }}
+          />
+          <FormControl fullWidth margin="normal" variant="standard">
+            <InputLabel>Employer</InputLabel>
+            <Select
+              value={updateData.employers}
+              onChange={(e) =>
+                setUpdateData({ ...updateData, employers: e.target.value })
+              }
+            >
+              {employers.map((employer) => (
+                <MenuItem key={employer.id} value={employer.id}>
+                  {employer.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <FormControl fullWidth margin="normal" variant="standard">
+            <InputLabel>Material</InputLabel>
+            <Select
+              value={updateData.material}
+              onChange={(e) =>
+                setUpdateData({ ...updateData, material: e.target.value })
+              }
+            >
+              {materials.map((material) => (
+                <MenuItem key={material.id} value={material.id}>
+                  {material.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setAddModalOpen(false)} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={addSalary} color="primary">
+            Add
           </Button>
         </DialogActions>
       </Dialog>

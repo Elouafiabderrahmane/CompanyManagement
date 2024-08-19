@@ -5,6 +5,7 @@ import jakarta.validation.Valid;
 import ma.barakatouna.company_management.entities.Employer;
 import ma.barakatouna.company_management.entities.Material;
 import ma.barakatouna.company_management.entities.Salary;
+import ma.barakatouna.company_management.entities.SalaryStatsDTO;
 import ma.barakatouna.company_management.model.SalaryDTO;
 import ma.barakatouna.company_management.repos.EmployerRepository;
 import ma.barakatouna.company_management.repos.MaterialRepository;
@@ -16,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 @RestController
@@ -104,4 +106,19 @@ public class SalaryResource {
     }
 
 
+    @GetMapping("/stats")
+    public SalaryStatsDTO getSalaryStats() {
+        List<Object[]> rawStats = salaryRepository.findSalaryCountsGroupedByStartingDate();
+
+
+
+        List<Integer> data = rawStats.stream()
+                .map(stat -> ((Long) stat[1]).intValue()) // Assuming the count is returned as Long
+                .collect(Collectors.toList());
+
+        SalaryStatsDTO stats = new SalaryStatsDTO();
+
+        stats.setData(data);
+        return stats;
+    }
 }

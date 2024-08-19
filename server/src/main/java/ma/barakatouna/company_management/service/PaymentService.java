@@ -45,7 +45,7 @@ public class PaymentService {
 
         // Handle relations
         if (projectId != null) {
-            Project project = projectRepository.findById(projectId).orElseThrow(() -> new EntityNotFoundException("Project not found"));
+            Project project = projectRepository.findById(projectId).orElseThrow(() -> new   EntityNotFoundException("Project not found"));
             payment.setProject(project);
         }
 

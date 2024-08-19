@@ -1,8 +1,7 @@
 import { LOGIN_SUCCESS, LOGIN_FAILURE, LOGOUT } from "../actions/UserAction";
 
 const initialState = {
-  isAuthenticated: true, //// change to false when done testing
-  user: null,
+  isAuthenticated: !!localStorage.getItem("token"),   user: null,
   error: null,
 };
 

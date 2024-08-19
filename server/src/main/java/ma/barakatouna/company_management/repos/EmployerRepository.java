@@ -6,6 +6,7 @@ import ma.barakatouna.company_management.entities.Material;
 import ma.barakatouna.company_management.entities.Project;
 import ma.barakatouna.company_management.entities.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
 
 public interface EmployerRepository extends JpaRepository<Employer, Long> {
@@ -22,6 +23,7 @@ public interface EmployerRepository extends JpaRepository<Employer, Long> {
     Employer getEmployerByNameContaining(String name);
     Employer findByUser( User user);
 
+    @Query("SELECT p.hireDate, COUNT(p) FROM Employer p GROUP BY p.hireDate ORDER BY p.hireDate ASC")
 
-
+    List<Object[]> findEmployerCountsGroupedByHireDate();
 }

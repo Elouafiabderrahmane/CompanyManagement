@@ -3,6 +3,7 @@ package ma.barakatouna.company_management.rest;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 import ma.barakatouna.company_management.entities.Employer;
+import ma.barakatouna.company_management.entities.EmployerStatsDTO;
 import ma.barakatouna.company_management.model.EmployerDTO;
 import ma.barakatouna.company_management.repos.EmployerRepository;
 import ma.barakatouna.company_management.service.EmployerService;
@@ -24,6 +25,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 
 @RestController
@@ -150,4 +152,18 @@ public class EmployerResource {
         return ResponseEntity.ok(employerRepository.count());
     }
 
+    @GetMapping("/stats")
+    public EmployerStatsDTO getEmployerStats() {
+        List<Object[]> rawStats = employerRepository.findEmployerCountsGroupedByHireDate();
+
+
+        List<Integer> data = rawStats.stream()
+                .map(stat -> ((Long) stat[1]).intValue()) // Assuming the count is returned as Long
+                .collect(Collectors.toList());
+
+        EmployerStatsDTO stats = new EmployerStatsDTO();
+
+        stats.setData(data);
+        return stats;
+    }
 }

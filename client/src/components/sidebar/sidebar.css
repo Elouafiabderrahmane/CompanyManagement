@@ -6,6 +6,8 @@
     top: 0;
     background-color: var(--main-bg);
     box-shadow: var(--box-shadow);
+    display: flex;
+    flex-direction: column;
 }
 
 .sidebar__logo {
@@ -21,6 +23,7 @@
 
 .sidebar__item {
     padding: 0 20px;
+    cursor: pointer; /* Add pointer cursor for interactivity */
 }
 
 .sidebar__item-inner {
@@ -28,7 +31,8 @@
     display: flex;
     align-items: center;
     font-weight: 600;
-    transition: color 0.3s ease 0s;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    border-radius: var(--border-radius);
 }
 
 .sidebar__item-inner > i {
@@ -41,15 +45,53 @@
 }
 
 .sidebar__item-inner:hover {
-    color: var(--main-color);
+    background-color: var(--hover-bg-color); /* New background color on hover */
+    color: var(--main-color); /* Text color on hover */
 }
 
 .sidebar__item-inner.active {
-    border-radius: var(--border-radius);
     background-image: linear-gradient(
         to right,
         var(--main-color),
         var(--second-color)
     );
     color: var(--txt-white);
+}
+
+.sidebar__item-inner.active:hover {
+    background-image: linear-gradient(
+        to right,
+        var(--main-color),
+        var(--second-color)
+    );
+    color: var(--txt-white);
+}
+
+.sidebar__logout {
+    margin-top: auto;
+    padding: 10px 20px;
+    cursor: pointer;
+}
+
+.sidebar__logout-inner {
+    padding: 15px 25px;
+    display: flex;
+    align-items: center;
+    font-weight: 600;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    border-radius: var(--border-radius);
+}
+
+.sidebar__logout-inner > i {
+    margin-right: 10px;
+    font-size: 1.5rem;
+}
+
+.sidebar__logout-inner > span {
+    text-transform: capitalize;
+}
+
+.sidebar__logout-inner:hover {
+    background-color: var(--hover-bg-color); /* Same hover effect as other items */
+    color: var(--main-color); /* Text color on hover */
 }

@@ -33,11 +33,6 @@
     "display_name": "Payments",
     "route": "/payments",
     "icon": "bx bx-money"
-  },
-  {
-    "display_name": "Reports",
-    "route": "/reports",
-    "icon": "bx bxs-report"
   }
   
 ]
